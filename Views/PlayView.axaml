@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:Class="Chess.Views.PlayView">
+<UserControl.Styles>
+	<Style Selector="Rectangle.chess-tile">
+		<Setter Property="Height" 			Value="100"/>
+		<Setter Property="Width" 			Value="100"/>
+		<Setter Property="Margin" 			Value="0"/>
+	</Style>
+	<Style Selector="Button.navigation-button">
+		<Setter Property="FontSize" Value="15"/>
+		<Setter Property="FontWeight" Value="500"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Width" Value="180"/>
+		<Setter Property="Height" Value="50"/>
+		<Setter Property="HorizontalAlignment" Value="Center"/>
+		<Setter Property="VerticalAlignment" Value="Top"/>
+		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+	</Style>
+</UserControl.Styles>
+
+	<StackPanel Orientation="Horizontal">
+
+		<StackPanel Orientation="Vertical" Spacing="20" Background="#2a2829" Width="200">
+			<Button Classes="navigation-button" Content="Play" Margin="0,100,0,0"/>
+			<Button Classes="navigation-button" Content="Match History"/>
+			<Button Classes="navigation-button" Content="Statistics"/>
+			<Button Classes="navigation-button" Content="Login"/>
+		</StackPanel>
+		
+		<Border Background="#323240" CornerRadius="2" Margin="100,20,20,20" VerticalAlignment="Top" BorderThickness="20">
+			<Grid ColumnDefinitions="*,*" RowDefinitions="*,*" Width="200" Height="200" Margin="0" VerticalAlignment="Top">
+				<Rectangle Classes="chess-tile" Grid.Row="0" Grid.Column="0" Fill="White"/>
+				<Rectangle Classes="chess-tile" Grid.Row="0" Grid.Column="1" Fill="#080D24"/>
+				<Rectangle Classes="chess-tile" Grid.Row="1" Grid.Column="1" Fill="White"/>
+				<Rectangle Classes="chess-tile" Grid.Row="1" Grid.Column="0" Fill="#080D24"/>
+			</Grid>
+		</Border>
+
+	</StackPanel>
+</UserControl>
