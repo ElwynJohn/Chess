@@ -6,6 +6,11 @@ namespace Chess.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Welcome to Avalonia!";
-    }
+		public MainWindowViewModel()
+		{
+			List = new PlayViewModel();
+		}
+
+        public PlayViewModel List { get; }
+	}
 }

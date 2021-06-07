@@ -33,13 +33,28 @@
 			<Button Classes="navigation-button" Content="Login"/>
 		</StackPanel>
 		
-		<Border Background="#323240" CornerRadius="2" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">
-			<Grid ColumnDefinitions="*,*" RowDefinitions="*,*" Width="200" Height="200" Margin="0" VerticalAlignment="Top">
-				<Rectangle Classes="chess-tile" Grid.Row="0" Grid.Column="0" Fill="White"/>
-				<Rectangle Classes="chess-tile" Grid.Row="0" Grid.Column="1" Fill="#080D24"/>
-				<Rectangle Classes="chess-tile" Grid.Row="1" Grid.Column="1" Fill="White"/>
-				<Rectangle Classes="chess-tile" Grid.Row="1" Grid.Column="0" Fill="#080D24"/>
-			</Grid>
+		<Border Background="#323240" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">	
+			<ItemsControl Items="{Binding Rows}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+				
+						<ItemsControl Items="{Binding RowTiles}">
+							<ItemsControl.ItemsPanel>
+								<ItemsPanelTemplate>
+									<StackPanel Orientation="Horizontal"/>
+								</ItemsPanelTemplate>
+							</ItemsControl.ItemsPanel>
+								
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<Rectangle Classes="chess-tile" Fill="{Binding Fill}"/>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+	
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
 		</Border>
 		
 		<Grid ColumnDefinitions="40,*,*" RowDefinitions="30,30" Width="200" Height="220" Background="#323240" Margin="20,20,20,20" VerticalAlignment="Top">

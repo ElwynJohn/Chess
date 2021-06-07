@@ -3,8 +3,8 @@
 		xmlns:views="clr-namespace:Chess.Views"
         x:Class="Chess.Views.MainWindow"
 		Icon="/Assets/avalonia-logo.ico"
-		Width="1500" Height="800"
+		Width="1500" Height="860"
 		Title="Chess"
-		Background="#312e2b">
-	<views:PlayView/>
+		Background="#312e2b"
+		Content="{Binding List}">
 </Window>
