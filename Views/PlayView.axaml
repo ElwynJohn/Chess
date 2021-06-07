@@ -47,7 +47,7 @@
 								
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<Rectangle Classes="chess-tile" Fill="{Binding Fill}"/>
+									<Rectangle Classes="chess-tile" PointerReleased="change_rectangle_color" Fill="{Binding Fill}"/>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
 						</ItemsControl>

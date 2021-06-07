@@ -1,6 +1,7 @@
 using Chess.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Avalonia.Media;
 
 namespace Chess.ViewModels
 {
@@ -17,9 +18,19 @@ namespace Chess.ViewModels
 				for (int x = 0; x < 8; x++)
 				{
 					if (isWhite)
-						rowTiles.Add(new ChessTile{ Fill="White" });
+						rowTiles.Add(new ChessTile
+						{
+							Fill = new SolidColorBrush(0xFFD2CACA),
+							HighlightedFill = new SolidColorBrush(0xFFFFABCA),
+							NormalFill = new SolidColorBrush(0xFFD2CACA) 
+						});
 					else
-						rowTiles.Add(new ChessTile{ Fill="#080D24" });
+						rowTiles.Add(new ChessTile
+						{ 
+							Fill = new SolidColorBrush(0xFF080D24), 
+							HighlightedFill = new SolidColorBrush(0xFF480D24),
+							NormalFill = new SolidColorBrush(0xFF080D24)
+						});
 					isWhite = !isWhite;
 				}
 				isWhite = !isWhite;
