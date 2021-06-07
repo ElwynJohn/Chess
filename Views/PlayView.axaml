@@ -26,13 +26,14 @@
 	<StackPanel Orientation="Horizontal">
 
 		<StackPanel Orientation="Vertical" Spacing="20" Background="#2a2829" Width="200">
-			<Button Classes="navigation-button" Content="Play" Margin="0,100,0,0"/>
+			<TextBlock FontSize="30" FontWeight="600" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,25,0,0">Chess</TextBlock>
+			<Button Classes="navigation-button" Content="Play"/>
 			<Button Classes="navigation-button" Content="Match History"/>
 			<Button Classes="navigation-button" Content="Statistics"/>
 			<Button Classes="navigation-button" Content="Login"/>
 		</StackPanel>
 		
-		<Border Background="#323240" CornerRadius="2" Margin="100,20,20,20" VerticalAlignment="Top" BorderThickness="20">
+		<Border Background="#323240" CornerRadius="2" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">
 			<Grid ColumnDefinitions="*,*" RowDefinitions="*,*" Width="200" Height="200" Margin="0" VerticalAlignment="Top">
 				<Rectangle Classes="chess-tile" Grid.Row="0" Grid.Column="0" Fill="White"/>
 				<Rectangle Classes="chess-tile" Grid.Row="0" Grid.Column="1" Fill="#080D24"/>
@@ -40,6 +41,16 @@
 				<Rectangle Classes="chess-tile" Grid.Row="1" Grid.Column="0" Fill="#080D24"/>
 			</Grid>
 		</Border>
-
+		
+		<Grid ColumnDefinitions="40,*,*" RowDefinitions="30,30" Width="200" Height="220" Background="#323240" Margin="20,20,20,20" VerticalAlignment="Top">
+			<Rectangle Grid.Row="0" Grid.Column="0" Height="30" Width="200" Fill="#323240" Grid.ColumnSpan="3"/>
+			<TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">1</TextBlock>	
+			<TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">Ke2</TextBlock>	
+			<TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">be2</TextBlock>	
+			<Rectangle Grid.Row="1" Grid.Column="0" Height="30" Width="200" Fill="#27273d" Grid.ColumnSpan="3"/>
+			<TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">2</TextBlock>	
+			<TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">Ca2</TextBlock>	
+			<TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">Pc3</TextBlock> 
+		</Grid>
 	</StackPanel>
 </UserControl>
