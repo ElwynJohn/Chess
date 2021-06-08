@@ -47,7 +47,10 @@
 								
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
-									<Rectangle Classes="chess-tile" PointerReleased="change_rectangle_color" Fill="{Binding Fill}"/>
+									<Panel Height="100" Width="100" PointerReleased="change_rectangle_color">
+										<Rectangle Classes="chess-tile" Fill="{Binding Fill}"/>
+										<Image Source="{Binding PieceBitmap}" Height="80" Width="80" Margin="0"/>
+									</Panel>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
 						</ItemsControl>

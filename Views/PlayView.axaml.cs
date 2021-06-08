@@ -4,6 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Input;
+using Avalonia.Collections;
+using Avalonia.Media.Imaging;
 using Chess.Models;
 using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
@@ -27,21 +29,22 @@ namespace Chess.Views
 			if (e.InitialPressMouseButton != MouseButton.Right)
 				return;
 			
-			Rectangle rectangle = (Rectangle)sender;
-			ChessTile oldTile = (ChessTile)rectangle.DataContext;
+			Panel panel = (Panel)sender;
+			ChessTile oldTile = (ChessTile)panel.DataContext;
+			
 			ChessTile tile = new ChessTile
 			{
 				HighlightedFill = oldTile.HighlightedFill,
-				NormalFill = oldTile.NormalFill
+				NormalFill = oldTile.NormalFill,
+				PieceBitmap = oldTile.PieceBitmap
 			};
-
 			if (oldTile.IsHighlighted)
 				tile.Fill = tile.NormalFill;
 			else
 				tile.Fill = tile.HighlightedFill;
 			tile.IsHighlighted = !oldTile.IsHighlighted;	
 
-			rectangle.DataContext = tile;
+			panel.DataContext = tile;
 		}
     }
 }

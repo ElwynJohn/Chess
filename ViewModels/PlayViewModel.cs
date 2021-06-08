@@ -2,6 +2,7 @@ using Chess.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 
 namespace Chess.ViewModels
 {
@@ -22,14 +23,16 @@ namespace Chess.ViewModels
 						{
 							Fill = new SolidColorBrush(0xFFD2CACA),
 							HighlightedFill = new SolidColorBrush(0xFFFFABCA),
-							NormalFill = new SolidColorBrush(0xFFD2CACA) 
+							NormalFill = new SolidColorBrush(0xFFD2CACA),
+							PieceBitmap = new Bitmap("./Assets/piece_white_horse.png")
 						});
 					else
 						rowTiles.Add(new ChessTile
 						{ 
 							Fill = new SolidColorBrush(0xFF080D24), 
 							HighlightedFill = new SolidColorBrush(0xFF480D24),
-							NormalFill = new SolidColorBrush(0xFF080D24)
+							NormalFill = new SolidColorBrush(0xFF080D24),
+							PieceBitmap = new Bitmap("./Assets/piece_white_castle.png")
 						});
 					isWhite = !isWhite;
 				}

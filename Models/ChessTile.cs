@@ -1,4 +1,5 @@
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 
 namespace Chess.Models
 {
@@ -8,5 +9,6 @@ namespace Chess.Models
 		public bool IsHighlighted { get; set; } = false;
 		public IBrush HighlightedFill { get; set; }
 		public IBrush NormalFill { get; set; }
+		public Bitmap PieceBitmap { get; set; }
 	}
 }
