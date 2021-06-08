@@ -9,6 +9,7 @@ namespace Chess.Models
 		public bool IsHighlighted { get; set; } = false;
 		public IBrush HighlightedFill { get; set; }
 		public IBrush NormalFill { get; set; }
+		public ChessPieceType pieceType { get; set; }
 		public Bitmap PieceBitmap { get; set; }
 	}
 }
