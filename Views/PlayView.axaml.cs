@@ -24,6 +24,40 @@ namespace Chess.Views
             AvaloniaXamlLoader.Load(this);
         }
 
+        public void on_pointer_released(object sender, PointerReleasedEventArgs e)
+        {
+            pickup_or_drop(sender, e);
+            change_rectangle_color(sender, e);
+        }
+
+        private Panel? pStagedPanel { get; set; } = null;
+
+        public void pickup_or_drop(object sender, PointerReleasedEventArgs e)
+        {
+            if (e.InitialPressMouseButton != MouseButton.Left)
+                return;
+
+            Panel panel = (Panel)sender;
+            ChessTile clickedTile = (ChessTile)panel.DataContext;
+            if (clickedTile == null)
+                return;
+            if (pStagedPanel == null)
+            {
+                pStagedPanel = panel;
+            }
+            else
+            {
+                ChessTile pStagedTile = (ChessTile)pStagedPanel.DataContext;
+                if (pStagedTile != null)
+                {
+                    clickedTile.SetPiece(pStagedTile.PieceType);
+                    pStagedTile.SetPiece(ChessPieceType.None);
+                }
+                pStagedPanel = null;
+            }
+
+        }
+
         public void change_rectangle_color(object sender, PointerReleasedEventArgs e)
         {
             if (e.InitialPressMouseButton != MouseButton.Right)

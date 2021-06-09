@@ -1,18 +1,37 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.ComponentModel;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
 namespace Chess.Models
 {
-    public class ChessTile
+    public class ChessTile : INotifyPropertyChanged
     {
         public IBrush? Fill { get; set; }
         public bool IsHighlighted { get; set; } = false;
         public IBrush? HighlightedFill { get; set; }
         public IBrush? NormalFill { get; set; }
-        public ChessPieceType PieceType { get; set; }
-        public Bitmap? PieceBitmap { get; set; }
+        private ChessPieceType pPieceType;
+        public ChessPieceType PieceType
+        {
+            get { return pPieceType; }
+            set { pPieceType = value; NotifyPropertyChanged(); }
+        }
+        private Bitmap? pPieceBitmap;
+        public Bitmap? PieceBitmap
+        {
+            get { return pPieceBitmap; }
+            set { pPieceBitmap = value; NotifyPropertyChanged(); }
+        }
         public string? AssetPath { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public static Dictionary<ChessPieceType, string> PieceToAssetMap = new Dictionary<ChessPieceType, string>
         {
@@ -30,9 +49,32 @@ namespace Chess.Models
           {ChessPieceType.Pawn | ChessPieceType.IsWhite, "./Assets/piece_white_pawn.png"},
         };
 
+        public void SetPiece(ChessPieceType piece)
+        {
+            PieceType = piece;
+            AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
+            if (AssetPath != null)
+                PieceBitmap = new Bitmap(AssetPath);
+            else
+                PieceBitmap = null;
+        }
+
         public ChessTile()
         {
 
+        }
+
+        public ChessTile(ChessTile tile, ChessPieceType piece)
+        {
+            Fill = tile.Fill;
+            HighlightedFill = tile.HighlightedFill;
+            NormalFill = tile.NormalFill;
+
+            PieceType = piece;
+
+            AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
+            if (AssetPath != null)
+                PieceBitmap = new Bitmap(AssetPath);
         }
 
         public ChessTile(ChessPieceType piece)
