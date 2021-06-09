@@ -13,7 +13,8 @@ namespace Chess.Models
         public ChessPieceType PieceType { get; set; }
         public Bitmap? PieceBitmap { get; set; }
         public string? AssetPath { get; set; }
-        public Dictionary<ChessPieceType, string> PieceToAssetMap = new Dictionary<ChessPieceType, string>
+
+        public static Dictionary<ChessPieceType, string> PieceToAssetMap = new Dictionary<ChessPieceType, string>
         {
           {ChessPieceType.Castle, "./Assets/piece_black_castle.png"},
           {ChessPieceType.Knight, "./Assets/piece_black_knight.png"},
