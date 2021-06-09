@@ -46,9 +46,10 @@ namespace Chess.Views
             if (clickedTile == null)
                 return;
             if (pStagedPanel == null)
-            {
-                pStagedPanel = panel;
-            }
+			{
+				if (clickedTile.PieceType != ChessPieceType.None)
+					pStagedPanel = panel;
+			}
             else
             {
                 ChessTile pStagedTile = (ChessTile)pStagedPanel.DataContext;
