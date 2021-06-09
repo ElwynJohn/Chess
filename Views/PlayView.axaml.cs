@@ -59,10 +59,7 @@ namespace Chess.Views
 					ChessPieceType[] boardState = SimplifyBoard(boardModel);
 					byte[] pos = PiecePositions(boardModel, pStagedTile, clickedTile);
 					if (IsLegalMove(boardState, pos[0], pos[1], pos[2], pos[3]))
-					{
-						clickedTile.SetPiece(pStagedTile.PieceType);
-						pStagedTile.SetPiece(ChessPieceType.None);
-					}
+						MakeMove(boardModel, pos[0], pos[1], pos[2], pos[3]);
                  }
                 pStagedPanel = null;
             }
@@ -134,6 +131,13 @@ namespace Chess.Views
 			}
 
 			return true;
+		}
+
+		public void MakeMove(PlayViewModel model, byte originRank, byte originFile, byte targetRank, byte targetFile)
+		{
+			ChessTile oldTile = model.Rows[originRank].RowTiles[originFile];
+			model.Rows[targetRank].RowTiles[targetFile].SetPiece(oldTile.PieceType);
+			oldTile.SetPiece(ChessPieceType.None);
 		}
 
         public void change_rectangle_color(object sender, PointerReleasedEventArgs e)
