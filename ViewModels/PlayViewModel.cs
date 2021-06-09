@@ -69,104 +69,25 @@ namespace Chess.ViewModels
                 i++;
             }
 
+            var FenToPieceMap = new Dictionary<char, ChessPieceType>
+            {
+                {'r', ChessPieceType.Castle},
+                {'n', ChessPieceType.Knight},
+                {'b', ChessPieceType.Bishop},
+                {'q', ChessPieceType.Queen},
+                {'k', ChessPieceType.King},
+                {'p', ChessPieceType.Pawn},
+                {'R', ChessPieceType.Castle | ChessPieceType.IsWhite},
+                {'N', ChessPieceType.Knight | ChessPieceType.IsWhite},
+                {'B', ChessPieceType.Bishop | ChessPieceType.IsWhite},
+                {'Q', ChessPieceType.Queen | ChessPieceType.IsWhite},
+                {'K', ChessPieceType.King | ChessPieceType.IsWhite},
+                {'P', ChessPieceType.Pawn | ChessPieceType.IsWhite},
+            };
+
             ChessTile[] chessTiles = new ChessTile[64];
             for (i = 0; i < 64; i++)
-            {
-                switch (parsedFen[i])
-                {
-                    case 'r':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Castle & ChessPieceType.IsWhite,
-                            PieceBitmap = new Bitmap("./Assets/piece_black_castle.png")
-                        };
-                        break;
-                    case 'n':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Knight & ChessPieceType.IsWhite,
-                            PieceBitmap = new Bitmap("./Assets/piece_black_knight.png")
-                        };
-                        break;
-                    case 'b':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Bishop & ChessPieceType.IsWhite,
-                            PieceBitmap = new Bitmap("./Assets/piece_black_bishop.png")
-                        };
-                        break;
-                    case 'q':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Queen & ChessPieceType.IsWhite,
-                            PieceBitmap = new Bitmap("./Assets/piece_black_queen.png")
-                        };
-                        break;
-                    case 'k':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.King & ChessPieceType.IsWhite,
-                            PieceBitmap = new Bitmap("./Assets/piece_black_king.png")
-                        };
-                        break;
-                    case 'p':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Pawn & ChessPieceType.IsWhite,
-                            PieceBitmap = new Bitmap("./Assets/piece_black_pawn.png")
-                        };
-                        break;
-                    case 'R':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Castle,
-                            PieceBitmap = new Bitmap("./Assets/piece_white_castle.png")
-                        };
-                        break;
-                    case 'N':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Knight,
-                            PieceBitmap = new Bitmap("./Assets/piece_white_knight.png")
-                        };
-                        break;
-                    case 'B':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Bishop,
-                            PieceBitmap = new Bitmap("./Assets/piece_white_bishop.png")
-                        };
-                        break;
-                    case 'Q':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Queen,
-                            PieceBitmap = new Bitmap("./Assets/piece_white_queen.png")
-                        };
-                        break;
-                    case 'K':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.King,
-                            PieceBitmap = new Bitmap("./Assets/piece_white_king.png")
-                        };
-                        break;
-                    case 'P':
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = ChessPieceType.Pawn,
-                            PieceBitmap = new Bitmap("./Assets/piece_white_pawn.png")
-                        };
-                        break;
-                    default:
-                        chessTiles[i] = new ChessTile
-                        {
-                            PieceType = 0,
-                            PieceBitmap = null
-                        };
-                        break;
-                }
-            }
+                chessTiles[i] = new ChessTile(FenToPieceMap.GetValueOrDefault(parsedFen[i]));
             return chessTiles;
         }
     }
