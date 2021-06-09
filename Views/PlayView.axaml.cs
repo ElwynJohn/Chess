@@ -24,27 +24,27 @@ namespace Chess.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-		public void change_rectangle_color(object sender, PointerReleasedEventArgs e)
-		{
-			if (e.InitialPressMouseButton != MouseButton.Right)
-				return;
-			
-			Panel panel = (Panel)sender;
-			ChessTile oldTile = (ChessTile)panel.DataContext;
-			
-			ChessTile tile = new ChessTile
-			{
-				HighlightedFill = oldTile.HighlightedFill,
-				NormalFill = oldTile.NormalFill,
-				PieceBitmap = oldTile.PieceBitmap
-			};
-			if (oldTile.IsHighlighted)
-				tile.Fill = tile.NormalFill;
-			else
-				tile.Fill = tile.HighlightedFill;
-			tile.IsHighlighted = !oldTile.IsHighlighted;	
+        public void change_rectangle_color(object sender, PointerReleasedEventArgs e)
+        {
+            if (e.InitialPressMouseButton != MouseButton.Right)
+                return;
 
-			panel.DataContext = tile;
-		}
+            Panel panel = (Panel)sender;
+            ChessTile oldTile = (ChessTile)panel.DataContext;
+
+            ChessTile tile = new ChessTile
+            {
+                HighlightedFill = oldTile.HighlightedFill,
+                NormalFill = oldTile.NormalFill,
+                PieceBitmap = oldTile.PieceBitmap
+            };
+            if (oldTile.IsHighlighted)
+                tile.Fill = tile.NormalFill;
+            else
+                tile.Fill = tile.HighlightedFill;
+            tile.IsHighlighted = !oldTile.IsHighlighted;
+
+            panel.DataContext = tile;
+        }
     }
 }
