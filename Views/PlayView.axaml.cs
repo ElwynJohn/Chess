@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
@@ -117,8 +118,37 @@ namespace Chess.Views
 
 			if (board[originPos] == ChessPieceType.None)
 				return false;
+            // Prevent self capture
 			if (ChessPieceType.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
 				return false;
+
+            // Only Knights can jump over pieces
+            if ((board[originPos] & ChessPieceType.Knight) == 0)
+            {
+                var dirVec = new int[]
+                {
+                    targetFile - originFile,
+                    targetRank - originRank,
+                };
+
+                for (int i = 0; i < 2; i++)
+                    if (dirVec[i] != 0)
+                        dirVec[i] /= Math.Abs(dirVec[i]);
+
+                int checkPos = originPos;
+                int checkFile = originFile;
+                int checkRank = originRank;
+                while (checkPos > 0 && checkPos < board.GetLength(0))
+                {
+                    checkFile += dirVec[0];
+                    checkRank += dirVec[1];
+                    checkPos = checkFile + 8 * checkRank;
+                    if (checkPos == targetPos)
+                        break;
+                    if (board[checkPos] != ChessPieceType.None)
+                        return false;
+                }
+            }
 
 			if (0 != (board[originPos] & ChessPieceType.Knight))
 			{
@@ -130,7 +160,67 @@ namespace Chess.Views
 					return false;
 			}
 
-			return true;
+            if ((board[originPos] & (ChessPieceType.Bishop | ChessPieceType.Queen)) != 0)
+            {
+                if (Math.Abs(targetRank - originRank) == Math.Abs(targetFile - originFile))
+                    return true;
+            }
+
+            if ((board[originPos] & (ChessPieceType.Castle | ChessPieceType.Queen)) != 0)
+            {
+                if (targetRank == originRank)
+                    return true;
+                if (targetFile == originFile)
+                    return true;
+            }
+
+            if ((board[originPos] & ChessPieceType.Pawn) != 0)
+            {
+                // Pawns can only move forwards
+                if ((board[originPos] & ChessPieceType.IsWhite) != 0)
+                {
+                    if (targetRank > originRank)
+                        return false;
+                }
+                else
+                {
+                    if (targetRank < originRank)
+                        return false;
+                }
+
+                // Allow moving 2 squares at the start
+                if (originRank == 1 || originRank == 6)
+                {
+                    if (Math.Abs(targetRank - originRank) > 2)
+                        return false;
+                }
+                else
+                {
+                    if (Math.Abs(targetRank - originRank) > 1)
+                        return false;
+                }
+
+                if (targetFile == originFile)
+                    return true;
+
+                // Can't move horizontally
+                if (targetRank == originRank)
+                    return false;
+
+                // Can take pieces diagonally 1 square in front
+                if (board[targetPos] == ChessPieceType.None)
+                    return false;
+                if ((Math.Abs(targetFile - originFile) == 1 && Math.Abs(targetRank - originRank) == 1))
+                    return true;
+            }
+
+            if ((board[originPos] & ChessPieceType.King) != 0)
+            {
+                if (Math.Abs(targetRank - originRank) <= 1 && Math.Abs(targetFile - originFile) <= 1)
+                    return true;
+            }
+
+			return false;
 		}
 
 		public void MakeMove(PlayViewModel model, byte originRank, byte originFile, byte targetRank, byte targetFile)
