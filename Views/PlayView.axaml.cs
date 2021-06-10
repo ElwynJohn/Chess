@@ -138,7 +138,7 @@ namespace Chess.Views
                 int checkPos = originPos;
                 int checkFile = originFile;
                 int checkRank = originRank;
-                while (checkPos > 0 && checkPos < board.GetLength(0))
+                while (checkPos >= 0 && checkPos < board.GetLength(0))
                 {
                     checkFile += dirVec[0];
                     checkRank += dirVec[1];
