@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Chess.Views.BoardView">
+
+	<ItemsControl Items="{Binding Rows}">
+		<ItemsControl.ItemTemplate>
+			<DataTemplate>
+				
+				<ItemsControl Items="{Binding RowTiles}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Orientation="Horizontal"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+								
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<Panel Height="100" Width="100" PointerReleased="on_pointer_released">
+								<Rectangle Classes="chess-tile" Fill="{Binding Fill}"/>
+								<Image Source="{Binding PieceBitmap}" Height="80" Width="80" Margin="0"/>
+							</Panel>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+	
+			</DataTemplate>
+		</ItemsControl.ItemTemplate>
+	</ItemsControl>
+
+</UserControl>
