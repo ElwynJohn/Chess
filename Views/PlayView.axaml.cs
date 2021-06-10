@@ -200,7 +200,7 @@ namespace Chess.Views
                         return false;
                 }
 
-                if (targetFile == originFile)
+                if (targetFile == originFile && board[targetPos] == ChessPieceType.None)
                     return true;
 
                 // Can't move horizontally
