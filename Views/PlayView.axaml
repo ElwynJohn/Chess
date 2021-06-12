@@ -17,7 +17,7 @@
 		<views:MenuView/>
 
 		<Border Background="#323240" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">	
-		<views:BoardView/>
+			<views:BoardView DataContext="{Binding Board}"/>
 		</Border>
 		
 		<Grid ColumnDefinitions="40,*,*" RowDefinitions="30,30" Width="200" Height="220" Background="#323240" Margin="20,20,20,20" VerticalAlignment="Top">

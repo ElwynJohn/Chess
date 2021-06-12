@@ -49,7 +49,7 @@ namespace Chess.Views
                 ChessTile pStagedTile = (ChessTile)pStagedPanel.DataContext;
                 if (pStagedTile != null)
                 {
-					PlayViewModel boardModel = (PlayViewModel)panel.FindAncestorOfType<UserControl>().DataContext;
+					BoardViewModel boardModel = (BoardViewModel)panel.FindAncestorOfType<UserControl>().DataContext;
 					ChessPieceType[] boardState = SimplifyBoard(boardModel);
 					byte[] pos = PiecePositions(boardModel, pStagedTile, clickedTile);
 					if (IsLegalMove(boardState, pos[0], pos[1], pos[2], pos[3]))
@@ -60,7 +60,7 @@ namespace Chess.Views
 
         }
 
-		public byte[] PiecePositions(PlayViewModel model, ChessTile origin, ChessTile target)
+		public byte[] PiecePositions(BoardViewModel model, ChessTile origin, ChessTile target)
 		{
 			byte[] positions = new byte[4];
 			byte rank = 0;
@@ -87,7 +87,7 @@ namespace Chess.Views
 			return positions;
 		}
 
-		public ChessPieceType[] SimplifyBoard(PlayViewModel model)
+		public ChessPieceType[] SimplifyBoard(BoardViewModel model)
 		{
 			ChessPieceType[] board = new ChessPieceType[64];
 			int i = 0;
@@ -216,7 +216,7 @@ namespace Chess.Views
 			return false;
 		}
 
-		public void MakeMove(PlayViewModel model, byte originRank, byte originFile, byte targetRank, byte targetFile)
+		public void MakeMove(BoardViewModel model, byte originRank, byte originFile, byte targetRank, byte targetFile)
 		{
 			ChessTile oldTile = model.Rows[originRank].RowTiles[originFile];
 			model.Rows[targetRank].RowTiles[targetFile].SetPiece(oldTile.PieceType);
