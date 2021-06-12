@@ -5,13 +5,22 @@
 		 	 xmlns:views="clr-namespace:Chess.Views"
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 			 x:Class="Chess.Views.PlayView">
-<UserControl.Styles>
-	<Style Selector="Rectangle.chess-tile">
-		<Setter Property="Height" 			Value="100"/>
-		<Setter Property="Width" 			Value="100"/>
-		<Setter Property="Margin" 			Value="0"/>
-	</Style>
-</UserControl.Styles>
+	<UserControl.Styles>
+		<Style Selector="Rectangle.chess-tile">
+			<Setter Property="Height" 			Value="100"/>
+			<Setter Property="Width" 			Value="100"/>
+			<Setter Property="Margin" 			Value="0"/>
+		</Style>
+		<Style Selector="Image.chess-tile">
+			<Setter Property="Height" 			Value="80"/>
+			<Setter Property="Width" 			Value="80"/>
+			<Setter Property="Margin" 			Value="0"/>
+		</Style>
+		<Style Selector="Panel.chess-tile">
+			<Setter Property="Height" 			Value="100"/>
+			<Setter Property="Width" 			Value="100"/>
+		</Style>
+	</UserControl.Styles>
 
 	<StackPanel Orientation="Horizontal">
 		<views:MenuView/>
