@@ -21,8 +21,8 @@
 
 	<StackPanel Orientation="Vertical" Spacing="20" Background="#2a2829" Width="200">
 		<TextBlock FontSize="30" FontWeight="600" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,25,0,0">Chess</TextBlock>
-		<Button Classes="navigation-button" Content="Play"/>
-		<Button Classes="navigation-button" Content="Match History" Click="on_pointer_released_history"/>
+		<Button Classes="navigation-button" Content="Play" Click="on_click_play"/>
+		<Button Classes="navigation-button" Content="Match History" Click="on_click_history"/>
 		<Button Classes="navigation-button" Content="Statistics"/>
 		<Button Classes="navigation-button" Content="Login"/>
 	</StackPanel>
