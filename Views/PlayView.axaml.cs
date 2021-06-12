@@ -17,11 +17,5 @@ namespace Chess.Views
         {
             AvaloniaXamlLoader.Load(this);
         }
-
-        public void on_pointer_released_history(object sender, RoutedEventArgs e)
-        {
-            MainWindowViewModel model = (MainWindowViewModel)((Control)sender).FindAncestorOfType<Window>().DataContext;
-            model.List = new HistoryViewModel();
-        }
     }
 }

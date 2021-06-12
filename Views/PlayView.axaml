@@ -11,29 +11,11 @@
 		<Setter Property="Width" 			Value="100"/>
 		<Setter Property="Margin" 			Value="0"/>
 	</Style>
-	<Style Selector="Button.navigation-button">
-		<Setter Property="FontSize" Value="15"/>
-		<Setter Property="FontWeight" Value="500"/>
-		<Setter Property="Foreground" Value="White"/>
-		<Setter Property="Width" Value="180"/>
-		<Setter Property="Height" Value="50"/>
-		<Setter Property="HorizontalAlignment" Value="Center"/>
-		<Setter Property="VerticalAlignment" Value="Top"/>
-		<Setter Property="HorizontalContentAlignment" Value="Center"/>
-		<Setter Property="VerticalContentAlignment" Value="Center"/>
-	</Style>
 </UserControl.Styles>
 
 	<StackPanel Orientation="Horizontal">
+		<views:MenuView/>
 
-		<StackPanel Orientation="Vertical" Spacing="20" Background="#2a2829" Width="200">
-			<TextBlock FontSize="30" FontWeight="600" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,25,0,0">Chess</TextBlock>
-			<Button Classes="navigation-button" Content="Play"/>
-			<Button Classes="navigation-button" Content="Match History" Click="on_pointer_released_history"/>
-			<Button Classes="navigation-button" Content="Statistics"/>
-			<Button Classes="navigation-button" Content="Login"/>
-		</StackPanel>
-		
 		<Border Background="#323240" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">	
 		<views:BoardView/>
 		</Border>
