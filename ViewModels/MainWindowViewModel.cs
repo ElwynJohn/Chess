@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Chess.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : ViewModelBase, INotifyPropertyChanged
     {
         public MainWindowViewModel()
         {
@@ -12,6 +11,18 @@ namespace Chess.ViewModels
             List = new PlayViewModel(fen);
         }
 
-        public PlayViewModel List { get; }
+        private ViewModelBase list;
+        public ViewModelBase List
+        {
+            get { return list; }
+            set { list = value; NotifyPropertyChanged(); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
