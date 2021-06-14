@@ -15,13 +15,13 @@ namespace Chess.Views
             InitializeComponent();
         }
 
+        private Panel? pStagedPanel { get; set; } = null;
+
         public void on_pointer_released(object sender, PointerReleasedEventArgs e)
         {
             pickup_or_drop(sender, e);
             change_rectangle_color(sender, e);
         }
-
-        private Panel? pStagedPanel { get; set; } = null;
 
         public void pickup_or_drop(object sender, PointerReleasedEventArgs e)
         {

@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System;
-using System.IO;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Diagnostics;
@@ -17,6 +16,7 @@ namespace Chess.ViewModels
         {
             ChessTile[] tiles = ParseFen(fen);
             Rows = new ObservableCollection<ChessRow>();
+            Moves = new ObservableCollection<MoveData>();
 
             int currentTile = 0;
             bool isWhite = true;
@@ -45,15 +45,48 @@ namespace Chess.ViewModels
                 isWhite = !isWhite;
                 Rows.Add(new ChessRow { RowTiles = rowTiles });
             }
-
         }
 
-        public ObservableCollection<ChessRow> Rows { get; set; }
+        public ObservableCollection<ChessRow> Rows { get; private set; }
+        public ObservableCollection<MoveData> Moves { get; private set; }
 
-        public void MakeMove(MoveData move)
+        private bool viewingCurrentMove = true;
+        private int currentMove = -1; //currentMove points to the move that has just been made. Therefore, if NextMove() is called, currentMove + 1 is the move that should be executed (if it exists).
+
+        public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false);
+        public void PreviousMove()          => MakeMove(new MoveData(), false, true,  false);
+        public void NextMove()              => MakeMove(new MoveData(), false, false, true);
+        private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove)
         {
+            viewingCurrentMove = currentMove == Moves.Count - 1;
+            if (!newMove)
+            {
+                if (previousMove && currentMove >= 0)
+                {
+                    move = new MoveData()
+                    {
+                        OriginFile = Moves[currentMove].TargetFile,
+                        OriginRank = Moves[currentMove].TargetRank,
+                        TargetFile = Moves[currentMove].OriginFile,
+                        TargetRank = Moves[currentMove].OriginRank
+                    };
+                    currentMove--;
+                }
+                else if (nextMove && currentMove < Moves.Count - 1)
+                    move = Moves[++currentMove];
+                else
+                    return;
+            }
+            else
+            {
+                if (!viewingCurrentMove)
+                    return;
+                Moves.Add(move);
+                currentMove++;
+            }
+            ChessTile newTile = Rows[move.TargetRank].RowTiles[move.TargetFile];
             ChessTile oldTile = Rows[move.OriginRank].RowTiles[move.OriginFile];
-            Rows[move.TargetRank].RowTiles[move.TargetFile].SetPiece(oldTile.PieceType);
+            newTile.SetPiece(oldTile.PieceType);
             oldTile.SetPiece(ChessPieceType.None);
         }
 
