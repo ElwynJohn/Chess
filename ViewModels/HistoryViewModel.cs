@@ -1,16 +1,20 @@
+using System;
+using System.IO;
+using System.Text.Json;
 using System.Collections.ObjectModel;
+using Chess.Models;
 
 namespace Chess.ViewModels
 {
     public class HistoryViewModel : ViewModelBase
     {
-        public HistoryViewModel(string[] fen)
+        public HistoryViewModel()
         {
             Boards = new ObservableCollection<BoardViewModel>();
-            for (int i = 0; i < fen.Length; i++)
-            {
-                Boards.Add(new BoardViewModel(fen[i], false));
-            }
+            string dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
+            string[] filePaths = Directory.GetFiles(dirPath);
+            foreach (string filePath in filePaths)
+                Boards.Add(new BoardViewModel(filePath, false));
         }
 
         public ObservableCollection<BoardViewModel> Boards { get; set; }

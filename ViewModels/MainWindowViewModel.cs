@@ -7,8 +7,7 @@ namespace Chess.ViewModels
     {
         public MainWindowViewModel()
         {
-            string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-            List = new PlayViewModel(fen);
+            List = new PlayViewModel();
         }
 
         private ViewModelBase list;

@@ -13,9 +13,9 @@ namespace Chess.ViewModels
 {
     public class PlayViewModel : ViewModelBase
     {
-        public PlayViewModel(string fen)
+        public PlayViewModel()
         {
-            Board = new BoardViewModel(fen, true);
+            Board = new BoardViewModel();
         }
 
         public BoardViewModel Board { get; }

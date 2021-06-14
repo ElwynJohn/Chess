@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Linq;
 using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Text;
+using System.Text.Json;
 using System.Diagnostics;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -12,12 +15,15 @@ namespace Chess.ViewModels
 {
     public class BoardViewModel
     {
-        public BoardViewModel(string fen, bool isInteractable)
+        public BoardViewModel() : this(String.Empty, true) {}
+        public BoardViewModel(string gameRecordPath, bool isInteractable)
         {
-            ChessTile[] tiles = ParseFen(fen);
+            ChessTile[] tiles = ParseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
             Rows = new ObservableCollection<ChessRow>();
-            Moves = new ObservableCollection<MoveData>();
-            IsInteractable = isInteractable;
+            Moves = new ObservableCollection<MoveData>(LoadGame(gameRecordPath));
+            dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
+            filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");
+
             int currentTile = 0;
             bool isWhite = true;
             for (int y = 0; y < 8; y++)
@@ -45,19 +51,26 @@ namespace Chess.ViewModels
                 isWhite = !isWhite;
                 Rows.Add(new ChessRow { RowTiles = rowTiles });
             }
+
+            IsInteractable = true;
+            for (int i = 0; i < Moves.Count; i++)
+                NextMove();
+            IsInteractable = isInteractable;
         }
 
         public ObservableCollection<ChessRow> Rows { get; private set; }
         public ObservableCollection<MoveData> Moves { get; private set; }
         public bool IsInteractable { get; set; }
 
+        private string dirPath;
+        private string filePath;
         private bool viewingCurrentMove = true;
         private int currentMove = -1; //currentMove points to the move that has just been made. Therefore, if NextMove() is called, currentMove + 1 is the move that should be executed (if it exists).
 
-        public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false);
-        public void PreviousMove()          => MakeMove(new MoveData(), false, true,  false);
-        public void NextMove()              => MakeMove(new MoveData(), false, false, true);
-        private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove)
+        public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false, true);
+        public void PreviousMove()          => MakeMove(new MoveData(), false, true,  false, false);
+        public void NextMove()              => MakeMove(new MoveData(), false, false, true,  false);
+        private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
         {
             if (!IsInteractable)
                 return;
@@ -91,6 +104,29 @@ namespace Chess.ViewModels
             ChessTile oldTile = Rows[move.OriginRank].RowTiles[move.OriginFile];
             newTile.SetPiece(oldTile.PieceType);
             oldTile.SetPiece(ChessPieceType.None);
+
+            if (saveGame)
+                SaveGame();
+        }
+
+        public void SaveGame()
+        {
+            Directory.CreateDirectory(dirPath);
+            using (StreamWriter writer = new StreamWriter(filePath))
+                writer.Write(JsonSerializer.Serialize<MoveData[]>(Moves.ToArray<MoveData>()));
+        }
+        public static MoveData[] LoadGame(string gameRecordPath)
+        {
+            if (gameRecordPath == String.Empty)
+                return new MoveData[0];
+
+            MoveData[] moves;
+            using (StreamReader reader = new StreamReader(gameRecordPath))
+            {
+                string json = reader.ReadToEnd();
+                moves = JsonSerializer.Deserialize<MoveData[]>(json);
+            }
+            return moves;
         }
 
         public MoveData PiecePositions(ChessTile origin, ChessTile target)
