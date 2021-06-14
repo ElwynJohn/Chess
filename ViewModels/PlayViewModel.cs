@@ -15,7 +15,7 @@ namespace Chess.ViewModels
     {
         public PlayViewModel(string fen)
         {
-            Board = new BoardViewModel(fen);
+            Board = new BoardViewModel(fen, true);
         }
 
         public BoardViewModel Board { get; }

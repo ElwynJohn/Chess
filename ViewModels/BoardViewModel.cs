@@ -12,12 +12,12 @@ namespace Chess.ViewModels
 {
     public class BoardViewModel
     {
-        public BoardViewModel(string fen)
+        public BoardViewModel(string fen, bool isInteractable)
         {
             ChessTile[] tiles = ParseFen(fen);
             Rows = new ObservableCollection<ChessRow>();
             Moves = new ObservableCollection<MoveData>();
-
+            IsInteractable = isInteractable;
             int currentTile = 0;
             bool isWhite = true;
             for (int y = 0; y < 8; y++)
@@ -49,6 +49,7 @@ namespace Chess.ViewModels
 
         public ObservableCollection<ChessRow> Rows { get; private set; }
         public ObservableCollection<MoveData> Moves { get; private set; }
+        public bool IsInteractable { get; set; }
 
         private bool viewingCurrentMove = true;
         private int currentMove = -1; //currentMove points to the move that has just been made. Therefore, if NextMove() is called, currentMove + 1 is the move that should be executed (if it exists).
@@ -58,6 +59,8 @@ namespace Chess.ViewModels
         public void NextMove()              => MakeMove(new MoveData(), false, false, true);
         private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove)
         {
+            if (!IsInteractable)
+                return;
             viewingCurrentMove = currentMove == Moves.Count - 1;
             if (!newMove)
             {

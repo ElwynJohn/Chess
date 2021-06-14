@@ -9,7 +9,7 @@ namespace Chess.ViewModels
             Boards = new ObservableCollection<BoardViewModel>();
             for (int i = 0; i < fen.Length; i++)
             {
-                Boards.Add(new BoardViewModel(fen[i]));
+                Boards.Add(new BoardViewModel(fen[i], false));
             }
         }
 
