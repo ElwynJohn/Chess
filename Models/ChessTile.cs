@@ -35,18 +35,18 @@ namespace Chess.Models
 
         public static Dictionary<ChessPieceType, string> PieceToAssetMap = new Dictionary<ChessPieceType, string>
         {
-          {ChessPieceType.Castle, "./Assets/piece_black_castle.png"},
-          {ChessPieceType.Knight, "./Assets/piece_black_knight.png"},
-          {ChessPieceType.Bishop, "./Assets/piece_black_bishop.png"},
-          {ChessPieceType.Queen, "./Assets/piece_black_queen.png"},
-          {ChessPieceType.King, "./Assets/piece_black_king.png"},
-          {ChessPieceType.Pawn, "./Assets/piece_black_pawn.png"},
-          {ChessPieceType.Castle | ChessPieceType.IsWhite, "./Assets/piece_white_castle.png"},
-          {ChessPieceType.Knight | ChessPieceType.IsWhite, "./Assets/piece_white_knight.png"},
-          {ChessPieceType.Bishop | ChessPieceType.IsWhite, "./Assets/piece_white_bishop.png"},
-          {ChessPieceType.Queen | ChessPieceType.IsWhite, "./Assets/piece_white_queen.png"},
-          {ChessPieceType.King | ChessPieceType.IsWhite, "./Assets/piece_white_king.png"},
-          {ChessPieceType.Pawn | ChessPieceType.IsWhite, "./Assets/piece_white_pawn.png"},
+            {ChessPieceType.Castle, "./Assets/piece_black_castle.png"},
+            {ChessPieceType.Knight, "./Assets/piece_black_knight.png"},
+            {ChessPieceType.Bishop, "./Assets/piece_black_bishop.png"},
+            {ChessPieceType.Queen, "./Assets/piece_black_queen.png"},
+            {ChessPieceType.King, "./Assets/piece_black_king.png"},
+            {ChessPieceType.Pawn, "./Assets/piece_black_pawn.png"},
+            {ChessPieceType.Castle | ChessPieceType.IsWhite, "./Assets/piece_white_castle.png"},
+            {ChessPieceType.Knight | ChessPieceType.IsWhite, "./Assets/piece_white_knight.png"},
+            {ChessPieceType.Bishop | ChessPieceType.IsWhite, "./Assets/piece_white_bishop.png"},
+            {ChessPieceType.Queen | ChessPieceType.IsWhite, "./Assets/piece_white_queen.png"},
+            {ChessPieceType.King | ChessPieceType.IsWhite, "./Assets/piece_white_king.png"},
+            {ChessPieceType.Pawn | ChessPieceType.IsWhite, "./Assets/piece_white_pawn.png"},
         };
 
         public void SetPiece(ChessPieceType piece)

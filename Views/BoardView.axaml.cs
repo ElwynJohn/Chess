@@ -40,50 +40,50 @@ namespace Chess.Views
             if (clickedTile == null)
                 return;
             if (pStagedPanel == null)
-			{
-				if (clickedTile.PieceType != ChessPieceType.None)
-					pStagedPanel = panel;
-			}
+            {
+                if (clickedTile.PieceType != ChessPieceType.None)
+                    pStagedPanel = panel;
+            }
             else
             {
                 ChessTile pStagedTile = (ChessTile)pStagedPanel.DataContext;
                 if (pStagedTile != null)
                 {
-					BoardViewModel boardModel = (BoardViewModel)panel.FindAncestorOfType<UserControl>().DataContext;
-					ChessPieceType[] boardState = SimplifyBoard(boardModel);
-					MoveData move = PiecePositions(boardModel, pStagedTile, clickedTile);
-					if (IsLegalMove(boardState, move))
-						MakeMove(boardModel, move);
-                 }
+                    BoardViewModel boardModel = (BoardViewModel)panel.FindAncestorOfType<UserControl>().DataContext;
+                    ChessPieceType[] boardState = SimplifyBoard(boardModel);
+                    MoveData move = PiecePositions(boardModel, pStagedTile, clickedTile);
+                    if (IsLegalMove(boardState, move))
+                        MakeMove(boardModel, move);
+                }
                 pStagedPanel = null;
             }
 
         }
 
-		public MoveData PiecePositions(BoardViewModel model, ChessTile origin, ChessTile target)
-		{
-			byte[] positions = new byte[4];
-			byte rank = 0;
-			byte file = 0;
-			foreach (ChessRow row in model.Rows)
-			{
-				foreach (ChessTile tile in row.RowTiles)
-				{
-					if (tile == origin)
-					{
-						positions[0] = file;
-						positions[1] = rank;
-					}
-					if (tile == target)
-					{
-						positions[2] = file;
-						positions[3] = rank;
-					}
-					file++;
-				}
-				file = 0;
-				rank++;
-			}
+        public MoveData PiecePositions(BoardViewModel model, ChessTile origin, ChessTile target)
+        {
+            byte[] positions = new byte[4];
+            byte rank = 0;
+            byte file = 0;
+            foreach (ChessRow row in model.Rows)
+            {
+                foreach (ChessTile tile in row.RowTiles)
+                {
+                    if (tile == origin)
+                    {
+                        positions[0] = file;
+                        positions[1] = rank;
+                    }
+                    if (tile == target)
+                    {
+                        positions[2] = file;
+                        positions[3] = rank;
+                    }
+                    file++;
+                }
+                file = 0;
+                rank++;
+            }
             MoveData move = new MoveData()
             {
                 OriginFile = positions[0],
@@ -91,40 +91,40 @@ namespace Chess.Views
                 TargetFile = positions[2],
                 TargetRank = positions[3]
             };
-			return move;
-		}
+            return move;
+        }
 
-		public ChessPieceType[] SimplifyBoard(BoardViewModel model)
-		{
-			ChessPieceType[] board = new ChessPieceType[64];
-			int i = 0;
-			foreach (ChessRow row in model.Rows)
-			{
-				foreach (ChessTile tile in row.RowTiles)
-				{
-					board[i] = tile.PieceType;
-					i++;
-				}
-			}
-			return board;
-		}
+        public ChessPieceType[] SimplifyBoard(BoardViewModel model)
+        {
+            ChessPieceType[] board = new ChessPieceType[64];
+            int i = 0;
+            foreach (ChessRow row in model.Rows)
+            {
+                foreach (ChessTile tile in row.RowTiles)
+                {
+                    board[i] = tile.PieceType;
+                    i++;
+                }
+            }
+            return board;
+        }
 
-		public bool IsLegalMove(ChessPieceType[] board, MoveData move)
-		{
+        public bool IsLegalMove(ChessPieceType[] board, MoveData move)
+        {
             byte originFile = move.OriginFile;
             byte originRank = move.OriginRank;
             byte targetFile = move.TargetFile;
             byte targetRank = move.TargetRank;
-			int originPos = originRank * 8 + originFile;
-			int targetPos = targetRank * 8 + targetFile;
-			ChessPieceType originPieceColor = board[originPos] & ChessPieceType.IsWhite;
-			ChessPieceType targetPieceColor = board[targetPos] & ChessPieceType.IsWhite;
+            int originPos = originRank * 8 + originFile;
+            int targetPos = targetRank * 8 + targetFile;
+            ChessPieceType originPieceColor = board[originPos] & ChessPieceType.IsWhite;
+            ChessPieceType targetPieceColor = board[targetPos] & ChessPieceType.IsWhite;
 
-			if (board[originPos] == ChessPieceType.None)
-				return false;
+            if (board[originPos] == ChessPieceType.None)
+                return false;
             // Prevent self capture
-			if (ChessPieceType.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
-				return false;
+            if (ChessPieceType.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
+                return false;
 
             // Only Knights can jump over pieces
             if ((board[originPos] & ChessPieceType.Knight) == 0)
@@ -132,7 +132,7 @@ namespace Chess.Views
                 var dirVec = new int[]
                 {
                     targetFile - originFile,
-                    targetRank - originRank,
+                               targetRank - originRank,
                 };
 
                 for (int i = 0; i < 2; i++)
@@ -154,15 +154,15 @@ namespace Chess.Views
                 }
             }
 
-			if (0 != (board[originPos] & ChessPieceType.Knight))
-			{
-				if (Math.Abs(originRank - targetRank) == 2 && Math.Abs(originFile - targetFile) == 1)
-					return true;
-				else if (Math.Abs(originRank - targetRank) == 1 && Math.Abs(originFile - targetFile) == 2)
-					return true;
-				else
-					return false;
-			}
+            if (0 != (board[originPos] & ChessPieceType.Knight))
+            {
+                if (Math.Abs(originRank - targetRank) == 2 && Math.Abs(originFile - targetFile) == 1)
+                    return true;
+                else if (Math.Abs(originRank - targetRank) == 1 && Math.Abs(originFile - targetFile) == 2)
+                    return true;
+                else
+                    return false;
+            }
 
             if ((board[originPos] & (ChessPieceType.Bishop | ChessPieceType.Queen)) != 0)
             {
@@ -224,15 +224,15 @@ namespace Chess.Views
                     return true;
             }
 
-			return false;
-		}
+            return false;
+        }
 
-		public void MakeMove(BoardViewModel model, MoveData move)
-		{
-			ChessTile oldTile = model.Rows[move.OriginRank].RowTiles[move.OriginFile];
-			model.Rows[move.TargetRank].RowTiles[move.TargetFile].SetPiece(oldTile.PieceType);
-			oldTile.SetPiece(ChessPieceType.None);
-		}
+        public void MakeMove(BoardViewModel model, MoveData move)
+        {
+            ChessTile oldTile = model.Rows[move.OriginRank].RowTiles[move.OriginFile];
+            model.Rows[move.TargetRank].RowTiles[move.TargetFile].SetPiece(oldTile.PieceType);
+            oldTile.SetPiece(ChessPieceType.None);
+        }
 
         public void change_rectangle_color(object sender, PointerReleasedEventArgs e)
         {

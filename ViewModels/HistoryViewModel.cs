@@ -2,8 +2,8 @@ using System.Collections.ObjectModel;
 
 namespace Chess.ViewModels
 {
-	public class HistoryViewModel : ViewModelBase
-	{
+    public class HistoryViewModel : ViewModelBase
+    {
         public HistoryViewModel(string[] fen)
         {
             Boards = new ObservableCollection<BoardViewModel>();
@@ -14,5 +14,5 @@ namespace Chess.ViewModels
         }
 
         public ObservableCollection<BoardViewModel> Boards { get; set; }
-	}
+    }
 }

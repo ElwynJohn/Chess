@@ -4,6 +4,11 @@ root = true
 charset = utf-8
 insert_final_newline = true
 
+[*.axaml]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
 [*.cs]
 indent_style = space
 indent_size = 4
