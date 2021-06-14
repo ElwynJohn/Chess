@@ -51,16 +51,16 @@ namespace Chess.Views
                 {
 					BoardViewModel boardModel = (BoardViewModel)panel.FindAncestorOfType<UserControl>().DataContext;
 					ChessPieceType[] boardState = SimplifyBoard(boardModel);
-					byte[] pos = PiecePositions(boardModel, pStagedTile, clickedTile);
-					if (IsLegalMove(boardState, pos[0], pos[1], pos[2], pos[3]))
-						MakeMove(boardModel, pos[0], pos[1], pos[2], pos[3]);
+					MoveData move = PiecePositions(boardModel, pStagedTile, clickedTile);
+					if (IsLegalMove(boardState, move))
+						MakeMove(boardModel, move);
                  }
                 pStagedPanel = null;
             }
 
         }
 
-		public byte[] PiecePositions(BoardViewModel model, ChessTile origin, ChessTile target)
+		public MoveData PiecePositions(BoardViewModel model, ChessTile origin, ChessTile target)
 		{
 			byte[] positions = new byte[4];
 			byte rank = 0;
@@ -71,20 +71,27 @@ namespace Chess.Views
 				{
 					if (tile == origin)
 					{
-						positions[0] = rank;
-						positions[1] = file;
+						positions[0] = file;
+						positions[1] = rank;
 					}
 					if (tile == target)
 					{
-						positions[2] = rank;
-						positions[3] = file;
+						positions[2] = file;
+						positions[3] = rank;
 					}
 					file++;
 				}
 				file = 0;
 				rank++;
 			}
-			return positions;
+            MoveData move = new MoveData()
+            {
+                OriginFile = positions[0],
+                OriginRank = positions[1],
+                TargetFile = positions[2],
+                TargetRank = positions[3]
+            };
+			return move;
 		}
 
 		public ChessPieceType[] SimplifyBoard(BoardViewModel model)
@@ -102,8 +109,12 @@ namespace Chess.Views
 			return board;
 		}
 
-		public bool IsLegalMove(ChessPieceType[] board, byte originRank, byte originFile, byte targetRank, byte targetFile)
+		public bool IsLegalMove(ChessPieceType[] board, MoveData move)
 		{
+            byte originFile = move.OriginFile;
+            byte originRank = move.OriginRank;
+            byte targetFile = move.TargetFile;
+            byte targetRank = move.TargetRank;
 			int originPos = originRank * 8 + originFile;
 			int targetPos = targetRank * 8 + targetFile;
 			ChessPieceType originPieceColor = board[originPos] & ChessPieceType.IsWhite;
@@ -216,10 +227,10 @@ namespace Chess.Views
 			return false;
 		}
 
-		public void MakeMove(BoardViewModel model, byte originRank, byte originFile, byte targetRank, byte targetFile)
+		public void MakeMove(BoardViewModel model, MoveData move)
 		{
-			ChessTile oldTile = model.Rows[originRank].RowTiles[originFile];
-			model.Rows[targetRank].RowTiles[targetFile].SetPiece(oldTile.PieceType);
+			ChessTile oldTile = model.Rows[move.OriginRank].RowTiles[move.OriginFile];
+			model.Rows[move.TargetRank].RowTiles[move.TargetFile].SetPiece(oldTile.PieceType);
 			oldTile.SetPiece(ChessPieceType.None);
 		}
 
