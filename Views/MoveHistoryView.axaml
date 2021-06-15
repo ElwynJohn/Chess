@@ -5,18 +5,26 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Chess.Views.MoveHistoryView">
 
-    <Grid ColumnDefinitions="40,*,*" RowDefinitions="30,30,60" Width="200" Height="220" Background="#323240" Margin="20,20,20,20" VerticalAlignment="Top">
-        <Rectangle Grid.Row="0" Grid.Column="0" Height="30" Width="200" Fill="#323240" Grid.ColumnSpan="3"/>
-        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">1</TextBlock>
-        <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">Ke2</TextBlock>
-        <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">be2</TextBlock>
-        <Rectangle Grid.Row="1" Grid.Column="0" Height="30" Width="200" Fill="#27273d" Grid.ColumnSpan="3"/>
-        <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">2</TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">Ca2</TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White">Pc3</TextBlock>
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
-            <Button Content="Prev" Click="previous_move"/>
-            <Button Content="Next" Click="next_move"/>
+    <StackPanel Height="820" Width="300" Margin="30,20" VerticalAlignment="Top" Background="#323240">
+
+        <ItemsControl Items="{Binding Turns}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+
+                    <StackPanel Orientation="Horizontal" Width="300" Background="{Binding Fill}">
+                        <TextBlock Text="{Binding Turn}" Margin="0,10" Width="50" TextAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="{Binding WhiteMove.Move}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="{Binding BlackMove.Move}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
+                    </StackPanel>
+
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+            <Button Margin="10,20" Content="Prev" Click="previous_move"/>
+            <Button Margin="10,20" Content="Next" Click="next_move"/>
         </StackPanel>
-    </Grid>
+
+    </StackPanel>
 </UserControl>

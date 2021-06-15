@@ -21,6 +21,7 @@ namespace Chess.ViewModels
             ChessTile[] tiles = ParseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
             Rows = new ObservableCollection<ChessRow>();
             Moves = new ObservableCollection<MoveData>(LoadGame(gameRecordPath));
+            Turns = new ObservableCollection<TurnData>();
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
             filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");
 
@@ -60,6 +61,7 @@ namespace Chess.ViewModels
 
         public ObservableCollection<ChessRow> Rows { get; private set; }
         public ObservableCollection<MoveData> Moves { get; private set; }
+        public ObservableCollection<TurnData> Turns { get; private set; }
         public bool IsInteractable { get; set; }
 
         private string dirPath;
@@ -98,8 +100,10 @@ namespace Chess.ViewModels
                 if (!viewingCurrentMove)
                     return;
                 Moves.Add(move);
+                AddMoveToTurns(move);
                 currentMove++;
             }
+
             ChessTile newTile = Rows[move.TargetRank].RowTiles[move.TargetFile];
             ChessTile oldTile = Rows[move.OriginRank].RowTiles[move.OriginFile];
             newTile.SetPiece(oldTile.PieceType);
@@ -107,6 +111,32 @@ namespace Chess.ViewModels
 
             if (saveGame)
                 SaveGame();
+        }
+
+        private void AddMoveToTurns(MoveData move)
+        {
+            bool newTurn = Math.Abs(currentMove % 2) == 1;
+            if (newTurn)
+                Turns.Add(new TurnData()
+                {
+                    Turn = (currentMove + 3) / 2,
+                    WhiteMove = move,
+                    BlackMove = default,
+                    Fill = Turns.Count % 2 == 1 ?
+                        new SolidColorBrush(0xFF323240) :
+                        new SolidColorBrush(0xFF2A2A40)
+                });
+            else
+            {
+                TurnData temp = Turns[Turns.Count - 1];
+                Turns[Turns.Count - 1] = new TurnData()
+                {
+                    Turn = temp.Turn,
+                    WhiteMove = temp.WhiteMove,
+                    BlackMove = move,
+                    Fill = temp.Fill
+                };
+            }
         }
 
         public void SaveGame()
