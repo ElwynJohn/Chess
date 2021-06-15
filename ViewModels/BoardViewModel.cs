@@ -242,11 +242,13 @@ namespace Chess.ViewModels
                 int checkPos = originPos;
                 int checkFile = originFile;
                 int checkRank = originRank;
-                while (checkPos >= 0 && checkPos < board.GetLength(0))
+                while (true)
                 {
                     checkFile += dirVec[0];
                     checkRank += dirVec[1];
                     checkPos = checkFile + 8 * checkRank;
+                    if (checkPos < 0 || checkPos >= board.GetLength(0))
+                        return false;
                     if (checkPos == targetPos)
                         break;
                     if (board[checkPos] != ChessPieceType.None)
