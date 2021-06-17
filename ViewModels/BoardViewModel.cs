@@ -68,6 +68,7 @@ namespace Chess.ViewModels
         private string filePath;
         private bool viewingCurrentMove = true;
         private int currentMove = -1; //currentMove points to the move that has just been made. Therefore, if NextMove() is called, currentMove + 1 is the move that should be executed (if it exists).
+        private bool isWhitesMove = true;
 
         public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false, true);
         public void PreviousMove()          => MakeMove(new MoveData(), false, true,  false, false);
@@ -102,6 +103,7 @@ namespace Chess.ViewModels
                 Moves.Add(move);
                 AddMoveToTurns(move);
                 currentMove++;
+                isWhitesMove = !isWhitesMove;
             }
 
             ChessTile newTile = Rows[move.TargetRank].RowTiles[move.TargetFile];
@@ -221,6 +223,10 @@ namespace Chess.ViewModels
             ChessPieceType targetPieceColor = board[targetPos] & ChessPieceType.IsWhite;
 
             if (board[originPos] == ChessPieceType.None)
+                return false;
+            //Prevent white's pieces being moved on black's move & vice versa
+            if ((!isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) != 0)) ||
+                (isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) == 0)))
                 return false;
             // Prevent self capture
             if (ChessPieceType.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
