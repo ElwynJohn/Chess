@@ -84,6 +84,7 @@ namespace Chess.ViewModels
             if (!IsInteractable)
                 return;
             viewingCurrentMove = currentMove == Moves.Count - 1;
+            // @Refactor logic
             if (!newMove)
             {
                 if (previousMove && currentMove >= 0)
@@ -138,6 +139,42 @@ namespace Chess.ViewModels
                     currentMove++;
                 }
             }
+        }
+
+        private bool IsInCheck(ChessPieceType[] board, bool isWhite)
+        {
+            byte king = FindKing(board, isWhite);
+            for (byte i = 0; i < 64; i++)
+            {
+                if (board[i] == ChessPieceType.None)
+                    continue;
+                // pieces cannot check their own king
+                if (isWhite && (board[i] & ChessPieceType.IsWhite) != 0)
+                    continue;
+                if (!isWhite && (board[i] & ChessPieceType.IsWhite) == 0)
+                    continue;
+
+                byte originFile = (byte)(i % 8);
+                byte originRank = (byte)(i / 8);
+                byte kingFile = (byte)(king % 8);
+                byte kingRank = (byte)(king / 8);
+                if (IsLegalMove(board, originFile, originRank, kingFile, kingRank, false, !isWhite))
+                    return true;
+            }
+            return false;
+        }
+        private byte FindKing(ChessPieceType[] board, bool isWhite)
+        {
+            for (byte i = 0; i < 64; i++)
+            {
+                if ((board[i] & ChessPieceType.King) == 0)
+                    continue;
+                if (isWhite && (board[i] & ChessPieceType.IsWhite) != 0)
+                    return i;
+                if (!isWhite && (board[i] & ChessPieceType.IsWhite) == 0)
+                    return i;
+            }
+            return default;
         }
 
         private void AddMoveToTurns(MoveData move)
@@ -234,14 +271,9 @@ namespace Chess.ViewModels
             }
             return board;
         }
-
-        public bool IsLegalMove(MoveData move)
+        public bool IsLegalMove(MoveData move) => IsLegalMove(SimplifyBoard(), move.OriginFile, move.OriginRank, move.TargetFile, move.TargetRank, true, this.isWhitesMove);
+        private bool IsLegalMove(ChessPieceType[] board, byte originFile, byte originRank, byte targetFile, byte targetRank, bool considerChecks, bool _isWhitesMove)
         {
-            ChessPieceType[] board = SimplifyBoard();
-            byte originFile = move.OriginFile;
-            byte originRank = move.OriginRank;
-            byte targetFile = move.TargetFile;
-            byte targetRank = move.TargetRank;
             int originPos = originRank * 8 + originFile;
             int targetPos = targetRank * 8 + targetFile;
             ChessPieceType originPieceColor = board[originPos] & ChessPieceType.IsWhite;
@@ -250,8 +282,8 @@ namespace Chess.ViewModels
             if (board[originPos] == ChessPieceType.None)
                 return false;
             //Prevent white's pieces being moved on black's move & vice versa
-            if ((!isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) != 0)) ||
-                (isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) == 0)))
+            if ((!_isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) != 0)) ||
+                (_isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) == 0)))
                 return false;
             // Prevent self capture
             if (ChessPieceType.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
@@ -263,7 +295,7 @@ namespace Chess.ViewModels
                 var dirVec = new int[]
                 {
                     targetFile - originFile,
-                               targetRank - originRank,
+                    targetRank - originRank,
                 };
 
                 for (int i = 0; i < 2; i++)
@@ -285,6 +317,16 @@ namespace Chess.ViewModels
                     if (board[checkPos] != ChessPieceType.None)
                         return false;
                 }
+            }
+            if (considerChecks)
+            {
+                ChessPieceType[] boardAfterMove = new ChessPieceType[64];
+                for (int i = 0; i < 64; i++)
+                    boardAfterMove[i] = board[i];
+                boardAfterMove[originPos] = ChessPieceType.None;
+                boardAfterMove[targetPos] = board[originPos];
+                if (IsInCheck(boardAfterMove, _isWhitesMove))
+                    return false;
             }
 
             if (0 != (board[originPos] & ChessPieceType.Knight))
