@@ -139,88 +139,6 @@ namespace Chess.ViewModels
             }
         }
 
-        private bool IsInCheck(ChessPieceType[] board, bool isWhite)
-        {
-            byte king = FindKing(board, isWhite);
-            for (byte i = 0; i < 64; i++)
-            {
-                if (board[i] == ChessPieceType.None)
-                    continue;
-                // pieces cannot check their own king
-                if (isWhite && (board[i] & ChessPieceType.IsWhite) != 0)
-                    continue;
-                if (!isWhite && (board[i] & ChessPieceType.IsWhite) == 0)
-                    continue;
-
-                byte originFile = (byte)(i % 8);
-                byte originRank = (byte)(i / 8);
-                byte kingFile = (byte)(king % 8);
-                byte kingRank = (byte)(king / 8);
-                if (IsLegalMove(board, originFile, originRank, kingFile, kingRank, false, !isWhite))
-                    return true;
-            }
-            return false;
-        }
-        private byte FindKing(ChessPieceType[] board, bool isWhite)
-        {
-            for (byte i = 0; i < 64; i++)
-            {
-                if ((board[i] & ChessPieceType.King) == 0)
-                    continue;
-                if (isWhite && (board[i] & ChessPieceType.IsWhite) != 0)
-                    return i;
-                if (!isWhite && (board[i] & ChessPieceType.IsWhite) == 0)
-                    return i;
-            }
-            return default;
-        }
-
-        private void AddMoveToTurns(MoveData move)
-        {
-            bool newTurn = Math.Abs(currentMove % 2) == 1;
-            if (newTurn)
-                Turns.Add(new TurnData()
-                {
-                    Turn = (currentMove + 3) / 2,
-                    WhiteMove = move,
-                    BlackMove = default,
-                    Fill = Turns.Count % 2 == 1 ?
-                        new SolidColorBrush(0xFF323240) :
-                        new SolidColorBrush(0xFF2A2A40)
-                });
-            else
-            {
-                TurnData temp = Turns[Turns.Count - 1];
-                Turns[Turns.Count - 1] = new TurnData()
-                {
-                    Turn = temp.Turn,
-                    WhiteMove = temp.WhiteMove,
-                    BlackMove = move,
-                    Fill = temp.Fill
-                };
-            }
-        }
-
-        public void SaveGame()
-        {
-            Directory.CreateDirectory(dirPath);
-            using (StreamWriter writer = new StreamWriter(filePath))
-                writer.Write(JsonSerializer.Serialize<MoveData[]>(Moves.ToArray<MoveData>()));
-        }
-        public static MoveData[] LoadGame(string gameRecordPath)
-        {
-            if (gameRecordPath == String.Empty)
-                return new MoveData[0];
-
-            MoveData[] moves;
-            using (StreamReader reader = new StreamReader(gameRecordPath))
-            {
-                string json = reader.ReadToEnd();
-                moves = JsonSerializer.Deserialize<MoveData[]>(json);
-            }
-            return moves;
-        }
-
         public MoveData PiecePositions(ChessTile origin, ChessTile target)
         {
             byte[] positions = new byte[4];
@@ -255,20 +173,6 @@ namespace Chess.ViewModels
             return move;
         }
 
-        public ChessPieceType[] SimplifyBoard()
-        {
-            ChessPieceType[] board = new ChessPieceType[64];
-            int i = 0;
-            foreach (ChessRow row in Rows)
-            {
-                foreach (ChessTile tile in row.RowTiles)
-                {
-                    board[i] = tile.PieceType;
-                    i++;
-                }
-            }
-            return board;
-        }
 
         // IsLegalMove takes considerChecks as an argument because a pinned
         // piece can still give check: i.e. a piece that is pinned against the king
@@ -403,6 +307,103 @@ namespace Chess.ViewModels
             }
 
             return false;
+        }
+
+        public static MoveData[] LoadGame(string gameRecordPath)
+        {
+            if (gameRecordPath == String.Empty)
+                return new MoveData[0];
+
+            MoveData[] moves;
+            using (StreamReader reader = new StreamReader(gameRecordPath))
+            {
+                string json = reader.ReadToEnd();
+                moves = JsonSerializer.Deserialize<MoveData[]>(json);
+            }
+            return moves;
+        }
+        private void SaveGame()
+        {
+            Directory.CreateDirectory(dirPath);
+            using (StreamWriter writer = new StreamWriter(filePath))
+                writer.Write(JsonSerializer.Serialize<MoveData[]>(Moves.ToArray<MoveData>()));
+        }
+
+        private bool IsInCheck(ChessPieceType[] board, bool isWhite)
+        {
+            byte king = FindKing(board, isWhite);
+            for (byte i = 0; i < 64; i++)
+            {
+                if (board[i] == ChessPieceType.None)
+                    continue;
+                // pieces cannot check their own king
+                if (isWhite && (board[i] & ChessPieceType.IsWhite) != 0)
+                    continue;
+                if (!isWhite && (board[i] & ChessPieceType.IsWhite) == 0)
+                    continue;
+
+                byte originFile = (byte)(i % 8);
+                byte originRank = (byte)(i / 8);
+                byte kingFile = (byte)(king % 8);
+                byte kingRank = (byte)(king / 8);
+                if (IsLegalMove(board, originFile, originRank, kingFile, kingRank, false, !isWhite))
+                    return true;
+            }
+            return false;
+        }
+        private byte FindKing(ChessPieceType[] board, bool isWhite)
+        {
+            for (byte i = 0; i < 64; i++)
+            {
+                if ((board[i] & ChessPieceType.King) == 0)
+                    continue;
+                if (isWhite && (board[i] & ChessPieceType.IsWhite) != 0)
+                    return i;
+                if (!isWhite && (board[i] & ChessPieceType.IsWhite) == 0)
+                    return i;
+            }
+            return default;
+        }
+
+        private ChessPieceType[] SimplifyBoard()
+        {
+            ChessPieceType[] board = new ChessPieceType[64];
+            int i = 0;
+            foreach (ChessRow row in Rows)
+            {
+                foreach (ChessTile tile in row.RowTiles)
+                {
+                    board[i] = tile.PieceType;
+                    i++;
+                }
+            }
+            return board;
+        }
+
+        private void AddMoveToTurns(MoveData move)
+        {
+            bool newTurn = Math.Abs(currentMove % 2) == 1;
+            if (newTurn)
+                Turns.Add(new TurnData()
+                {
+                    Turn = (currentMove + 3) / 2,
+                    WhiteMove = move,
+                    BlackMove = default,
+                    Fill = Turns.Count % 2 == 1 ?
+                        new SolidColorBrush(0xFF323240) :
+                        new SolidColorBrush(0xFF2A2A40)
+                });
+            else
+            {
+                TurnData temp = Turns[Turns.Count - 1];
+                Turns[Turns.Count - 1] = new TurnData()
+                {
+                    Turn = temp.Turn,
+                    WhiteMove = temp.WhiteMove,
+                    BlackMove = move,
+                    Fill = temp.Fill
+                };
+            }
         }
 
         private ChessTile[] ParseFen(string fen)
