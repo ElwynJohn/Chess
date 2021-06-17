@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using System.IO;
+using System.IO.Pipes;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Text.Json;
@@ -15,9 +16,12 @@ namespace Chess.ViewModels
 {
     public class BoardViewModel
     {
-        public BoardViewModel() : this(String.Empty, true) {}
+        public BoardViewModel() : this(String.Empty, true) { }
         public BoardViewModel(string gameRecordPath, bool isInteractable)
         {
+            try { client.Connect(100); }
+            catch (TimeoutException) { }
+
             ChessTile[] tiles = ParseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
             Rows = new ObservableCollection<ChessRow>();
             Moves = new ObservableCollection<MoveData>(LoadGame(gameRecordPath));
@@ -72,6 +76,8 @@ namespace Chess.ViewModels
         public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false, true);
         public void PreviousMove()          => MakeMove(new MoveData(), false, true,  false, false);
         public void NextMove()              => MakeMove(new MoveData(), false, false, true,  false);
+
+        public NamedPipeClientStream client = new NamedPipeClientStream("ChessIPC");
         private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
         {
             if (!IsInteractable)
@@ -111,6 +117,25 @@ namespace Chess.ViewModels
 
             if (saveGame)
                 SaveGame();
+
+            if (client.IsConnected)
+            {
+                if (newMove)
+                {
+                    byte[] buf = new byte[4];
+                    client.Write(move.ToByteArray(), 0, 4);
+                    client.Read(buf, 0, 4);
+                    MoveData server_move = new MoveData(buf);
+                    Console.WriteLine("Got move: {0}", server_move.Move);
+                    ChessTile _newTile = Rows[server_move.TargetRank].RowTiles[server_move.TargetFile];
+                    ChessTile _oldTile = Rows[server_move.OriginRank].RowTiles[server_move.OriginFile];
+                    _newTile.SetPiece(_oldTile.PieceType);
+                    _oldTile.SetPiece(ChessPieceType.None);
+                    Moves.Add(server_move);
+                    AddMoveToTurns(server_move);
+                    currentMove++;
+                }
+            }
         }
 
         private void AddMoveToTurns(MoveData move)
