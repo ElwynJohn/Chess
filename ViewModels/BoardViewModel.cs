@@ -68,42 +68,25 @@ namespace Chess.ViewModels
         public ObservableCollection<TurnData> Turns { get; private set; }
         public bool IsInteractable { get; set; }
 
+        public NamedPipeClientStream client = new NamedPipeClientStream("ChessIPC");
         private string dirPath;
         private string filePath;
         private bool viewingCurrentMove = true;
-        private int currentMove = -1; //currentMove points to the move that has just been made. Therefore, if NextMove() is called, currentMove + 1 is the move that should be executed (if it exists).
+        private int currentMove = -1; //currentMove points to the move that has just been made.
+            //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
+            //executed (if it exists).
         private bool isWhitesMove = true;
 
         public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false, true);
         public void PreviousMove()          => MakeMove(new MoveData(), false, true,  false, false);
         public void NextMove()              => MakeMove(new MoveData(), false, false, true,  false);
-
-        public NamedPipeClientStream client = new NamedPipeClientStream("ChessIPC");
         private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
         {
             if (!IsInteractable)
                 return;
             viewingCurrentMove = currentMove == Moves.Count - 1;
-            // @Refactor logic
-            if (!newMove)
-            {
-                if (previousMove && currentMove >= 0)
-                {
-                    move = new MoveData()
-                    {
-                        OriginFile = Moves[currentMove].TargetFile,
-                        OriginRank = Moves[currentMove].TargetRank,
-                        TargetFile = Moves[currentMove].OriginFile,
-                        TargetRank = Moves[currentMove].OriginRank
-                    };
-                    currentMove--;
-                }
-                else if (nextMove && currentMove < Moves.Count - 1)
-                    move = Moves[++currentMove];
-                else
-                    return;
-            }
-            else
+
+            if (newMove)
             {
                 if (!viewingCurrentMove)
                     return;
@@ -112,6 +95,21 @@ namespace Chess.ViewModels
                 currentMove++;
                 isWhitesMove = !isWhitesMove;
             }
+            else if (previousMove && currentMove >= 0)
+            {
+                move = new MoveData()
+                {
+                    OriginFile = Moves[currentMove].TargetFile,
+                    OriginRank = Moves[currentMove].TargetRank,
+                    TargetFile = Moves[currentMove].OriginFile,
+                    TargetRank = Moves[currentMove].OriginRank
+                };
+                currentMove--;
+            }
+            else if (nextMove && currentMove < Moves.Count - 1)
+                move = Moves[++currentMove];
+            else
+                return;
 
             ChessTile newTile = Rows[move.TargetRank].RowTiles[move.TargetFile];
             ChessTile oldTile = Rows[move.OriginRank].RowTiles[move.OriginFile];
@@ -271,6 +269,11 @@ namespace Chess.ViewModels
             }
             return board;
         }
+
+        // IsLegalMove takes considerChecks as an argument because a pinned
+        // piece can still give check: i.e. a piece that is pinned against the king
+        // can still move to kill the enemy king even if doing so leaves its own
+        // king in check.
         public bool IsLegalMove(MoveData move) => IsLegalMove(SimplifyBoard(), move.OriginFile, move.OriginRank, move.TargetFile, move.TargetRank, true, this.isWhitesMove);
         private bool IsLegalMove(ChessPieceType[] board, byte originFile, byte originRank, byte targetFile, byte targetRank, bool considerChecks, bool _isWhitesMove)
         {
