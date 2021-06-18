@@ -67,6 +67,7 @@ namespace Chess.ViewModels
         public ObservableCollection<MoveData> Moves { get; private set; }
         public ObservableCollection<TurnData> Turns { get; private set; }
         public bool IsInteractable { get; set; }
+        public bool isWhitesMove { get; private set; } = true;
 
         public NamedPipeClientStream client = new NamedPipeClientStream("ChessIPC");
         private string dirPath;
@@ -75,7 +76,6 @@ namespace Chess.ViewModels
         private int currentMove = -1; //currentMove points to the move that has just been made.
             //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
             //executed (if it exists).
-        private bool isWhitesMove = true;
         private bool gameOver = false;
 
         public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false, true);
