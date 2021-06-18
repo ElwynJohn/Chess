@@ -6,5 +6,6 @@
         Width="1500" Height="860"
         Title="Chess"
         Background="#312e2b"
+        WindowStartupLocation="CenterScreen"
         Content="{Binding List}">
 </Window>
