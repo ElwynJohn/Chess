@@ -40,7 +40,12 @@ namespace Chess.Models
                 return NormalFill;
             }
         }
-        public bool IsHighlighted { get; set; } = false;
+        private bool isHighlighted = false;
+        public bool IsHighlighted
+        {
+            get { return isHighlighted; }
+            set { isHighlighted = value; NotifyPropertyChanged("Fill"); }
+        }
         public IBrush? HighlightedFill { get; set; }
         public IBrush? NormalFill { get; set; }
         private ChessPieceType pPieceType;

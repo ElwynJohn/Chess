@@ -65,16 +65,7 @@ namespace Chess.Views
 
             Panel panel = (Panel)sender;
             ChessTile oldTile = (ChessTile)panel.DataContext;
-
-            ChessTile tile = new ChessTile
-            {
-                HighlightedFill = oldTile.HighlightedFill,
-                NormalFill = oldTile.NormalFill,
-                PieceBitmap = oldTile.PieceBitmap,
-                IsHighlighted = !oldTile.IsHighlighted
-            };
-
-            panel.DataContext = tile;
+            oldTile.IsHighlighted = !oldTile.IsHighlighted;
         }
 
         private void InitializeComponent()
