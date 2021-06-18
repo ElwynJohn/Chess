@@ -21,6 +21,8 @@
                             <Panel Classes="chess-tile" PointerReleased="on_pointer_released">
                                 <Rectangle Classes="chess-tile" Fill="{Binding Fill}"/>
                                 <Image Classes="chess-tile" Source="{Binding PieceBitmap}"/>
+                                <TextBlock Text="{Binding FileToDisplay}" Foreground="{Binding TextToDisplayColour}" FontSize="22" FontWeight="600" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding RankToDisplay}" Foreground="{Binding TextToDisplayColour}" FontSize="22" FontWeight="600" Margin="5,0,0,0"/>
                             </Panel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

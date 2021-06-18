@@ -8,7 +8,38 @@ namespace Chess.Models
 {
     public class ChessTile : INotifyPropertyChanged
     {
-        public IBrush? Fill { get; set; }
+        public byte Position { get; set; }
+        public bool DisplayOverlay { get; set; }
+        // FileToDisplay and RankToDisplay are the strings that are displayed
+        // on the board. Only the left and bottom tiles should display a string.
+        public string FileToDisplay
+        {
+            get
+            {
+                if (!DisplayOverlay || Position / 8 != 7)
+                    return "";
+                return ((char)('a' + Position % 8)).ToString();
+            }
+        }
+        public string RankToDisplay
+        {
+            get
+            {
+                if (!DisplayOverlay || Position % 8 != 0)
+                    return "";
+                return (8 - Position / 8).ToString();
+            }
+        }
+        public IBrush? TextToDisplayColour { get; set; }
+        public IBrush? Fill
+        {
+            get
+            {
+                if (IsHighlighted)
+                    return HighlightedFill;
+                return NormalFill;
+            }
+        }
         public bool IsHighlighted { get; set; } = false;
         public IBrush? HighlightedFill { get; set; }
         public IBrush? NormalFill { get; set; }
@@ -66,7 +97,6 @@ namespace Chess.Models
 
         public ChessTile(ChessTile tile, ChessPieceType piece)
         {
-            Fill = tile.Fill;
             HighlightedFill = tile.HighlightedFill;
             NormalFill = tile.NormalFill;
 

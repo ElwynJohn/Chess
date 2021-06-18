@@ -70,13 +70,9 @@ namespace Chess.Views
             {
                 HighlightedFill = oldTile.HighlightedFill,
                 NormalFill = oldTile.NormalFill,
-                PieceBitmap = oldTile.PieceBitmap
+                PieceBitmap = oldTile.PieceBitmap,
+                IsHighlighted = !oldTile.IsHighlighted
             };
-            if (oldTile.IsHighlighted)
-                tile.Fill = tile.NormalFill;
-            else
-                tile.Fill = tile.HighlightedFill;
-            tile.IsHighlighted = !oldTile.IsHighlighted;
 
             panel.DataContext = tile;
         }

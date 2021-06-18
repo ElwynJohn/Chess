@@ -16,8 +16,8 @@ namespace Chess.ViewModels
 {
     public class BoardViewModel
     {
-        public BoardViewModel() : this(String.Empty, true) { }
-        public BoardViewModel(string gameRecordPath, bool isInteractable)
+        public BoardViewModel() : this(String.Empty, true, true) { }
+        public BoardViewModel(string gameRecordPath, bool isInteractable, bool displayOverlay)
         {
             try { client.Connect(100); }
             catch (TimeoutException) { }
@@ -29,25 +29,27 @@ namespace Chess.ViewModels
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
             filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");
 
-            int currentTile = 0;
+            byte currentTile = 0;
             bool isWhite = true;
             for (int y = 0; y < 8; y++)
             {
                 ObservableCollection<ChessTile> rowTiles = new ObservableCollection<ChessTile>();
                 for (int x = 0; x < 8; x++)
                 {
+                    tiles[currentTile].Position = currentTile;
+                    tiles[currentTile].DisplayOverlay = displayOverlay;
                     if (isWhite)
                     {
-                        tiles[currentTile].Fill = new SolidColorBrush(0xFFD2CACA);
-                        tiles[currentTile].HighlightedFill = new SolidColorBrush(0xFFFFABCA);
                         tiles[currentTile].NormalFill = new SolidColorBrush(0xFFD2CACA);
+                        tiles[currentTile].HighlightedFill = new SolidColorBrush(0xFFFFABCA);
+                        tiles[currentTile].TextToDisplayColour = new SolidColorBrush(0xFF383D64);
                         rowTiles.Add(tiles[currentTile]);
                     }
                     else
                     {
-                        tiles[currentTile].Fill = new SolidColorBrush(0xFF080D24);
-                        tiles[currentTile].HighlightedFill = new SolidColorBrush(0xFF480D24);
-                        tiles[currentTile].NormalFill = new SolidColorBrush(0xFF080D24);
+                        tiles[currentTile].NormalFill = new SolidColorBrush(0xFF383D64);
+                        tiles[currentTile].HighlightedFill = new SolidColorBrush(0xFF682D44);
+                        tiles[currentTile].TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
                         rowTiles.Add(tiles[currentTile]);
                     }
                     currentTile++;
