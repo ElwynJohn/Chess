@@ -4,6 +4,8 @@ using System.ComponentModel;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
+using Chess.ViewModels;
+
 namespace Chess.Models
 {
     public class ChessTile : INotifyPropertyChanged
@@ -48,11 +50,12 @@ namespace Chess.Models
         }
         public IBrush? HighlightedFill { get; set; }
         public IBrush? NormalFill { get; set; }
+        public ChessBoard board;
         private ChessPiece pPieceType;
         public ChessPiece PieceType
         {
-            get { return pPieceType; }
-            set { pPieceType = value; NotifyPropertyChanged(); }
+            get { return board[Position]; }
+            set { board[Position] = value; NotifyPropertyChanged(); }
         }
         private Bitmap? pPieceBitmap;
         public Bitmap? PieceBitmap
@@ -119,6 +122,17 @@ namespace Chess.Models
             AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
             if (AssetPath != null)
                 PieceBitmap = new Bitmap(AssetPath);
+        }
+
+        public ChessTile(ChessBoard board, int pos)
+        {
+            this.board = board;
+            this.Position = (byte)pos;
+
+            AssetPath = PieceToAssetMap.GetValueOrDefault(board[pos]);
+            if (AssetPath != null)
+                PieceBitmap = new Bitmap(AssetPath);
+
         }
     }
 }

@@ -16,13 +16,16 @@ namespace Chess.ViewModels
 {
     public class BoardViewModel
     {
+        public ChessBoard board;
         public BoardViewModel() : this(String.Empty, true, true) { }
         public BoardViewModel(string gameRecordPath, bool isInteractable, bool displayOverlay)
         {
             try { client.Connect(100); }
             catch (TimeoutException) { }
 
-            ChessTile[] tiles = ParseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            board = new ChessBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            ChessTile[] tiles = new ChessTile[64];
+
             Rows = new ObservableCollection<ChessRow>();
             Moves = new ObservableCollection<MoveData>(LoadGame(gameRecordPath));
             Turns = new ObservableCollection<TurnData>();
@@ -36,6 +39,7 @@ namespace Chess.ViewModels
                 ObservableCollection<ChessTile> rowTiles = new ObservableCollection<ChessTile>();
                 for (int x = 0; x < 8; x++)
                 {
+                    tiles[currentTile] = new ChessTile(board, currentTile);
                     tiles[currentTile].Position = currentTile;
                     tiles[currentTile].DisplayOverlay = displayOverlay;
                     if (isWhite)
@@ -575,25 +579,9 @@ namespace Chess.ViewModels
                 i++;
             }
 
-            var FenToPieceMap = new Dictionary<char, ChessPiece>
-            {
-                {'r', ChessPiece.Castle},
-                {'n', ChessPiece.Knight},
-                {'b', ChessPiece.Bishop},
-                {'q', ChessPiece.Queen},
-                {'k', ChessPiece.King},
-                {'p', ChessPiece.Pawn},
-                {'R', ChessPiece.Castle | ChessPiece.IsWhite},
-                {'N', ChessPiece.Knight | ChessPiece.IsWhite},
-                {'B', ChessPiece.Bishop | ChessPiece.IsWhite},
-                {'Q', ChessPiece.Queen | ChessPiece.IsWhite},
-                {'K', ChessPiece.King | ChessPiece.IsWhite},
-                {'P', ChessPiece.Pawn | ChessPiece.IsWhite},
-            };
-
             ChessTile[] chessTiles = new ChessTile[64];
             for (i = 0; i < 64; i++)
-                chessTiles[i] = new ChessTile(FenToPieceMap.GetValueOrDefault(parsedFen[i]));
+                chessTiles[i] = new ChessTile(ChessBoard.FenToPieceMap.GetValueOrDefault(parsedFen[i]));
             return chessTiles;
         }
     }
