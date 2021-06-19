@@ -117,7 +117,7 @@ namespace Chess.ViewModels
             ChessTile newTile = Rows[move.TargetRank].RowTiles[move.TargetFile];
             ChessTile oldTile = Rows[move.OriginRank].RowTiles[move.OriginFile];
             newTile.SetPiece(oldTile.PieceType);
-            oldTile.SetPiece(ChessPieceType.None);
+            oldTile.SetPiece(ChessPiece.None);
 
             if (newMove && IsInCheckMate(SimplifyBoard()))
             {
@@ -139,7 +139,7 @@ namespace Chess.ViewModels
                     ChessTile _newTile = Rows[server_move.TargetRank].RowTiles[server_move.TargetFile];
                     ChessTile _oldTile = Rows[server_move.OriginRank].RowTiles[server_move.OriginFile];
                     _newTile.SetPiece(_oldTile.PieceType);
-                    _oldTile.SetPiece(ChessPieceType.None);
+                    _oldTile.SetPiece(ChessPiece.None);
                     Moves.Add(server_move);
                     AddMoveToTurns(server_move);
                     currentMove++;
@@ -187,7 +187,7 @@ namespace Chess.ViewModels
         // can still move to kill the enemy king even if doing so leaves its own
         // king in check.
         public bool IsLegalMove(MoveData move) => IsLegalMove(SimplifyBoard(), move.OriginFile, move.OriginRank, move.TargetFile, move.TargetRank, true, this.isWhitesMove);
-        private bool IsLegalMove(ChessPieceType[] board, byte originPos, byte targetPos)
+        private bool IsLegalMove(ChessPiece[] board, byte originPos, byte targetPos)
         {
             byte originFile = (byte)(originPos % 8);
             byte originRank = (byte)(originPos / 8);
@@ -196,25 +196,25 @@ namespace Chess.ViewModels
 
             return IsLegalMove(board, originFile, originRank, targetFile, targetRank, true, this.isWhitesMove);
         }
-        private bool IsLegalMove(ChessPieceType[] board, byte originFile, byte originRank, byte targetFile, byte targetRank, bool considerChecks, bool _isWhitesMove)
+        private bool IsLegalMove(ChessPiece[] board, byte originFile, byte originRank, byte targetFile, byte targetRank, bool considerChecks, bool _isWhitesMove)
         {
             int originPos = originRank * 8 + originFile;
             int targetPos = targetRank * 8 + targetFile;
-            ChessPieceType originPieceColor = board[originPos] & ChessPieceType.IsWhite;
-            ChessPieceType targetPieceColor = board[targetPos] & ChessPieceType.IsWhite;
+            ChessPiece originPieceColor = board[originPos] & ChessPiece.IsWhite;
+            ChessPiece targetPieceColor = board[targetPos] & ChessPiece.IsWhite;
 
-            if (board[originPos] == ChessPieceType.None)
+            if (board[originPos] == ChessPiece.None)
                 return false;
             //Prevent white's pieces being moved on black's move & vice versa
-            if ((!_isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) != 0)) ||
-                (_isWhitesMove && ((board[originPos] & ChessPieceType.IsWhite) == 0)))
+            if ((!_isWhitesMove && ((board[originPos] & ChessPiece.IsWhite) != 0)) ||
+                (_isWhitesMove && ((board[originPos] & ChessPiece.IsWhite) == 0)))
                 return false;
             // Prevent self capture
-            if (ChessPieceType.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
+            if (ChessPiece.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
                 return false;
 
             // Only Knights can jump over pieces
-            if ((board[originPos] & ChessPieceType.Knight) == 0)
+            if ((board[originPos] & ChessPiece.Knight) == 0)
             {
                 var dirVec = new int[]
                 {
@@ -238,22 +238,22 @@ namespace Chess.ViewModels
                         return false;
                     if (checkPos == targetPos)
                         break;
-                    if (board[checkPos] != ChessPieceType.None)
+                    if (board[checkPos] != ChessPiece.None)
                         return false;
                 }
             }
             if (considerChecks)
             {
-                ChessPieceType[] boardAfterMove = new ChessPieceType[64];
+                ChessPiece[] boardAfterMove = new ChessPiece[64];
                 for (int i = 0; i < 64; i++)
                     boardAfterMove[i] = board[i];
-                boardAfterMove[originPos] = ChessPieceType.None;
+                boardAfterMove[originPos] = ChessPiece.None;
                 boardAfterMove[targetPos] = board[originPos];
                 if (PositionOfChecker(boardAfterMove) != Byte.MaxValue)
                     return false;
             }
 
-            if (0 != (board[originPos] & ChessPieceType.Knight))
+            if (0 != (board[originPos] & ChessPiece.Knight))
             {
                 if (Math.Abs(originRank - targetRank) == 2 && Math.Abs(originFile - targetFile) == 1)
                     return true;
@@ -263,13 +263,13 @@ namespace Chess.ViewModels
                     return false;
             }
 
-            if ((board[originPos] & (ChessPieceType.Bishop | ChessPieceType.Queen)) != 0)
+            if ((board[originPos] & (ChessPiece.Bishop | ChessPiece.Queen)) != 0)
             {
                 if (Math.Abs(targetRank - originRank) == Math.Abs(targetFile - originFile))
                     return true;
             }
 
-            if ((board[originPos] & (ChessPieceType.Castle | ChessPieceType.Queen)) != 0)
+            if ((board[originPos] & (ChessPiece.Castle | ChessPiece.Queen)) != 0)
             {
                 if (targetRank == originRank)
                     return true;
@@ -277,10 +277,10 @@ namespace Chess.ViewModels
                     return true;
             }
 
-            if ((board[originPos] & ChessPieceType.Pawn) != 0)
+            if ((board[originPos] & ChessPiece.Pawn) != 0)
             {
                 // Pawns can only move forwards
-                if ((board[originPos] & ChessPieceType.IsWhite) != 0)
+                if ((board[originPos] & ChessPiece.IsWhite) != 0)
                 {
                     if (targetRank > originRank)
                         return false;
@@ -303,7 +303,7 @@ namespace Chess.ViewModels
                         return false;
                 }
 
-                if (targetFile == originFile && board[targetPos] == ChessPieceType.None)
+                if (targetFile == originFile && board[targetPos] == ChessPiece.None)
                     return true;
 
                 // Can't move horizontally
@@ -311,13 +311,13 @@ namespace Chess.ViewModels
                     return false;
 
                 // Can take pieces diagonally 1 square in front
-                if (board[targetPos] == ChessPieceType.None)
+                if (board[targetPos] == ChessPiece.None)
                     return false;
                 if ((Math.Abs(targetFile - originFile) == 1 && Math.Abs(targetRank - originRank) == 1))
                     return true;
             }
 
-            if ((board[originPos] & ChessPieceType.King) != 0)
+            if ((board[originPos] & ChessPiece.King) != 0)
             {
                 if (Math.Abs(targetRank - originRank) <= 1 && Math.Abs(targetFile - originFile) <= 1)
                     return true;
@@ -346,7 +346,7 @@ namespace Chess.ViewModels
                 writer.Write(JsonSerializer.Serialize<MoveData[]>(Moves.ToArray<MoveData>()));
         }
 
-        private bool IsInCheckMate(ChessPieceType[] board)
+        private bool IsInCheckMate(ChessPiece[] board)
         {
             LinkedList<byte> testKingMoves = new LinkedList<byte>();
             LinkedList<byte> testLegalBlockingMoves = new LinkedList<byte>();
@@ -383,9 +383,9 @@ namespace Chess.ViewModels
             LinkedList<byte> friendlyPiecePositions = new LinkedList<byte>();
             for (byte i = 0; i < 64; i++)
             {
-                if (isWhitesMove && ((board[i] & ChessPieceType.IsWhite) != 0))
+                if (isWhitesMove && ((board[i] & ChessPiece.IsWhite) != 0))
                     friendlyPiecePositions.AddLast(i);
-                else if (!isWhitesMove && ((board[i] & ChessPieceType.IsWhite) == 0))
+                else if (!isWhitesMove && ((board[i] & ChessPiece.IsWhite) == 0))
                     friendlyPiecePositions.AddLast(i);
             }
 
@@ -401,7 +401,7 @@ namespace Chess.ViewModels
             }
 
             // King can't move and knight cant be killed so it's checkmate
-            if ((board[attackingPiecePos] & ChessPieceType.Knight) != 0)
+            if ((board[attackingPiecePos] & ChessPiece.Knight) != 0)
                 return true;
 
             // Check if the checker can be blocked:
@@ -478,17 +478,17 @@ namespace Chess.ViewModels
             return true;
         }
         // Returns Byte.MaxValue when no piece is checking the king
-        private byte PositionOfChecker(ChessPieceType[] board)
+        private byte PositionOfChecker(ChessPiece[] board)
         {
             byte king = FindKing(board, isWhitesMove);
             for (byte i = 0; i < 64; i++)
             {
-                if (board[i] == ChessPieceType.None)
+                if (board[i] == ChessPiece.None)
                     continue;
                 // pieces cannot check their own king
-                if (isWhitesMove && (board[i] & ChessPieceType.IsWhite) != 0)
+                if (isWhitesMove && (board[i] & ChessPiece.IsWhite) != 0)
                     continue;
-                if (!isWhitesMove && (board[i] & ChessPieceType.IsWhite) == 0)
+                if (!isWhitesMove && (board[i] & ChessPiece.IsWhite) == 0)
                     continue;
 
                 byte originFile = (byte)(i % 8);
@@ -500,23 +500,23 @@ namespace Chess.ViewModels
             }
             return Byte.MaxValue;
         }
-        private byte FindKing(ChessPieceType[] board, bool isWhite)
+        private byte FindKing(ChessPiece[] board, bool isWhite)
         {
             for (byte i = 0; i < 64; i++)
             {
-                if ((board[i] & ChessPieceType.King) == 0)
+                if ((board[i] & ChessPiece.King) == 0)
                     continue;
-                if (isWhite && (board[i] & ChessPieceType.IsWhite) != 0)
+                if (isWhite && (board[i] & ChessPiece.IsWhite) != 0)
                     return i;
-                if (!isWhite && (board[i] & ChessPieceType.IsWhite) == 0)
+                if (!isWhite && (board[i] & ChessPiece.IsWhite) == 0)
                     return i;
             }
             return default;
         }
 
-        private ChessPieceType[] SimplifyBoard()
+        private ChessPiece[] SimplifyBoard()
         {
-            ChessPieceType[] board = new ChessPieceType[64];
+            ChessPiece[] board = new ChessPiece[64];
             int i = 0;
             foreach (ChessRow row in Rows)
             {
@@ -575,20 +575,20 @@ namespace Chess.ViewModels
                 i++;
             }
 
-            var FenToPieceMap = new Dictionary<char, ChessPieceType>
+            var FenToPieceMap = new Dictionary<char, ChessPiece>
             {
-                {'r', ChessPieceType.Castle},
-                {'n', ChessPieceType.Knight},
-                {'b', ChessPieceType.Bishop},
-                {'q', ChessPieceType.Queen},
-                {'k', ChessPieceType.King},
-                {'p', ChessPieceType.Pawn},
-                {'R', ChessPieceType.Castle | ChessPieceType.IsWhite},
-                {'N', ChessPieceType.Knight | ChessPieceType.IsWhite},
-                {'B', ChessPieceType.Bishop | ChessPieceType.IsWhite},
-                {'Q', ChessPieceType.Queen | ChessPieceType.IsWhite},
-                {'K', ChessPieceType.King | ChessPieceType.IsWhite},
-                {'P', ChessPieceType.Pawn | ChessPieceType.IsWhite},
+                {'r', ChessPiece.Castle},
+                {'n', ChessPiece.Knight},
+                {'b', ChessPiece.Bishop},
+                {'q', ChessPiece.Queen},
+                {'k', ChessPiece.King},
+                {'p', ChessPiece.Pawn},
+                {'R', ChessPiece.Castle | ChessPiece.IsWhite},
+                {'N', ChessPiece.Knight | ChessPiece.IsWhite},
+                {'B', ChessPiece.Bishop | ChessPiece.IsWhite},
+                {'Q', ChessPiece.Queen | ChessPiece.IsWhite},
+                {'K', ChessPiece.King | ChessPiece.IsWhite},
+                {'P', ChessPiece.Pawn | ChessPiece.IsWhite},
             };
 
             ChessTile[] chessTiles = new ChessTile[64];

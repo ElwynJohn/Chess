@@ -1,6 +1,6 @@
 namespace Chess.Models
 {
-    public enum ChessPieceType
+    public enum ChessPiece
     {
         None = 0,
         Pawn = 1 << 0,

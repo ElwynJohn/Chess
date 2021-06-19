@@ -48,8 +48,8 @@ namespace Chess.Models
         }
         public IBrush? HighlightedFill { get; set; }
         public IBrush? NormalFill { get; set; }
-        private ChessPieceType pPieceType;
-        public ChessPieceType PieceType
+        private ChessPiece pPieceType;
+        public ChessPiece PieceType
         {
             get { return pPieceType; }
             set { pPieceType = value; NotifyPropertyChanged(); }
@@ -69,23 +69,23 @@ namespace Chess.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public static Dictionary<ChessPieceType, string> PieceToAssetMap = new Dictionary<ChessPieceType, string>
+        public static Dictionary<ChessPiece, string> PieceToAssetMap = new Dictionary<ChessPiece, string>
         {
-            {ChessPieceType.Castle, "./Assets/piece_black_castle.png"},
-            {ChessPieceType.Knight, "./Assets/piece_black_knight.png"},
-            {ChessPieceType.Bishop, "./Assets/piece_black_bishop.png"},
-            {ChessPieceType.Queen, "./Assets/piece_black_queen.png"},
-            {ChessPieceType.King, "./Assets/piece_black_king.png"},
-            {ChessPieceType.Pawn, "./Assets/piece_black_pawn.png"},
-            {ChessPieceType.Castle | ChessPieceType.IsWhite, "./Assets/piece_white_castle.png"},
-            {ChessPieceType.Knight | ChessPieceType.IsWhite, "./Assets/piece_white_knight.png"},
-            {ChessPieceType.Bishop | ChessPieceType.IsWhite, "./Assets/piece_white_bishop.png"},
-            {ChessPieceType.Queen | ChessPieceType.IsWhite, "./Assets/piece_white_queen.png"},
-            {ChessPieceType.King | ChessPieceType.IsWhite, "./Assets/piece_white_king.png"},
-            {ChessPieceType.Pawn | ChessPieceType.IsWhite, "./Assets/piece_white_pawn.png"},
+            {ChessPiece.Castle, "./Assets/piece_black_castle.png"},
+            {ChessPiece.Knight, "./Assets/piece_black_knight.png"},
+            {ChessPiece.Bishop, "./Assets/piece_black_bishop.png"},
+            {ChessPiece.Queen, "./Assets/piece_black_queen.png"},
+            {ChessPiece.King, "./Assets/piece_black_king.png"},
+            {ChessPiece.Pawn, "./Assets/piece_black_pawn.png"},
+            {ChessPiece.Castle | ChessPiece.IsWhite, "./Assets/piece_white_castle.png"},
+            {ChessPiece.Knight | ChessPiece.IsWhite, "./Assets/piece_white_knight.png"},
+            {ChessPiece.Bishop | ChessPiece.IsWhite, "./Assets/piece_white_bishop.png"},
+            {ChessPiece.Queen | ChessPiece.IsWhite, "./Assets/piece_white_queen.png"},
+            {ChessPiece.King | ChessPiece.IsWhite, "./Assets/piece_white_king.png"},
+            {ChessPiece.Pawn | ChessPiece.IsWhite, "./Assets/piece_white_pawn.png"},
         };
 
-        public void SetPiece(ChessPieceType piece)
+        public void SetPiece(ChessPiece piece)
         {
             PieceType = piece;
             AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
@@ -100,7 +100,7 @@ namespace Chess.Models
 
         }
 
-        public ChessTile(ChessTile tile, ChessPieceType piece)
+        public ChessTile(ChessTile tile, ChessPiece piece)
         {
             HighlightedFill = tile.HighlightedFill;
             NormalFill = tile.NormalFill;
@@ -112,7 +112,7 @@ namespace Chess.Models
                 PieceBitmap = new Bitmap(AssetPath);
         }
 
-        public ChessTile(ChessPieceType piece)
+        public ChessTile(ChessPiece piece)
         {
             PieceType = piece;
 

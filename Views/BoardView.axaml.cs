@@ -36,13 +36,13 @@ namespace Chess.Views
                 return;
             if (pStagedPanel == null)
             {
-                if (clickedTile.PieceType != ChessPieceType.None)
+                if (clickedTile.PieceType != ChessPiece.None)
                     //if it's white's turn, check if the clickedTile is white
                     if ((boardModel.isWhitesMove
-                        && (clickedTile.PieceType & ChessPieceType.IsWhite) != 0)
+                        && (clickedTile.PieceType & ChessPiece.IsWhite) != 0)
                         //if it's black's turn, check if the clickedTile is black
                         || (!boardModel.isWhitesMove
-                        && (clickedTile.PieceType & ChessPieceType.IsWhite) == 0))
+                        && (clickedTile.PieceType & ChessPiece.IsWhite) == 0))
                             pStagedPanel = panel;
             }
             else
