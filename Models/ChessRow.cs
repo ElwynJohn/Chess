@@ -5,6 +5,6 @@ namespace Chess.Models
 {
     public class ChessRow
     {
-        public ObservableCollection<ChessTile> RowTiles { get; set; }
+        public ObservableCollection<ChessTile>? RowTiles { get; set; }
     }
 }

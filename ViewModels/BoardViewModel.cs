@@ -138,6 +138,8 @@ namespace Chess.ViewModels
             byte file = 0;
             foreach (ChessRow row in Rows)
             {
+                if (row.RowTiles == null)
+                    continue;
                 foreach (ChessTile tile in row.RowTiles)
                 {
                     if (tile == origin)
@@ -315,13 +317,13 @@ namespace Chess.ViewModels
             if (gameRecordPath == String.Empty)
                 return new MoveData[0];
 
-            MoveData[] moves;
+            MoveData[]? moves;
             using (StreamReader reader = new StreamReader(gameRecordPath))
             {
                 string json = reader.ReadToEnd();
                 moves = JsonSerializer.Deserialize<MoveData[]>(json);
             }
-            return moves;
+            return moves != null ? moves : new MoveData[0];
         }
         private void SaveGame()
         {
@@ -504,6 +506,8 @@ namespace Chess.ViewModels
             int i = 0;
             foreach (ChessRow row in Rows)
             {
+                if (row.RowTiles == null)
+                    continue;
                 foreach (ChessTile tile in row.RowTiles)
                 {
                     board[i] = tile.PieceType;

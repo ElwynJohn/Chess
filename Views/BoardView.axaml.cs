@@ -28,11 +28,11 @@ namespace Chess.Views
             if (e.InitialPressMouseButton != MouseButton.Left)
                 return;
 
-            BoardViewModel boardModel = (BoardViewModel)this.DataContext;
+            BoardViewModel? boardModel = (BoardViewModel?)this.DataContext;
             Panel panel = (Panel)sender;
-            ChessTile clickedTile = (ChessTile)panel.DataContext;
+            ChessTile? clickedTile = (ChessTile?)panel.DataContext;
 
-            if (clickedTile == null)
+            if (clickedTile == null || boardModel == null)
                 return;
             if (pStagedPanel == null)
             {
@@ -47,7 +47,7 @@ namespace Chess.Views
             }
             else
             {
-                ChessTile pStagedTile = (ChessTile)pStagedPanel.DataContext;
+                ChessTile? pStagedTile = (ChessTile?)pStagedPanel.DataContext;
                 if (pStagedTile != null)
                 {
                     MoveData move = boardModel.PiecePositions(pStagedTile, clickedTile);
@@ -64,8 +64,9 @@ namespace Chess.Views
                 return;
 
             Panel panel = (Panel)sender;
-            ChessTile oldTile = (ChessTile)panel.DataContext;
-            oldTile.IsHighlighted = !oldTile.IsHighlighted;
+            ChessTile? oldTile = (ChessTile?)panel.DataContext;
+            if (oldTile != null)
+                oldTile.IsHighlighted = !oldTile.IsHighlighted;
         }
 
         private void InitializeComponent()

@@ -20,14 +20,16 @@ namespace Chess.Views
 
         public void on_click_play(object sender, RoutedEventArgs e)
         {
-            MainWindowViewModel model = (MainWindowViewModel)((Control)sender).FindAncestorOfType<Window>().DataContext;
-            model.List = new PlayViewModel();
+            MainWindowViewModel? model = (MainWindowViewModel?)((Control)sender).FindAncestorOfType<Window>().DataContext;
+            if (model != null)
+                model.List = new PlayViewModel();
         }
 
         public void on_click_history(object sender, RoutedEventArgs e)
         {
-            MainWindowViewModel model = (MainWindowViewModel)((Control)sender).FindAncestorOfType<Window>().DataContext;
-            model.List = new HistoryViewModel();
+            MainWindowViewModel? model = (MainWindowViewModel?)((Control)sender).FindAncestorOfType<Window>().DataContext;
+            if (model != null)
+                model.List = new HistoryViewModel();
         }
     }
 }

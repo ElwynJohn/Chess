@@ -10,14 +10,14 @@ namespace Chess.ViewModels
             List = new PlayViewModel();
         }
 
-        private ViewModelBase list;
-        public ViewModelBase List
+        private ViewModelBase? list;
+        public ViewModelBase? List
         {
             get { return list; }
             set { list = value; NotifyPropertyChanged(); }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        new public event PropertyChangedEventHandler? PropertyChanged;
 
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
