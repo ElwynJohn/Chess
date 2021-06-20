@@ -62,13 +62,13 @@ namespace Chess.ViewModels
         private string filePath;
         private bool viewingCurrentMove = true;
         private int currentMove = -1; //currentMove points to the move that has just been made.
-            //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
-            //executed (if it exists).
+                                      //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
+                                      //executed (if it exists).
         private bool gameOver = false;
 
-        public void MakeMove(MoveData move) => MakeMove(move,           true,  false, false, true);
-        public void PreviousMove()          => MakeMove(new MoveData(), false, true,  false, false);
-        public void NextMove()              => MakeMove(new MoveData(), false, false, true,  false);
+        public void MakeMove(MoveData move) => MakeMove(move, true, false, false, true);
+        public void PreviousMove() => MakeMove(new MoveData(), false, true, false, false);
+        public void NextMove() => MakeMove(new MoveData(), false, false, true, false);
         private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
         {
             if (!IsInteractable)
@@ -349,7 +349,7 @@ namespace Chess.ViewModels
 
             // Check if the king can move
             byte king = FindKing(board, isWhitesMove);
-            sbyte[] kingMoves = new sbyte[8] { -9, -8, -7, -1, 1, -7, 8,  9 };
+            sbyte[] kingMoves = new sbyte[8] { -9, -8, -7, -1, 1, -7, 8, 9 };
             for (int i = 0; i < 8; i++)
             {
                 sbyte starget = (sbyte)(king + kingMoves[i]);
