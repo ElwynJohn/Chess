@@ -50,8 +50,7 @@ namespace Chess.Models
         }
         public IBrush? HighlightedFill { get; set; }
         public IBrush? NormalFill { get; set; }
-        public ChessBoard board;
-        private ChessPiece pPieceType;
+        private ChessBoard board;
         public ChessPiece PieceType
         {
             get { return board[Position]; }
@@ -64,6 +63,15 @@ namespace Chess.Models
             set { pPieceBitmap = value; NotifyPropertyChanged(); }
         }
         public string? AssetPath { get; set; }
+
+        public void Update()
+        {
+            AssetPath = PieceToAssetMap.GetValueOrDefault(board[Position]);
+            if (AssetPath != null)
+                PieceBitmap = new Bitmap(AssetPath);
+            else
+                PieceBitmap = null;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -88,51 +96,34 @@ namespace Chess.Models
             {ChessPiece.Pawn | ChessPiece.IsWhite, "./Assets/piece_white_pawn.png"},
         };
 
-        public void SetPiece(ChessPiece piece)
-        {
-            PieceType = piece;
-            AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
-            if (AssetPath != null)
-                PieceBitmap = new Bitmap(AssetPath);
-            else
-                PieceBitmap = null;
-        }
-
-        public ChessTile()
-        {
-
-        }
-
-        public ChessTile(ChessTile tile, ChessPiece piece)
-        {
-            HighlightedFill = tile.HighlightedFill;
-            NormalFill = tile.NormalFill;
-
-            PieceType = piece;
-
-            AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
-            if (AssetPath != null)
-                PieceBitmap = new Bitmap(AssetPath);
-        }
-
-        public ChessTile(ChessPiece piece)
-        {
-            PieceType = piece;
-
-            AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
-            if (AssetPath != null)
-                PieceBitmap = new Bitmap(AssetPath);
-        }
-
-        public ChessTile(ChessBoard board, int pos)
+        public ChessTile(ChessBoard board, int pos, bool displayOverlay = true)
         {
             this.board = board;
-            this.Position = (byte)pos;
+
+            Position = (byte)pos;
+            DisplayOverlay = displayOverlay;
+
+            int file = pos % 8;
+            int rank = pos / 8;
+
+            bool isWhite = (rank % 2 == 1) ? (pos % 2 == 0) : (pos % 2 == 1);
+
+            if (isWhite)
+            {
+                NormalFill = new SolidColorBrush(0xFFD2CACA);
+                HighlightedFill = new SolidColorBrush(0xFFFFABCA);
+                TextToDisplayColour = new SolidColorBrush(0xFF383D64);
+            }
+            else
+            {
+                NormalFill = new SolidColorBrush(0xFF383D64);
+                HighlightedFill = new SolidColorBrush(0xFF682D44);
+                TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
+            }
 
             AssetPath = PieceToAssetMap.GetValueOrDefault(board[pos]);
             if (AssetPath != null)
                 PieceBitmap = new Bitmap(AssetPath);
-
         }
     }
 }

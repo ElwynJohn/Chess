@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Diagnostics;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using System.ComponentModel;
 using Chess.Models;
 
 namespace Chess.ViewModels
@@ -17,14 +18,14 @@ namespace Chess.ViewModels
     public class BoardViewModel
     {
         public ChessBoard board;
+        public ChessTile[] tiles = new ChessTile[64];
         public BoardViewModel() : this(String.Empty, true, true) { }
         public BoardViewModel(string gameRecordPath, bool isInteractable, bool displayOverlay)
         {
             try { client.Connect(100); }
             catch (TimeoutException) { }
 
-            board = new ChessBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-            ChessTile[] tiles = new ChessTile[64];
+            board = new ChessBoard(this, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
             Rows = new ObservableCollection<ChessRow>();
             Moves = new ObservableCollection<MoveData>(LoadGame(gameRecordPath));
@@ -32,34 +33,15 @@ namespace Chess.ViewModels
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
             filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");
 
-            byte currentTile = 0;
-            bool isWhite = true;
             for (int y = 0; y < 8; y++)
             {
                 ObservableCollection<ChessTile> rowTiles = new ObservableCollection<ChessTile>();
                 for (int x = 0; x < 8; x++)
                 {
-                    tiles[currentTile] = new ChessTile(board, currentTile);
-                    tiles[currentTile].Position = currentTile;
-                    tiles[currentTile].DisplayOverlay = displayOverlay;
-                    if (isWhite)
-                    {
-                        tiles[currentTile].NormalFill = new SolidColorBrush(0xFFD2CACA);
-                        tiles[currentTile].HighlightedFill = new SolidColorBrush(0xFFFFABCA);
-                        tiles[currentTile].TextToDisplayColour = new SolidColorBrush(0xFF383D64);
-                        rowTiles.Add(tiles[currentTile]);
-                    }
-                    else
-                    {
-                        tiles[currentTile].NormalFill = new SolidColorBrush(0xFF383D64);
-                        tiles[currentTile].HighlightedFill = new SolidColorBrush(0xFF682D44);
-                        tiles[currentTile].TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
-                        rowTiles.Add(tiles[currentTile]);
-                    }
-                    currentTile++;
-                    isWhite = !isWhite;
+                    int currentTile = y * 8 + x;
+                    tiles[currentTile] = new ChessTile(board, currentTile, displayOverlay);
+                    rowTiles.Add(tiles[currentTile]);
                 }
-                isWhite = !isWhite;
                 Rows.Add(new ChessRow { RowTiles = rowTiles });
             }
 
@@ -118,10 +100,8 @@ namespace Chess.ViewModels
             else
                 return;
 
-            ChessTile newTile = Rows[move.TargetRank].RowTiles[move.TargetFile];
-            ChessTile oldTile = Rows[move.OriginRank].RowTiles[move.OriginFile];
-            newTile.SetPiece(oldTile.PieceType);
-            oldTile.SetPiece(ChessPiece.None);
+            board[move.TargetFile, move.TargetRank] = board[move.OriginFile, move.OriginRank];
+            board[move.OriginFile, move.OriginRank] = ChessPiece.None;
 
             if (newMove && IsInCheckMate(SimplifyBoard()))
             {
@@ -140,15 +120,15 @@ namespace Chess.ViewModels
                     client.Read(buf, 0, 4);
                     MoveData server_move = new MoveData(buf);
                     Console.WriteLine("Got move: {0}", server_move.Move);
-                    ChessTile _newTile = Rows[server_move.TargetRank].RowTiles[server_move.TargetFile];
-                    ChessTile _oldTile = Rows[server_move.OriginRank].RowTiles[server_move.OriginFile];
-                    _newTile.SetPiece(_oldTile.PieceType);
-                    _oldTile.SetPiece(ChessPiece.None);
+                    board[server_move.TargetFile, server_move.TargetRank] =
+                        board[server_move.OriginFile, server_move.OriginRank];
+                    board[server_move.OriginFile, server_move.OriginRank] = ChessPiece.None;
                     Moves.Add(server_move);
                     AddMoveToTurns(server_move);
                     currentMove++;
                 }
             }
+            Console.WriteLine(board);
         }
 
         public MoveData PiecePositions(ChessTile origin, ChessTile target)
@@ -559,30 +539,24 @@ namespace Chess.ViewModels
             }
         }
 
-        private ChessTile[] ParseFen(string fen)
+        public ChessPiece[] ParseFen(string fen)
         {
-            Regex reg = new Regex(@"\D");
             StringBuilder parsedFen = new StringBuilder();
-            int i = 0;
-            while (fen[i] != ' ')
+            foreach (char c in fen)
             {
-                if (fen[i] == '/') ;
-                else if (reg.Match(fen, i, 1).Success)
-                    parsedFen.Append(fen, i, 1);
+                if (c == '/' || c == ' ')
+                    continue;
+
+                if (System.Char.IsDigit(c))
+                    parsedFen.Append('0', Int32.Parse(c.ToString()));
                 else
-                {
-                    StringBuilder temp = new StringBuilder();
-                    temp.Append(fen[i]);
-                    int numEmptySquares = Int32.Parse(temp.ToString());
-                    parsedFen.Append('1', numEmptySquares);
-                }
-                i++;
+                    parsedFen.Append(c);
             }
 
-            ChessTile[] chessTiles = new ChessTile[64];
-            for (i = 0; i < 64; i++)
-                chessTiles[i] = new ChessTile(ChessBoard.FenToPieceMap.GetValueOrDefault(parsedFen[i]));
-            return chessTiles;
+            var pieces = new ChessPiece[64];
+            for (int i = 0; i < 64; i++)
+                pieces[i] = ChessBoard.FenToPieceMap.GetValueOrDefault(parsedFen[i]);
+            return pieces;
         }
     }
 }

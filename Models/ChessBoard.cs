@@ -4,13 +4,17 @@ using System.Linq;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Avalonia.Media.Imaging;
+using Chess.ViewModels;
 
 namespace Chess.Models
 {
-    public class ChessBoard : INotifyPropertyChanged
+    public class ChessBoard
     {
         /// <summary>0x88 representation of the board</summary>
-        private ChessPiece[] state;
+        private ChessPiece[] state = new ChessPiece[128];
+        public BoardViewModel? BoardGUI;
+        private ChessTile[] tiles;
 
         public static Dictionary<char, ChessPiece> FenToPieceMap = new Dictionary<char, ChessPiece>
         {
@@ -27,12 +31,6 @@ namespace Chess.Models
             {'K', ChessPiece.King | ChessPiece.IsWhite},
             {'P', ChessPiece.Pawn | ChessPiece.IsWhite},
         };
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         public static int Pos0x88To64(int pos)
         {
@@ -60,7 +58,7 @@ namespace Chess.Models
                 if (pos0x88)
                 {
                     state[pos] = value;
-                    NotifyPropertyChanged();
+                    tiles[pos].Update();
                 }
                 else
                     this[pos % 8, pos / 8] = value;
@@ -71,26 +69,18 @@ namespace Chess.Models
         public ChessPiece this[int file, int rank]
         {
             get => state[rank * 16 + file];
-            set { state[rank * 16 + file] = value; NotifyPropertyChanged(); }
+            set { state[rank * 16 + file] = value; tiles[rank * 8 + file].Update(); }
         }
 
-        public ChessBoard(string fen)
+        public ChessBoard(BoardViewModel bvm, string fen)
         {
-            state = new ChessPiece[128];
-            StringBuilder parsedFen = new StringBuilder();
-            foreach (char c in fen)
-            {
-                if (c == '/' || c == ' ')
-                    continue;
+            BoardGUI = bvm;
+            tiles = bvm.tiles;
 
-                if (System.Char.IsDigit(c))
-                    parsedFen.Append('0', Int32.Parse(c.ToString()));
-                else
-                    parsedFen.Append(c);
-            }
+            var pieces = bvm.ParseFen(fen);
 
             for (int i = 0; i < 64; i++)
-                this[i] = FenToPieceMap.GetValueOrDefault(parsedFen[i]);
+                state[Pos64To0x88(i)] = pieces[i];
         }
 
         public override string ToString()
