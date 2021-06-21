@@ -50,7 +50,7 @@ namespace Chess.Views
                 ChessTile? pStagedTile = (ChessTile?)pStagedPanel.DataContext;
                 if (pStagedTile != null)
                 {
-                    MoveData move = boardModel.PiecePositions(pStagedTile, clickedTile);
+                    ChessMove move = boardModel.PiecePositions(pStagedTile, clickedTile);
                     if (boardModel.IsLegalMove(move))
                         boardModel.MakeMove(move);
                 }

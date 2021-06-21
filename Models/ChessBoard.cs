@@ -32,14 +32,34 @@ namespace Chess.Models
             {'P', ChessPiece.Pawn | ChessPiece.IsWhite},
         };
 
-        public static int Pos0x88To64(int pos)
+        public static int Pos64(int pos0x88)
         {
-            return (pos + (pos & 7)) >> 1;
+            return (pos0x88 + (pos0x88 & 7)) >> 1;
         }
 
-        public static int Pos64To0x88(int pos)
+        public static int Pos88(int pos64)
         {
-            return pos + (pos & ~7);
+            return pos64 + (pos64 & ~7);
+        }
+
+        public static int Pos64(int file, int rank)
+        {
+            return file + 8 * rank;
+        }
+
+        public static int Pos88(int file, int rank)
+        {
+            return file + 16 * rank;
+        }
+
+        public static int File(int pos, bool pos0x88 = false)
+        {
+            return pos % (pos0x88 ? 16 : 8);
+        }
+
+        public static int Rank(int pos, bool pos0x88 = false)
+        {
+            return pos / (pos0x88 ? 16 : 8);
         }
 
         /// <summary>Get or set the board state by 64 (default) or 0x88 based
@@ -80,7 +100,7 @@ namespace Chess.Models
             var pieces = bvm.ParseFen(fen);
 
             for (int i = 0; i < 64; i++)
-                state[Pos64To0x88(i)] = pieces[i];
+                state[Pos88(i)] = pieces[i];
         }
 
         public override string ToString()

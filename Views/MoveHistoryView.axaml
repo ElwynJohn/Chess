@@ -13,8 +13,8 @@
 
                     <StackPanel Orientation="Horizontal" Width="300" Background="{Binding Fill}">
                         <TextBlock Text="{Binding Turn}" Margin="0,10" Width="50" TextAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="{Binding WhiteMove.Move}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="{Binding BlackMove.Move}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="{Binding WhiteMove}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="{Binding BlackMove}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
                     </StackPanel>
 
                 </DataTemplate>

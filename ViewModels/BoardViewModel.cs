@@ -28,7 +28,7 @@ namespace Chess.ViewModels
             board = new ChessBoard(this, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
             Rows = new ObservableCollection<ChessRow>();
-            Moves = new ObservableCollection<MoveData>(LoadGame(gameRecordPath));
+            Moves = new ObservableCollection<ChessMove>(LoadGame(gameRecordPath));
             Turns = new ObservableCollection<TurnData>();
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
             filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");
@@ -52,7 +52,7 @@ namespace Chess.ViewModels
         }
 
         public ObservableCollection<ChessRow> Rows { get; private set; }
-        public ObservableCollection<MoveData> Moves { get; private set; }
+        public ObservableCollection<ChessMove> Moves { get; private set; }
         public ObservableCollection<TurnData> Turns { get; private set; }
         public bool IsInteractable { get; set; }
         public bool isWhitesMove { get; private set; } = true;
@@ -66,10 +66,10 @@ namespace Chess.ViewModels
                                       //executed (if it exists).
         private bool gameOver = false;
 
-        public void MakeMove(MoveData move) => MakeMove(move, true, false, false, true);
-        public void PreviousMove() => MakeMove(new MoveData(), false, true, false, false);
-        public void NextMove() => MakeMove(new MoveData(), false, false, true, false);
-        private void MakeMove(MoveData move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
+        public void MakeMove(ChessMove move) => MakeMove(move, true, false, false, true);
+        public void PreviousMove() => MakeMove(new ChessMove(), false, true, false, false);
+        public void NextMove() => MakeMove(new ChessMove(), false, false, true, false);
+        private void MakeMove(ChessMove move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
         {
             if (!IsInteractable)
                 return;
@@ -86,13 +86,7 @@ namespace Chess.ViewModels
             }
             else if (previousMove && currentMove >= 0)
             {
-                move = new MoveData()
-                {
-                    OriginFile = Moves[currentMove].TargetFile,
-                    OriginRank = Moves[currentMove].TargetRank,
-                    TargetFile = Moves[currentMove].OriginFile,
-                    TargetRank = Moves[currentMove].OriginRank
-                };
+                move = new ChessMove(Moves[currentMove].data);
                 currentMove--;
             }
             else if (nextMove && currentMove < Moves.Count - 1)
@@ -100,8 +94,10 @@ namespace Chess.ViewModels
             else
                 return;
 
-            board[move.TargetFile, move.TargetRank] = board[move.OriginFile, move.OriginRank];
-            board[move.OriginFile, move.OriginRank] = ChessPiece.None;
+            board[move.To] = board[move.From];
+            board[move.From] = ChessPiece.None;
+
+            ChessMove testmove = new ChessMove(move.From, move.To);
 
             if (newMove && IsInCheckMate(SimplifyBoard()))
             {
@@ -115,23 +111,23 @@ namespace Chess.ViewModels
             {
                 if (newMove)
                 {
-                    byte[] buf = new byte[4];
-                    client.Write(move.ToByteArray(), 0, 4);
-                    client.Read(buf, 0, 4);
-                    MoveData server_move = new MoveData(buf);
-                    Console.WriteLine("Got move: {0}", server_move.Move);
-                    board[server_move.TargetFile, server_move.TargetRank] =
-                        board[server_move.OriginFile, server_move.OriginRank];
-                    board[server_move.OriginFile, server_move.OriginRank] = ChessPiece.None;
+                    byte[] buf = new byte[2];
+                    client.Write(move.data, 0, 2);
+                    client.Read(buf, 0, 2);
+                    ChessMove server_move = new ChessMove(buf);
+                    Console.WriteLine("Got move: {0}", server_move);
+                    board[server_move.To] = board[server_move.From];
+                    board[server_move.From] = ChessPiece.None;
                     Moves.Add(server_move);
                     AddMoveToTurns(server_move);
                     currentMove++;
                 }
             }
+            Console.WriteLine($"From: {testmove.From}\t To: {testmove.To}");
             Console.WriteLine(board);
         }
 
-        public MoveData PiecePositions(ChessTile origin, ChessTile target)
+        public ChessMove PiecePositions(ChessTile origin, ChessTile target)
         {
             byte[] positions = new byte[4];
             byte rank = 0;
@@ -157,12 +153,14 @@ namespace Chess.ViewModels
                 file = 0;
                 rank++;
             }
-            MoveData move = new MoveData()
+            ChessMove move = new ChessMove()
             {
-                OriginFile = positions[0],
-                OriginRank = positions[1],
-                TargetFile = positions[2],
-                TargetRank = positions[3]
+                From = ChessBoard.Pos64(positions[0], positions[1]),
+                To = ChessBoard.Pos64(positions[2], positions[3]),
+                /* OriginFile = positions[0], */
+                /* OriginRank = positions[1], */
+                /* TargetFile = positions[2], */
+                /* TargetRank = positions[3] */
             };
             return move;
         }
@@ -172,7 +170,7 @@ namespace Chess.ViewModels
         // piece can still give check: i.e. a piece that is pinned against the king
         // can still move to kill the enemy king even if doing so leaves its own
         // king in check.
-        public bool IsLegalMove(MoveData move) => IsLegalMove(SimplifyBoard(), move.OriginFile, move.OriginRank, move.TargetFile, move.TargetRank, true, this.isWhitesMove);
+        public bool IsLegalMove(ChessMove move) => IsLegalMove(SimplifyBoard(), (byte)move.From, (byte)move.To);
         private bool IsLegalMove(ChessPiece[] board, byte originPos, byte targetPos)
         {
             byte originFile = (byte)(originPos % 8);
@@ -312,24 +310,24 @@ namespace Chess.ViewModels
             return false;
         }
 
-        public static MoveData[] LoadGame(string gameRecordPath)
+        public static ChessMove[] LoadGame(string gameRecordPath)
         {
             if (gameRecordPath == String.Empty)
-                return new MoveData[0];
+                return new ChessMove[0];
 
-            MoveData[]? moves;
+            ChessMove[]? moves;
             using (StreamReader reader = new StreamReader(gameRecordPath))
             {
                 string json = reader.ReadToEnd();
-                moves = JsonSerializer.Deserialize<MoveData[]>(json);
+                moves = JsonSerializer.Deserialize<ChessMove[]>(json);
             }
-            return moves != null ? moves : new MoveData[0];
+            return moves != null ? moves : new ChessMove[0];
         }
         private void SaveGame()
         {
             Directory.CreateDirectory(dirPath);
             using (StreamWriter writer = new StreamWriter(filePath))
-                writer.Write(JsonSerializer.Serialize<MoveData[]>(Moves.ToArray<MoveData>()));
+                writer.Write(JsonSerializer.Serialize<ChessMove[]>(Moves.ToArray<ChessMove>()));
         }
 
         private bool IsInCheckMate(ChessPiece[] board)
@@ -517,7 +515,7 @@ namespace Chess.ViewModels
             return board;
         }
 
-        private void AddMoveToTurns(MoveData move)
+        private void AddMoveToTurns(ChessMove move)
         {
             bool newTurn = Math.Abs(currentMove % 2) == 1;
             if (newTurn)
