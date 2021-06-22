@@ -118,6 +118,7 @@ namespace Chess.ViewModels
                     Console.WriteLine("Got move: {0}", server_move);
                     board[server_move.To] = board[server_move.From];
                     board[server_move.From] = ChessPiece.None;
+                    isWhitesMove = !isWhitesMove;
                     Moves.Add(server_move);
                     AddMoveToTurns(server_move);
                     currentMove++;
