@@ -4,20 +4,20 @@ namespace Chess.Models
 {
     public class ChessMove
     {
-        /// <summary>0x88 based origin/target positions</summary>
+        /// <summary>64 based origin/target positions</summary>
         public byte[] data = new byte[2];
 
         /// <summary>64 based origin position</summary>
         public int From
         {
-            get => Pos64(data[0]);
-            set => data[0] = (byte)Pos88(value);
+            get => data[0];
+            set => data[0] = (byte)value;
         }
         /// <summary>64 based target position</summary>
         public int To
         {
-            get => Pos64(data[1]);
-            set => data[1] = (byte)Pos88(value);
+            get => data[1];
+            set => data[1] = (byte)value;
         }
 
         public ChessMove()
@@ -26,7 +26,6 @@ namespace Chess.Models
 
         public ChessMove(int from, int to, bool pos0x88 = false)
         {
-            System.Console.WriteLine($"ChessMove ctor: {from} {to}");
             if (pos0x88)
             {
                 from = ChessBoard.Pos64(from);
