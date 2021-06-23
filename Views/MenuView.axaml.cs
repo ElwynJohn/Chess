@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
@@ -13,23 +14,52 @@ namespace Chess.Views
             InitializeComponent();
         }
 
+
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
         }
 
-        public void on_click_play(object sender, RoutedEventArgs e)
+        public void on_click(object sender, RoutedEventArgs e)
         {
-            MainWindowViewModel? model = (MainWindowViewModel?)((Control)sender).FindAncestorOfType<Window>().DataContext;
-            if (model != null)
-                model.List = new PlayViewModel();
-        }
+            MainWindowViewModel? mainWindowVM = ((Control)sender).FindAncestorOfType<Window>().DataContext as MainWindowViewModel;
+            MenuViewModel? menuVM = DataContext as MenuViewModel;
+            if (mainWindowVM == null)
+                return;
+            if (menuVM == null)
+                return;
 
-        public void on_click_history(object sender, RoutedEventArgs e)
-        {
-            MainWindowViewModel? model = (MainWindowViewModel?)((Control)sender).FindAncestorOfType<Window>().DataContext;
-            if (model != null)
-                model.List = new HistoryViewModel();
+            string buttonText = (string)((Button)sender).Content;
+            switch (buttonText)
+            {
+                case "Play":
+                    menuVM.Buttons.Clear();
+                    menuVM.Buttons.Add("Back");
+                    menuVM.Buttons.Add("Online");
+                    menuVM.Buttons.Add("vs Computer");
+                    menuVM.Buttons.Add("Local");
+                    break;
+                case "Back":
+                    menuVM.Buttons.Clear();
+                    menuVM.Buttons.Add("Play");
+                    menuVM.Buttons.Add("Match History");
+                    menuVM.Buttons.Add("Statistics");
+                    break;
+                case "Online":
+                    mainWindowVM.List = new PlayViewModel();
+                    break;
+                case "vs Computer":
+                    mainWindowVM.List = new PlayViewModel();
+                    break;
+                case "Local":
+                    mainWindowVM.List = new PlayViewModel();
+                    break;
+                case "Match History":
+                    mainWindowVM.List = new HistoryViewModel();
+                    break;
+                case "Statistics":
+                    break;
+            }
         }
     }
 }

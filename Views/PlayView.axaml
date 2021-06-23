@@ -23,7 +23,7 @@
     </UserControl.Styles>
 
     <StackPanel Orientation="Horizontal">
-        <views:MenuView/>
+        <views:MenuView DataContext="{Binding Menu}"/>
 
         <Border Background="#323240" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">
             <views:BoardView DataContext="{Binding Board}"/>

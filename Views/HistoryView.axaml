@@ -24,7 +24,7 @@
 
     <StackPanel Orientation="Horizontal">
 
-        <views:MenuView/>
+        <views:MenuView DataContext="{Binding Menu}"/>
 
         <ItemsControl Items="{Binding Boards}">
             <ItemsControl.ItemTemplate>

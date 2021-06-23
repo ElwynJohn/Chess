@@ -10,6 +10,7 @@ namespace Chess.ViewModels
     {
         public HistoryViewModel()
         {
+            Menu = new MenuViewModel();
             Boards = new ObservableCollection<BoardViewModel>();
             string dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
             string[] filePaths = Directory.GetFiles(dirPath);
@@ -18,5 +19,6 @@ namespace Chess.ViewModels
         }
 
         public ObservableCollection<BoardViewModel> Boards { get; set; }
+        public MenuViewModel Menu { get; }
     }
 }

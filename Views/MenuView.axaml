@@ -18,12 +18,24 @@
         </Style>
     </UserControl.Styles>
 
-    <StackPanel Orientation="Vertical" Spacing="20" Background="#2a2829" Width="200">
+    <StackPanel Spacing="20" Background="#2a2829" Width="200">
+
         <TextBlock FontSize="30" FontWeight="600" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,25,0,0">Chess</TextBlock>
-        <Button Classes="navigation-button" Content="Play" Click="on_click_play"/>
-        <Button Classes="navigation-button" Content="Match History" Click="on_click_history"/>
-        <Button Classes="navigation-button" Content="Statistics"/>
-        <Button Classes="navigation-button" Content="Login"/>
+
+        <ItemsControl Items="{Binding Buttons}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Spacing="20" Background="#2a2829" Width="200"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Classes="navigation-button" Content="{Binding}" Click="on_click"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
     </StackPanel>
 
 </UserControl>
