@@ -22,9 +22,6 @@ namespace Chess.ViewModels
         public BoardViewModel() : this(String.Empty, true, true) { }
         public BoardViewModel(string gameRecordPath, bool isInteractable, bool displayOverlay)
         {
-            try { client.Connect(100); }
-            catch (TimeoutException) { }
-
             board = new ChessBoard(this, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
             Rows = new ObservableCollection<ChessRow>();
@@ -55,18 +52,17 @@ namespace Chess.ViewModels
         public ObservableCollection<ChessMove> Moves { get; private set; }
         public ObservableCollection<TurnData> Turns { get; private set; }
         public bool IsInteractable { get; set; }
-        public bool isWhitesMove { get; private set; } = true;
+        public bool isWhitesMove { get; protected set; } = true;
 
-        public NamedPipeClientStream client = new NamedPipeClientStream("ChessIPC");
         private string dirPath;
         private string filePath;
         private bool viewingCurrentMove = true;
-        private int currentMove = -1; //currentMove points to the move that has just been made.
+        protected int currentMove = -1; //currentMove points to the move that has just been made.
                                       //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
                                       //executed (if it exists).
         private bool gameOver = false;
 
-        public void MakeMove(ChessMove move) => MakeMove(move, true, false, false, true);
+        public virtual void MakeMove(ChessMove move) => MakeMove(move, true, false, false, true);
         public void PreviousMove() => MakeMove(new ChessMove(), false, true, false, false);
         public void NextMove() => MakeMove(new ChessMove(), false, false, true, false);
         private void MakeMove(ChessMove move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
@@ -97,8 +93,6 @@ namespace Chess.ViewModels
             board[move.To] = board[move.From];
             board[move.From] = ChessPiece.None;
 
-            ChessMove testmove = new ChessMove(move.From, move.To);
-
             if (newMove && IsInCheckMate(SimplifyBoard()))
             {
                 gameOver = true;
@@ -106,26 +100,6 @@ namespace Chess.ViewModels
             }
             if (saveGame)
                 SaveGame();
-
-            if (client.IsConnected)
-            {
-                if (newMove)
-                {
-                    byte[] buf = new byte[2];
-                    client.Write(move.data, 0, 2);
-                    client.Read(buf, 0, 2);
-                    ChessMove server_move = new ChessMove(buf);
-                    Console.WriteLine("Got move: {0}", server_move);
-                    board[server_move.To] = board[server_move.From];
-                    board[server_move.From] = ChessPiece.None;
-                    isWhitesMove = !isWhitesMove;
-                    Moves.Add(server_move);
-                    AddMoveToTurns(server_move);
-                    currentMove++;
-                }
-            }
-            Console.WriteLine($"From: {testmove.From}\t To: {testmove.To}");
-            Console.WriteLine(board);
         }
 
         public ChessMove PiecePositions(ChessTile origin, ChessTile target)
@@ -516,7 +490,7 @@ namespace Chess.ViewModels
             return board;
         }
 
-        private void AddMoveToTurns(ChessMove move)
+        protected void AddMoveToTurns(ChessMove move)
         {
             bool newTurn = Math.Abs(currentMove % 2) == 1;
             if (newTurn)

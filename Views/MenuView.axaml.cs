@@ -46,13 +46,13 @@ namespace Chess.Views
                     menuVM.Buttons.Add("Statistics");
                     break;
                 case "Online":
-                    mainWindowVM.List = new PlayViewModel();
+                    mainWindowVM.List = new PlayViewModel(new BoardViewModel());
                     break;
                 case "vs Computer":
-                    mainWindowVM.List = new PlayViewModel();
+                    mainWindowVM.List = new PlayViewModel(new AIBoardViewModel());
                     break;
                 case "Local":
-                    mainWindowVM.List = new PlayViewModel();
+                    mainWindowVM.List = new PlayViewModel(new BoardViewModel());
                     break;
                 case "Match History":
                     mainWindowVM.List = new HistoryViewModel();

@@ -7,7 +7,7 @@ namespace Chess.ViewModels
     {
         public MainWindowViewModel()
         {
-            List = new PlayViewModel();
+            List = new PlayViewModel(new AIBoardViewModel());
         }
 
         private ViewModelBase? list;
