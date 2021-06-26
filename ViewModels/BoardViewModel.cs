@@ -46,13 +46,18 @@ namespace Chess.ViewModels
             for (int i = 0; i < Moves.Count; i++)
                 NextMove();
             IsInteractable = isInteractable;
+            Status = GameStatus.InProgress;
         }
+
+        public event EventHandler? GameOver;
+        protected void OnGameOver() => GameOver?.Invoke(this, new EventArgs());
 
         public ObservableCollection<ChessRow> Rows { get; private set; }
         public ObservableCollection<ChessMove> Moves { get; private set; }
         public ObservableCollection<TurnData> Turns { get; private set; }
         public bool IsInteractable { get; set; }
         public bool isWhitesMove { get; protected set; } = true;
+        public GameStatus Status { get; private set; }
 
         private string dirPath;
         private string filePath;
@@ -60,7 +65,6 @@ namespace Chess.ViewModels
         protected int currentMove = -1; //currentMove points to the move that has just been made.
                                       //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
                                       //executed (if it exists).
-        private bool gameOver = false;
 
         public virtual void MakeMove(ChessMove move) => MakeMove(move, true, false, false, true);
         public void PreviousMove() => MakeMove(new ChessMove(), false, true, false, false);
@@ -95,8 +99,8 @@ namespace Chess.ViewModels
 
             if (newMove && IsInCheckMate(SimplifyBoard()))
             {
-                gameOver = true;
-                Console.WriteLine("Game Over\n{0} won", isWhitesMove ? "black" : "white");
+                Status = isWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
+                OnGameOver();
             }
             if (saveGame)
                 SaveGame();
@@ -433,8 +437,6 @@ namespace Chess.ViewModels
                 */
                 return false;
             }
-
-            return true;
         }
         // Returns Byte.MaxValue when no piece is checking the king
         private byte PositionOfChecker(ChessPiece[] board)
@@ -500,8 +502,8 @@ namespace Chess.ViewModels
                     WhiteMove = move,
                     BlackMove = default,
                     Fill = Turns.Count % 2 == 1 ?
-                        new SolidColorBrush(0xFF323240) :
-                        new SolidColorBrush(0xFF2A2A40)
+                        new SolidColorBrush(0xFF2A2A40) :
+                        new SolidColorBrush(0xFF323240)
                 });
             else
             {

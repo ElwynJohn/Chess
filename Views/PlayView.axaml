@@ -29,7 +29,7 @@
             <views:BoardView DataContext="{Binding Board}"/>
         </Border>
 
-        <views:MoveHistoryView DataContext="{Binding Board}"/>
+        <views:GamePanelView DataContext="{Binding GamePanel}"/>
 
     </StackPanel>
 </UserControl>

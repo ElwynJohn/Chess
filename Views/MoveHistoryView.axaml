@@ -5,7 +5,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Chess.Views.MoveHistoryView">
 
-    <StackPanel Height="820" Width="300" Margin="30,20" VerticalAlignment="Top" Background="#323240">
+    <StackPanel Height="630" Width="300" VerticalAlignment="Top" Background="#323240">
 
         <ItemsControl Items="{Binding Turns}">
             <ItemsControl.ItemTemplate>

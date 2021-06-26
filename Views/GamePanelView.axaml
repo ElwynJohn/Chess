@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:Chess.Views"
+             xmlns:vm="clr-namespace:Chess.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Chess.Views.GamePanelView">
+
+    <StackPanel Margin="20" Height="940" Width="300" VerticalAlignment="Top">
+
+        <Panel Width="300" Height="70" Background="#383D64">
+            <TextBlock Text="Time here" VerticalAlignment="Center"/>
+            <TextBlock Text="Pieces captured here" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+        </Panel>
+
+        <StackPanel Orientation="Horizontal" Height="50" Background="Black">
+            <Panel Height="50" Width="150" PointerReleased="ClickMoves">
+                <Rectangle Width="149" Height="50" Fill="{Binding MovesFill}" HorizontalAlignment="Left"/>
+                <TextBlock Text="Moves" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Panel>
+            <Panel Height="50" Width="150" PointerReleased="ClickStats">
+                <Rectangle Width="149" Height="50" Fill="{Binding StatsFill}" HorizontalAlignment="Right"/>
+                <TextBlock Text="Stats" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Panel>
+        </StackPanel>
+
+        <ContentControl Content="{Binding Content}"/>
+
+        <Panel Width="300" Height="70" Background="#D2CACA">
+            <TextBlock Text="Time here" VerticalAlignment="Center"/>
+            <TextBlock Text="Pieces captured here" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+        </Panel>
+
+    </StackPanel>
+
+</UserControl>
