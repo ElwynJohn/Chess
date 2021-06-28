@@ -1,8 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Interactivity;
-using Avalonia.VisualTree;
-using Chess.ViewModels;
 
 namespace Chess.Views
 {

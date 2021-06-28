@@ -1,19 +1,15 @@
-using System;
 using System.Text;
 using System.Linq;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Avalonia.Media.Imaging;
 using Chess.ViewModels;
 
 namespace Chess.Models
 {
     public class ChessBoard
     {
-        /// <summary>0x88 representation of the board</summary>
-        private ChessPiece[] state = new ChessPiece[128];
-        public BoardViewModel? BoardGUI;
+        /// <summary>64 based representation of the board</summary>
+        private ChessPiece[] state = new ChessPiece[64];
+        public BoardViewModel? GUI;
         private ChessTile[] tiles;
 
         public static Dictionary<char, ChessPiece> FenToPieceMap = new Dictionary<char, ChessPiece>
@@ -68,50 +64,48 @@ namespace Chess.Models
         {
             get
             {
-                if (pos0x88)
-                    return state[pos];
-                else
-                    return this[pos % 8, pos / 8];
+                return state[pos0x88 ? Pos64(pos) : pos];
             }
             set
             {
-                if (pos0x88)
-                {
-                    state[pos] = value;
-                    tiles[pos].Update();
-                }
-                else
-                    this[pos % 8, pos / 8] = value;
+                state[pos0x88 ? Pos64(pos) : pos] = value;
+                tiles[pos].Update();
             }
         }
 
         /// <summary>Get or set the board by file-rank.</summary>
         public ChessPiece this[int file, int rank]
         {
-            get => state[rank * 16 + file];
-            set { state[rank * 16 + file] = value; tiles[rank * 8 + file].Update(); }
+            get => state[Pos64(file, rank)];
+            set { state[Pos64(file, rank)] = value; tiles[Pos64(file, rank)].Update(); }
+        }
+
+        public ChessBoard(ChessBoard board)
+        {
+            for (int i = 0; i < 64; i++)
+                state[i] = board.state[i];
+            GUI = board.GUI;
+            tiles = board.tiles;
         }
 
         public ChessBoard(BoardViewModel bvm, string fen)
         {
-            BoardGUI = bvm;
+            GUI = bvm;
             tiles = bvm.tiles;
 
             var pieces = bvm.ParseFen(fen);
 
             for (int i = 0; i < 64; i++)
-                state[Pos88(i)] = pieces[i];
+                state[i] = pieces[i];
         }
 
         public override string ToString()
         {
             StringBuilder rv = new StringBuilder();
-            for (int i = 0; i < 128; i++)
+            for (int i = 0; i < 64; i++)
             {
-                if ((i & 0x88) != 0)
-                    continue;
-                int file = i & 7;
-                char c = FenToPieceMap.FirstOrDefault(x => x.Value.Equals(this[i, true])).Key;
+                int file = File(i);
+                char c = FenToPieceMap.FirstOrDefault(x => x.Value.Equals(this[i])).Key;
                 rv.Append(c != '\0' ? c : '0');
                 if (file == 7)
                     rv.Append("\n");

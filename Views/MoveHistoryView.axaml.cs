@@ -14,15 +14,15 @@ namespace Chess.Views
 
         public void previous_move(object sender, RoutedEventArgs e)
         {
-            BoardViewModel? board = (BoardViewModel?)this.DataContext;
+            MoveHistoryViewModel? board = (MoveHistoryViewModel?)this.DataContext;
             if (board != null)
-                board.PreviousMove();
+                board.bvm.PreviousMove();
         }
         public void next_move(object sender, RoutedEventArgs e)
         {
-            BoardViewModel? board = (BoardViewModel?)this.DataContext;
+            MoveHistoryViewModel? board = (MoveHistoryViewModel?)this.DataContext;
             if (board != null)
-                board.NextMove();
+                board.bvm.NextMove();
         }
 
         private void InitializeComponent()

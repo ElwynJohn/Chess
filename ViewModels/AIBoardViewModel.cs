@@ -21,26 +21,15 @@ namespace Chess.ViewModels
         {
             base.MakeMove(move);
 
-            if (client.IsConnected)
+            IsInteractable = false;
+            var t = new Task<ChessMove>(GetServerMove);
+            t.Start();
+            t.ContinueWith((x) =>
             {
-                byte[] buf = new byte[2];
-                client.Write(move.data, 0, 2);
-
-                Task t = client.ReadAsync(buf, 0, 2);
-                // We shouldn't be able to do anything while the server is thinking
-                // @@FIXME This seems to have weird behaviour if you try to move
-                // a piece while the server is thinking
-                IsInteractable = false;
-
-                t.ContinueWith((readTask) =>
-                {
-                    ChessMove server_move = new ChessMove(buf);
-                    Console.WriteLine("Got move: {0}", server_move);
-                    IsInteractable = true;
-                    base.MakeMove(server_move);
-                });
-            }
-            Console.WriteLine(board);
+                Console.WriteLine("Got move: {0}", t.Result);
+                OnMoveMade(t.Result);
+                IsInteractable = true;
+            });
         }
     }
 }

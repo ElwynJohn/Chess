@@ -4,8 +4,6 @@ using System.ComponentModel;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
-using Chess.ViewModels;
-
 namespace Chess.Models
 {
     public class ChessTile : INotifyPropertyChanged

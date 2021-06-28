@@ -1,8 +1,6 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Input;
-using Avalonia.VisualTree;
 using Chess.Models;
 using Chess.ViewModels;
 
@@ -51,7 +49,7 @@ namespace Chess.Views
                 if (pStagedTile != null)
                 {
                     ChessMove move = boardModel.PiecePositions(pStagedTile, clickedTile);
-                    if (boardModel.IsLegalMove(move))
+                    if (boardModel.IsLegalMove(move) && boardModel.IsInteractable)
                         boardModel.MakeMove(move);
                 }
                 pStagedPanel = null;
