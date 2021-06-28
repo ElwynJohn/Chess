@@ -62,6 +62,7 @@ namespace Chess.ViewModels
 
         public ObservableCollection<ChessRow> Rows { get; private set; }
         public ObservableCollection<ChessMove> Moves { get; private set; }
+        public ObservableCollection<ChessBoard> Boards { get; private set; }
         public ObservableCollection<TurnData> Turns { get; private set; }
         public bool IsInteractable { get; set; }
         public bool isWhitesMove { get; protected set; } = true;
@@ -70,48 +71,117 @@ namespace Chess.ViewModels
         private string dirPath;
         private string filePath;
         private bool viewingCurrentMove = true;
+        protected int currentBoard = 0;
         protected int currentMove = -1; //currentMove points to the move that has just been made.
-                                      //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
-                                      //executed (if it exists).
+                                        //Therefore, if NextMove() is called, currentMove + 1 is the move that should be
+                                        //executed (if it exists).
 
-        public virtual void MakeMove(ChessMove move) => MakeMove(move, true, false, false, true);
-        public void PreviousMove() => MakeMove(new ChessMove(), false, true, false, false);
-        public void NextMove() => MakeMove(new ChessMove(), false, false, true, false);
-        private void MakeMove(ChessMove move, bool newMove, bool previousMove, bool nextMove, bool saveGame)
+        // Tells the server what move we're making
+        public void SendMoveToServer(ChessMove move)
         {
-            if (!IsInteractable)
-                return;
-            viewingCurrentMove = currentMove == Moves.Count - 1;
+            Message mess_out = new Message(move.data, 2, MakeMoveRequest);
+            mess_out.Send(message_client);
 
-            if (newMove)
+            Message mess_in = new Message(MakeMoveReply);
+            mess_in.Receive(message_client);
+        }
+
+        public void SyncBoardState()
+        {
+            var state = GetBoardState();
+            for (int i = 0; i < 64; i++)
+                board[i] = state[i];
+        }
+
+        // Gets the board state from the server
+        public ChessPiece[] GetBoardState()
+        {
+            Message request = new Message(BoardStateRequest);
+            request.Send(message_client);
+
+            Message reply = new Message(BoardStateReply);
+            reply.Receive(message_client);
+
+            ChessPiece[] state = new ChessPiece[64];
+            for (int i = 0; i < 64; i++)
             {
-                if (!viewingCurrentMove)
-                    return;
-                Moves.Add(move);
-                AddMoveToTurns(move);
-                currentMove++;
-                isWhitesMove = !isWhitesMove;
+                var arrSeg = new ArraySegment<byte>(reply.Bytes, i * 4, 4);
+                int piece = BitConverter.ToInt32(arrSeg);
+                state[i] = (ChessPiece)piece;
             }
-            else if (previousMove && currentMove >= 0)
-            {
-                move = new ChessMove(Moves[currentMove].data);
-                currentMove--;
-            }
-            else if (nextMove && currentMove < Moves.Count - 1)
-                move = Moves[++currentMove];
-            else
+
+            return state;
+        }
+
+        // Note: This method will probably block for quite a while
+        public ChessMove GetServerMove()
+        {
+            Message request = new Message(new byte[1], 1, BestMoveRequest);
+            request.Send(message_client);
+
+            Message reply = new Message(BestMoveReply);
+            reply.Receive(message_client);
+
+            var move = new ChessMove(reply.Bytes);
+
+            return move;
+        }
+
+        // When user tries to make move
+        //    Check legal -> Send to server
+        //    Sync board state
+        // Get move from server
+        // sync board state
+
+        public void PreviousMove()
+        {
+            if (currentBoard == 0)
                 return;
+            currentBoard--;
 
-            board[move.To] = board[move.From];
-            board[move.From] = ChessPiece.None;
+            IsInteractable = false;
+            for (int i = 0; i < 64; i++)
+                board[i] = Boards[currentBoard][i];
+        }
 
-            if (newMove && IsInCheckMate(SimplifyBoard()))
+        public void NextMove()
+        {
+            if (currentBoard == Boards.Count - 1)
+                return;
+            currentBoard++;
+            if (currentBoard == Boards.Count - 1)
+                IsInteractable = true;
+            for (int i = 0; i < 64; i++)
+                board[i] = Boards[currentBoard][i];
+        }
+
+        // @@Rework Convert this to an event
+        public void OnMoveMade(ChessMove move)
+        {
+            SyncBoardState();
+            Boards.Add(new ChessBoard(board));
+            Moves.Add(move);
+            AddMoveToTurns(move);
+            currentMove++;
+            currentBoard++;
+
+            isWhitesMove = !isWhitesMove;
+
+            // After making a move, we check if our opponent is in checkmate
+            if (IsInCheckMate(board))
             {
                 Status = isWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
                 OnGameOver();
             }
-            if (saveGame)
-                SaveGame();
+            SaveGame();
+        }
+
+        // Sends move to server, syncs board state, gets server move, syncs
+        // board state
+        public virtual void MakeMove(ChessMove move)
+        {
+            SendMoveToServer(move);
+            OnMoveMade(move);
         }
 
         public ChessMove PiecePositions(ChessTile origin, ChessTile target)
@@ -144,10 +214,6 @@ namespace Chess.ViewModels
             {
                 From = ChessBoard.Pos64(positions[0], positions[1]),
                 To = ChessBoard.Pos64(positions[2], positions[3]),
-                /* OriginFile = positions[0], */
-                /* OriginRank = positions[1], */
-                /* TargetFile = positions[2], */
-                /* TargetRank = positions[3] */
             };
             return move;
         }
@@ -157,144 +223,22 @@ namespace Chess.ViewModels
         // piece can still give check: i.e. a piece that is pinned against the king
         // can still move to kill the enemy king even if doing so leaves its own
         // king in check.
-        public bool IsLegalMove(ChessMove move) => IsLegalMove(SimplifyBoard(), (byte)move.From, (byte)move.To);
-        private bool IsLegalMove(ChessPiece[] board, byte originPos, byte targetPos)
+        public bool IsLegalMove(ChessMove move)
         {
-            byte originFile = (byte)(originPos % 8);
-            byte originRank = (byte)(originPos / 8);
-            byte targetFile = (byte)(targetPos % 8);
-            byte targetRank = (byte)(targetPos / 8);
+            Message mess_out = new Message(move.data, 2, LegalMoveRequest);
+            mess_out.Send(message_client);
 
-            return IsLegalMove(board, originFile, originRank, targetFile, targetRank, true, this.isWhitesMove);
-        }
-        private bool IsLegalMove(ChessPiece[] board, byte originFile, byte originRank, byte targetFile, byte targetRank, bool considerChecks, bool _isWhitesMove)
-        {
-            int originPos = originRank * 8 + originFile;
-            int targetPos = targetRank * 8 + targetFile;
-            ChessPiece originPieceColor = board[originPos] & ChessPiece.IsWhite;
-            ChessPiece targetPieceColor = board[targetPos] & ChessPiece.IsWhite;
+            Message mess_in = new Message(LegalMoveReply);
+            mess_in.Receive(message_client);
 
-            if (board[originPos] == ChessPiece.None)
-                return false;
-            //Prevent white's pieces being moved on black's move & vice versa
-            if ((!_isWhitesMove && ((board[originPos] & ChessPiece.IsWhite) != 0)) ||
-                (_isWhitesMove && ((board[originPos] & ChessPiece.IsWhite) == 0)))
-                return false;
-            // Prevent self capture
-            if (ChessPiece.None != board[targetPos] && (originPieceColor ^ targetPieceColor) == 0)
-                return false;
+            int response = 0;
 
-            // Only Knights can jump over pieces
-            if ((board[originPos] & ChessPiece.Knight) == 0)
-            {
-                var dirVec = new int[]
-                {
-                    targetFile - originFile,
-                    targetRank - originRank,
-                };
+            // @@Implement Maybe add some exception or something here if the
+            // message response type isnt what we expect
+            if (mess_in.Type == LegalMoveReply)
+                response = BitConverter.ToInt32(mess_in.Bytes);
 
-                for (int i = 0; i < 2; i++)
-                    if (dirVec[i] != 0)
-                        dirVec[i] /= Math.Abs(dirVec[i]);
-
-                int checkPos = originPos;
-                int checkFile = originFile;
-                int checkRank = originRank;
-                while (true)
-                {
-                    checkFile += dirVec[0];
-                    checkRank += dirVec[1];
-                    checkPos = checkFile + 8 * checkRank;
-                    if (checkPos < 0 || checkPos >= board.GetLength(0))
-                        return false;
-                    if (checkPos == targetPos)
-                        break;
-                    if (board[checkPos] != ChessPiece.None)
-                        return false;
-                }
-            }
-            if (considerChecks)
-            {
-                ChessPiece[] boardAfterMove = new ChessPiece[64];
-                for (int i = 0; i < 64; i++)
-                    boardAfterMove[i] = board[i];
-                boardAfterMove[originPos] = ChessPiece.None;
-                boardAfterMove[targetPos] = board[originPos];
-                if (PositionOfChecker(boardAfterMove) != Byte.MaxValue)
-                    return false;
-            }
-
-            if (0 != (board[originPos] & ChessPiece.Knight))
-            {
-                if (Math.Abs(originRank - targetRank) == 2 && Math.Abs(originFile - targetFile) == 1)
-                    return true;
-                else if (Math.Abs(originRank - targetRank) == 1 && Math.Abs(originFile - targetFile) == 2)
-                    return true;
-                else
-                    return false;
-            }
-
-            if ((board[originPos] & (ChessPiece.Bishop | ChessPiece.Queen)) != 0)
-            {
-                if (Math.Abs(targetRank - originRank) == Math.Abs(targetFile - originFile))
-                    return true;
-            }
-
-            if ((board[originPos] & (ChessPiece.Castle | ChessPiece.Queen)) != 0)
-            {
-                if (targetRank == originRank)
-                    return true;
-                if (targetFile == originFile)
-                    return true;
-            }
-
-            if ((board[originPos] & ChessPiece.Pawn) != 0)
-            {
-                // Pawns can only move forwards
-                if ((board[originPos] & ChessPiece.IsWhite) != 0)
-                {
-                    if (targetRank > originRank)
-                        return false;
-                }
-                else
-                {
-                    if (targetRank < originRank)
-                        return false;
-                }
-
-                // Allow moving 2 squares at the start
-                if (originRank == 1 || originRank == 6)
-                {
-                    if (Math.Abs(targetRank - originRank) > 2)
-                        return false;
-                }
-                else
-                {
-                    if (Math.Abs(targetRank - originRank) > 1)
-                        return false;
-                }
-
-                if (targetFile == originFile && board[targetPos] == ChessPiece.None)
-                    return true;
-
-                // Can't move horizontally
-                if (targetRank == originRank)
-                    return false;
-
-                // Can take pieces diagonally 1 square in front
-                if (board[targetPos] == ChessPiece.None)
-                    return false;
-                if ((Math.Abs(targetFile - originFile) == 1 && Math.Abs(targetRank - originRank) == 1))
-                    return true;
-            }
-
-            if ((board[originPos] & ChessPiece.King) != 0)
-            {
-                if (Math.Abs(targetRank - originRank) <= 1 && Math.Abs(targetFile - originFile) <= 1)
-                    return true;
-            }
-
-            return false;
+            return response == 1;
         }
 
         public static ChessMove[] LoadGame(string gameRecordPath)
@@ -317,187 +261,26 @@ namespace Chess.ViewModels
                 writer.Write(JsonSerializer.Serialize<ChessMove[]>(Moves.ToArray<ChessMove>()));
         }
 
-        private bool IsInCheckMate(ChessPiece[] board)
+        public bool IsInCheckMate(ChessBoard board)
         {
-            LinkedList<byte> testKingMoves = new LinkedList<byte>();
-            LinkedList<byte> testLegalBlockingMoves = new LinkedList<byte>();
-            LinkedList<byte> testBlockingMoves = new LinkedList<byte>();
-            bool testIsInMate = true;
-            // The above variables can be removed. They are here to help
-            // with debugging if a bug is found.
-            //
-            // testIsInMate can be removed and replaced by returning
-            // early (which would save CPU time).
-
-            // Check if the king is in check
-            byte attackingPiecePos = PositionOfChecker(board);
-            if (attackingPiecePos == Byte.MaxValue)
-                return false;
-
-            // Check if the king can move
-            byte king = FindKing(board, isWhitesMove);
-            sbyte[] kingMoves = new sbyte[8] { -9, -8, -7, -1, 1, -7, 8, 9 };
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 64; i++)
             {
-                sbyte starget = (sbyte)(king + kingMoves[i]);
-                if (starget < 0 || starget > 63)
+                if (isWhitesMove && (board[i] & ChessPiece.IsWhite) == 0)
                     continue;
-                byte target = (byte)starget;
-
-                if (IsLegalMove(board, king, target))
-                {
-                    testKingMoves.AddLast(target);
-                    testIsInMate = false;
-                }
-            }
-
-            LinkedList<byte> friendlyPiecePositions = new LinkedList<byte>();
-            for (byte i = 0; i < 64; i++)
-            {
-                if (isWhitesMove && ((board[i] & ChessPiece.IsWhite) != 0))
-                    friendlyPiecePositions.AddLast(i);
-                else if (!isWhitesMove && ((board[i] & ChessPiece.IsWhite) == 0))
-                    friendlyPiecePositions.AddLast(i);
-            }
-
-            // Check if the checker can be captured. (See Note A)
-            for (byte i = 0; i < friendlyPiecePositions.Count; i++)
-            {
-                if (IsLegalMove(board, friendlyPiecePositions.ElementAt(i), attackingPiecePos))
-                {
-                    testLegalBlockingMoves.Remove(attackingPiecePos);
-                    testLegalBlockingMoves.AddLast(attackingPiecePos);
-                    testIsInMate = false;
-                }
-            }
-
-            // King can't move and knight cant be killed so it's checkmate
-            if ((board[attackingPiecePos] & ChessPiece.Knight) != 0)
-                return true;
-
-            // Check if the checker can be blocked:
-            // First, store all positions that would block a checker.
-            // Second, check to see if any friendly piece can move to one of these
-            // positions. (See Note A)
-            byte originFile = (byte)(king % 8);
-            byte originRank = (byte)(king / 8);
-            byte targetFile = (byte)(attackingPiecePos % 8);
-            byte targetRank = (byte)(attackingPiecePos / 8);
-            var dirVec = new int[] { targetFile - originFile, targetRank - originRank, };
-            for (int i = 0; i < 2; i++)
-                if (dirVec[i] != 0)
-                    dirVec[i] /= Math.Abs(dirVec[i]);
-            byte fileCheckPos = originFile;
-            byte rankCheckPos = originRank;
-            LinkedList<byte> blockingPositions = new LinkedList<byte>();
-            while (true)
-            {
-                fileCheckPos = (byte)(fileCheckPos + dirVec[0]);
-                rankCheckPos = (byte)(rankCheckPos + dirVec[1]);
-                if (fileCheckPos == targetFile)
-                {
-                    break;
-                }
-                testBlockingMoves.Remove((byte)(rankCheckPos * 8 + fileCheckPos));
-                testBlockingMoves.AddLast((byte)(rankCheckPos * 8 + fileCheckPos));
-                blockingPositions.AddLast((byte)(rankCheckPos * 8 + fileCheckPos));
-            }
-
-            for (int i = 0; i < friendlyPiecePositions.Count; i++)
-            {
-                for (int j = 0; j < blockingPositions.Count; j++)
-                {
-                    if (IsLegalMove(board, friendlyPiecePositions.ElementAt(i), blockingPositions.ElementAt(j)))
-                    {
-                        testLegalBlockingMoves.Remove(blockingPositions.ElementAt(j));
-                        testLegalBlockingMoves.AddLast(blockingPositions.ElementAt(j));
-                        testIsInMate = false;
-                    }
-                }
-            }
-
-            // Note A: As a by-product of using IsLegalMove, we also check if
-            // this move actually takes the king out of check. This deals
-            // with situations where there is more than one checker.
-
-            if (testIsInMate)
-                return true;
-            else
-            {
-                /*
-                Console.WriteLine("\nChecker at: {0},{1}", attackingPiecePos % 8 + 1, 8 - (attackingPiecePos / 8));
-                Console.WriteLine("Legal King Moves:");
-                foreach (byte pos in testKingMoves)
-                {
-                    Console.WriteLine("{0},{1}", pos % 8 + 1, 8 - (pos / 8));
-                }
-                Console.WriteLine("Positions that would break a checker's line of sight (this position might not break the check (e.g. if there are two checkers)):");
-                foreach (byte pos in testBlockingMoves)
-                {
-                    Console.WriteLine("{0},{1}", pos % 8 + 1, 8 - (pos / 8));
-                }
-                Console.WriteLine("Positions that can be reached and would break check:");
-                foreach (byte pos in testLegalBlockingMoves)
-                {
-                    Console.WriteLine("{0},{1}", pos % 8 + 1, 8 - (pos / 8));
-                }
-                Console.WriteLine();
-                */
-                return false;
-            }
-        }
-        // Returns Byte.MaxValue when no piece is checking the king
-        private byte PositionOfChecker(ChessPiece[] board)
-        {
-            byte king = FindKing(board, isWhitesMove);
-            for (byte i = 0; i < 64; i++)
-            {
-                if (board[i] == ChessPiece.None)
-                    continue;
-                // pieces cannot check their own king
-                if (isWhitesMove && (board[i] & ChessPiece.IsWhite) != 0)
-                    continue;
-                if (!isWhitesMove && (board[i] & ChessPiece.IsWhite) == 0)
+                if (!isWhitesMove && (board[i] & ChessPiece.IsWhite) != 0)
                     continue;
 
-                byte originFile = (byte)(i % 8);
-                byte originRank = (byte)(i / 8);
-                byte kingFile = (byte)(king % 8);
-                byte kingRank = (byte)(king / 8);
-                if (IsLegalMove(board, originFile, originRank, kingFile, kingRank, false, !isWhitesMove))
-                    return i;
-            }
-            return Byte.MaxValue;
-        }
-        private byte FindKing(ChessPiece[] board, bool isWhite)
-        {
-            for (byte i = 0; i < 64; i++)
-            {
-                if ((board[i] & ChessPiece.King) == 0)
-                    continue;
-                if (isWhite && (board[i] & ChessPiece.IsWhite) != 0)
-                    return i;
-                if (!isWhite && (board[i] & ChessPiece.IsWhite) == 0)
-                    return i;
-            }
-            return default;
-        }
+                Message request = new Message(BitConverter.GetBytes(i), sizeof(int), GetMovesRequest);
+                request.Send(message_client);
 
-        private ChessPiece[] SimplifyBoard()
-        {
-            ChessPiece[] board = new ChessPiece[64];
-            int i = 0;
-            foreach (ChessRow row in Rows)
-            {
-                if (row.RowTiles == null)
-                    continue;
-                foreach (ChessTile tile in row.RowTiles)
-                {
-                    board[i] = tile.PieceType;
-                    i++;
-                }
+                Message reply = new Message(GetMovesReply);
+                reply.Receive(message_client);
+                // If the message length is non-zero then we've found at least
+                // one legal move
+                if (reply.Length > 0)
+                    return false;
             }
-            return board;
+            return true;
         }
 
         protected void AddMoveToTurns(ChessMove move)

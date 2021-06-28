@@ -80,6 +80,14 @@ namespace Chess.Models
             set { state[Pos64(file, rank)] = value; tiles[Pos64(file, rank)].Update(); }
         }
 
+        public ChessBoard(ChessBoard board)
+        {
+            for (int i = 0; i < 64; i++)
+                state[i] = board.state[i];
+            GUI = board.GUI;
+            tiles = board.tiles;
+        }
+
         public ChessBoard(BoardViewModel bvm, string fen)
         {
             GUI = bvm;

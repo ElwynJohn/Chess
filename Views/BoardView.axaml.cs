@@ -49,7 +49,7 @@ namespace Chess.Views
                 if (pStagedTile != null)
                 {
                     ChessMove move = boardModel.PiecePositions(pStagedTile, clickedTile);
-                    if (boardModel.IsLegalMove(move))
+                    if (boardModel.IsLegalMove(move) && boardModel.IsInteractable)
                         boardModel.MakeMove(move);
                 }
                 pStagedPanel = null;

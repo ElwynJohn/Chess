@@ -5,8 +5,10 @@ namespace Chess.ViewModels
 {
     public class MoveHistoryViewModel : ViewModelBase
     {
-        public MoveHistoryViewModel(ObservableCollection<TurnData> turns)
+        public BoardViewModel bvm;
+        public MoveHistoryViewModel(ObservableCollection<TurnData> turns, BoardViewModel bvm)
         {
+            this.bvm = bvm;
             Turns = turns;
         }
         ObservableCollection<TurnData> Turns { get; set; }

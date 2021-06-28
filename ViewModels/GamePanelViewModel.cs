@@ -9,7 +9,7 @@ namespace Chess.ViewModels
     {
         public GamePanelViewModel(BoardViewModel board)
         {
-            Moves = new MoveHistoryViewModel(board.Turns);
+            Moves = new MoveHistoryViewModel(board.Turns, board);
             Stats = new GameStatsViewModel(board);
             Board = board;
             if (board != null)
