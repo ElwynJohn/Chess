@@ -4,28 +4,36 @@ using System.Linq;
 using System;
 using System.IO;
 using System.IO.Pipes;
-using System.Text.RegularExpressions;
 using System.Text;
 using System.Text.Json;
-using System.Diagnostics;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using System.ComponentModel;
 using Chess.Models;
+using static Chess.Models.Message.MessageType;
 
 namespace Chess.ViewModels
 {
     public class BoardViewModel
     {
+        // We use the same pipe instance for all board views
+        public static NamedPipeClientStream message_client = new NamedPipeClientStream("ChessIPC_Messages");
+
         public ChessBoard board;
         public ChessTile[] tiles = new ChessTile[64];
         public BoardViewModel() : this(String.Empty, true, true) { }
         public BoardViewModel(string gameRecordPath, bool isInteractable, bool displayOverlay)
         {
+            if (!message_client.IsConnected)
+            {
+                try { message_client.Connect(200); }
+                catch (TimeoutException) { Console.WriteLine($"Timed out connecting to client in {this}"); };
+            }
+
             board = new ChessBoard(this, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
             Rows = new ObservableCollection<ChessRow>();
             Moves = new ObservableCollection<ChessMove>(LoadGame(gameRecordPath));
+            Boards = new ObservableCollection<ChessBoard>();
+            Boards.Add(new ChessBoard(board));
             Turns = new ObservableCollection<TurnData>();
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
             filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");

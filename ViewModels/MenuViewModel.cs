@@ -1,4 +1,3 @@
-using Chess.Models;
 using System.Collections.ObjectModel;
 
 namespace Chess.ViewModels

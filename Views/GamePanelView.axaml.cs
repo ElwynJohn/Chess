@@ -1,10 +1,6 @@
-using System.Collections.Generic;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Templates;
 using Avalonia.Markup.Xaml;
 using Avalonia.Input;
-using Avalonia.VisualTree;
 using Chess.ViewModels;
 
 namespace Chess.Views

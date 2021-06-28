@@ -1,8 +1,6 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Input;
-using Avalonia.VisualTree;
 using Chess.Models;
 using Chess.ViewModels;
 
