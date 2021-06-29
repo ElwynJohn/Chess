@@ -50,6 +50,8 @@ namespace Chess.Models
             BoardStateReply,
             GetMovesRequest,
             GetMovesReply,
+            SetBoardRequest,
+            SetBoardReply,
         }
 
         public UInt32 Length

@@ -28,7 +28,9 @@ namespace Chess.ViewModels
                 catch (TimeoutException) { Console.WriteLine($"Timed out connecting to client in {this}"); };
             }
 
-            board = new ChessBoard(this, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+            board = new ChessBoard(this, fen);
+            SetBoardState(fen);
 
             Rows = new ObservableCollection<ChessRow>();
             Moves = new ObservableCollection<ChessMove>(LoadGame(gameRecordPath));
@@ -91,6 +93,20 @@ namespace Chess.ViewModels
             var state = GetBoardState();
             for (int i = 0; i < 64; i++)
                 board[i] = state[i];
+        }
+
+        public void SetBoardState(string fen)
+        {
+            byte[] fen_cstr = new byte[fen.Length + 1];
+            int idx = 0;
+            foreach (char c in fen)
+                fen_cstr[idx++] = (byte)c;
+            fen_cstr[idx] =  0;
+            Message request = new Message(fen_cstr, (uint)(fen.Length + 1), SetBoardRequest);
+            request.Send(message_client);
+
+            Message reply = new Message(SetBoardReply);
+            reply.Receive(message_client);
         }
 
         // Gets the board state from the server
