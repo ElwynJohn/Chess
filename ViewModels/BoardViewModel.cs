@@ -8,15 +8,26 @@ using System.Text;
 using System.Text.Json;
 using Avalonia.Media;
 using Chess.Models;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using static Chess.Models.Message.MessageType;
+using static Chess.Models.ChessBoard;
 
 namespace Chess.ViewModels
 {
-    public class BoardViewModel
+    public class BoardViewModel : ViewModelBase, INotifyPropertyChanged
     {
         // We use the same pipe instance for all board views
         public static NamedPipeClientStream message_client = new NamedPipeClientStream("ChessIPC_Messages");
 
+        public new event PropertyChangedEventHandler? PropertyChanged;
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public PlayViewModel? pvm;
         public ChessBoard board;
         public ChessTile[] tiles = new ChessTile[64];
         public BoardViewModel() : this(String.Empty, true, true) { }
@@ -181,15 +192,33 @@ namespace Chess.ViewModels
             currentMove++;
             currentBoard++;
 
-            isWhitesMove = !isWhitesMove;
+            if ((board[move.To] & ChessPiece.Pawn) != 0 && Rank(move.To) == (isWhitesMove ? 0 : 7))
+                if (pvm != null)
+                    pvm.IsPromoting = true;
 
-            // After making a move, we check if our opponent is in checkmate
-            if (IsInCheckMate(board))
+            var t = new Task(() =>
             {
-                Status = isWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
-                OnGameOver();
-            }
-            SaveGame();
+                IsInteractable = false;
+                if (pvm != null)
+                    while (pvm.IsPromoting)
+                        System.Threading.Thread.Sleep(10);
+            });
+
+            t.Start();
+            t.ContinueWith((x) =>
+            {
+                SyncBoardState();
+
+                // After making a move, we check if our opponent is in checkmate
+                if (IsInCheckMate(board))
+                {
+                    Status = isWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
+                    OnGameOver();
+                }
+                SaveGame();
+                IsInteractable = true;
+            });
+            isWhitesMove = !isWhitesMove;
         }
 
         // Sends move to server, syncs board state, gets server move, syncs
@@ -198,6 +227,15 @@ namespace Chess.ViewModels
         {
             SendMoveToServer(move);
             OnMoveMade(move);
+        }
+
+        public void RequestPromotion(ChessPiece piece)
+        {
+            Message request = new Message(BitConverter.GetBytes((int)piece), sizeof(int), PromotionRequest);
+            request.Send(message_client);
+
+            Message reply = new Message(PromotionReply);
+            reply.Receive(message_client);
         }
 
         public ChessMove PiecePositions(ChessTile origin, ChessTile target)
@@ -281,6 +319,8 @@ namespace Chess.ViewModels
         {
             for (int i = 0; i < 64; i++)
             {
+                if (board[i] == ChessPiece.None)
+                    continue;
                 if (isWhitesMove && (board[i] & ChessPiece.IsWhite) == 0)
                     continue;
                 if (!isWhitesMove && (board[i] & ChessPiece.IsWhite) != 0)

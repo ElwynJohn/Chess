@@ -1,5 +1,6 @@
 using System;
 using System.IO.Pipes;
+using System.Diagnostics;
 
 /* ##########################################################################
    Anytime you send a message you should immediately attempt to receive the
@@ -38,6 +39,9 @@ namespace Chess.Models
         private MessageType type;
         private byte[] data;
 
+        // Mutex
+        private static bool isBusy = false;
+
         public enum MessageType
         {
             LegalMoveRequest,
@@ -52,6 +56,8 @@ namespace Chess.Models
             GetMovesReply,
             SetBoardRequest,
             SetBoardReply,
+            PromotionRequest,
+            PromotionReply,
         }
 
         public UInt32 Length
@@ -79,13 +85,26 @@ namespace Chess.Models
 
         public void Send(NamedPipeClientStream client)
         {
+            while (isBusy)
+                System.Threading.Thread.Sleep(10);
+            isBusy = true;
+
+            Trace.Write($"DEBUG: Message.Send(): ({Type}) (len: {Length}) data: ");
+            foreach (byte b in Bytes)
+                Trace.Write($"{(int)b} ");
+            Trace.Write("\n");
+
             client.Write(BitConverter.GetBytes(len), 0, sizeof(int));
             client.Write(BitConverter.GetBytes((int)type), 0, sizeof(int));
             client.Write(data, 0, (int)len);
+            isBusy = false;
         }
 
         public void Receive(NamedPipeClientStream client)
         {
+            while (isBusy)
+                System.Threading.Thread.Sleep(10);
+            isBusy = true;
             byte[] message_len = new byte[4];
             byte[] message_type = new byte[4];
             client.Read(message_len, 0, 4);
@@ -94,6 +113,12 @@ namespace Chess.Models
             Type = (MessageType)BitConverter.ToUInt32(message_type, 0);
             Bytes = new byte[len];
             client.Read(data, 0, (int)len);
+
+            Trace.Write($"DEBUG: Message.Receive(): ({Type}) (len: {Length}) data: ");
+            foreach (byte b in Bytes)
+                Trace.Write($"{(int)b} ");
+            Trace.Write("\n");
+            isBusy = false;
         }
 
         public Message(MessageType type)

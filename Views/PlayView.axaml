@@ -25,6 +25,27 @@
     <StackPanel Orientation="Horizontal">
         <views:MenuView DataContext="{Binding Menu}"/>
 
+        <Canvas Opacity="{Binding IsPromoting}" IsEnabled="{Binding IsPromoting}">
+            <StackPanel Orientation="Vertical" Canvas.Left="0" Canvas.Top="30">
+                <Panel Classes="chess-tile" PointerReleased="on_pointer_released" Name="PromoteCastle">
+                    <Rectangle Classes="chess-tile" Fill="Blue"/>
+                    <Image Classes="chess-tile" Source="/Assets/piece_black_castle.png"/>
+                </Panel>
+                <Panel Classes="chess-tile" PointerReleased="on_pointer_released" Name="PromoteKnight">
+                    <Rectangle Classes="chess-tile" Fill="Blue"/>
+                    <Image Classes="chess-tile" Source="/Assets/piece_black_knight.png"/>
+                </Panel>
+                <Panel Classes="chess-tile" PointerReleased="on_pointer_released" Name="PromoteBishop">
+                    <Rectangle Classes="chess-tile" Fill="Blue"/>
+                    <Image Classes="chess-tile" Source="/Assets/piece_black_bishop.png"/>
+                </Panel>
+                <Panel Classes="chess-tile" PointerReleased="on_pointer_released" Name="PromoteQueen">
+                    <Rectangle Classes="chess-tile" Fill="Blue"/>
+                    <Image Classes="chess-tile" Source="/Assets/piece_black_queen.png"/>
+                </Panel>
+            </StackPanel>
+        </Canvas>
+
         <Border Background="#323240" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">
             <views:BoardView DataContext="{Binding Board}"/>
         </Border>
