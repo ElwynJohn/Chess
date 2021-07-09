@@ -19,6 +19,8 @@ namespace Chess.Views
         {
             BoardViewModel? boardModel = (BoardViewModel?)this.DataContext;
             ChessTile? clickedTile = (ChessTile?)((Panel)sender).DataContext;
+            if (clickedTile == null)
+                return;
             if (e.InitialPressMouseButton == MouseButton.Left)
                 boardModel?.LeftClickTile(clickedTile);
             else if (e.InitialPressMouseButton == MouseButton.Right)

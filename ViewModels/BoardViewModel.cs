@@ -22,7 +22,6 @@ namespace Chess.ViewModels
         public BoardViewModel(ChessBoard board,
             bool isInteractable = true, bool displayOverlay = true)
         {
-            string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
             Board = board;
             LiveBoard = board;
             board.Update += UpdateTiles;
@@ -53,19 +52,14 @@ namespace Chess.ViewModels
         }
 
         public ChessBoard Board { get; private set; }
-        public ChessBoard LiveBoard { get; private set; }
+        public ChessBoard LiveBoard { get; private set; } // If we don't store this,
+        // we would not be able to retrieve the most recent board after clicking previous move.
         public ObservableCollection<ChessRow> Rows { get; private set; }
         public bool IsInteractable { get; private set; }
 
         private ChessTile[] tiles = new ChessTile[64];
         private ChessTile? stagedTile;
         private int currentBoard = 0;
-
-        // When user tries to make move
-        //    Check legal -> Send to server
-        //    Sync board state
-        // Get move from server
-        // sync board state
 
         public void LeftClickTile(ChessTile clickedTile)
         {
@@ -127,11 +121,18 @@ namespace Chess.ViewModels
             UpdateTiles(null, new BoardUpdateEventArgs(Board, null));
         }
 
-        public void UpdateTiles(object sender, BoardUpdateEventArgs e)
+        public void UpdateTiles(object? sender, BoardUpdateEventArgs e)
         {
             foreach (ChessRow row in Rows.AsEnumerable())
+            {
+                if (row.RowTiles == null)
+                {
+                    Console.WriteLine("ERROR: rowTiles is null");
+                    continue;
+                }
                 foreach (ChessTile tile in row.RowTiles.AsEnumerable())
-                    tile.Update(e.Board);
+                    tile?.Update(e.Board);
+            }
         }
 
         public ChessMove PiecePositions(ChessTile origin, ChessTile target)

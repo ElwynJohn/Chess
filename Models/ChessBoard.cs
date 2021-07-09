@@ -39,7 +39,6 @@ namespace Chess.Models
                     ($"Timed out connecting to client in {this}"); };
             }
 
-            Console.WriteLine(fen);
             SetBoardState(fen);
 
             state = ParseFen(fen);
@@ -55,7 +54,7 @@ namespace Chess.Models
         public event EventHandler? GameOver;
         protected void OnGameOver() => GameOver?.Invoke(this, new EventArgs());
         public event BoardUpdateEventHandler? Update;
-        protected void OnUpdate(ChessMove move) => Update?.Invoke
+        protected void OnUpdate(ChessMove? move) => Update?.Invoke
             (this, new BoardUpdateEventArgs(this, move));
 
         // We use the same pipe instance for all board views
@@ -85,8 +84,6 @@ namespace Chess.Models
         private string filePath;
 
 
-        // Sends move to server, syncs board state, gets server move, syncs
-        // board state
         public virtual void MakeMove(ChessMove move, bool serverMove)
         {
             if (!serverMove)
@@ -127,10 +124,6 @@ namespace Chess.Models
             OnUpdate(null);
         }
 
-        // IsLegalMove takes considerChecks as an argument because a pinned
-        // piece can still give check: i.e. a piece that is pinned against the king
-        // can still move to kill the enemy king even if doing so leaves its own
-        // king in check.
         public bool IsLegalMove(ChessMove move)
         {
             Message mess_out = new Message(move.data, 2, LegalMoveRequest);
@@ -270,7 +263,6 @@ namespace Chess.Models
 
             return state;
         }
-
         // Tells the server what move we're making
         private void SendMoveToServer(ChessMove move)
         {

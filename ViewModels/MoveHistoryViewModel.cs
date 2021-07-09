@@ -21,8 +21,9 @@ namespace Chess.ViewModels
         {
             // if UpdateTurns is called but a move has not been made, such
             // as when a piece is promoted but not moved, then return.
-            if (e.Move == null)
+            if (e.Move == null || e.Board == null || e.Board.Boards == null)
                 return;
+
             bool newTurn = e.Board.Boards.Count % 2 == 0;
             if (newTurn)
                 Turns.Add(new TurnData()

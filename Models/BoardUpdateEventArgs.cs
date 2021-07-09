@@ -6,7 +6,7 @@ namespace Chess.Models
 
     public class BoardUpdateEventArgs : EventArgs
     {
-        public BoardUpdateEventArgs(ChessBoard board, ChessMove move)
+        public BoardUpdateEventArgs(ChessBoard board, ChessMove? move)
         {
             Board = new ChessBoard(board);
             Move = move;

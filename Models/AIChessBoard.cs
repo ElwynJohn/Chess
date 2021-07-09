@@ -47,6 +47,5 @@ namespace Chess.Models
 
             return move;
         }
-
     }
 }

@@ -15,7 +15,6 @@ namespace Chess.Views
         public void previous_move(object sender, RoutedEventArgs e)
         {
             MoveHistoryViewModel? board = (MoveHistoryViewModel?)this.DataContext;
-            System.Console.WriteLine(board.Bvm);
             if (board != null)
                 board.Bvm.PreviousMove();
         }

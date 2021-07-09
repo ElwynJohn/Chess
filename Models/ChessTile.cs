@@ -84,8 +84,10 @@ namespace Chess.Models
         }
         public string? AssetPath { get; set; }
 
-        public void Update(ChessBoard board)
+        public void Update(ChessBoard? board)
         {
+            if (board == null)
+                return;
             AssetPath = PieceToAssetMap.GetValueOrDefault(board[Position]);
             if (AssetPath != null)
                 PieceBitmap = new Bitmap(AssetPath);

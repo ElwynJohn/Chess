@@ -12,8 +12,8 @@ namespace Chess.ViewModels
         public GamePanelViewModel(BoardViewModel bvm)
         {
             Moves = new MoveHistoryViewModel(bvm);
-            Stats = new GameStatsViewModel(bvm?.Board);
-            Board = bvm?.Board;
+            Stats = new GameStatsViewModel(bvm.Board);
+            Board = bvm.Board;
             if (bvm?.Board != null)
                 Board.GameOver += OnGameOver;
 
