@@ -3,16 +3,18 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Media;
 
+using Chess.Models;
+
 namespace Chess.ViewModels
 {
     public class GamePanelViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public GamePanelViewModel(BoardViewModel board)
+        public GamePanelViewModel(BoardViewModel bvm)
         {
-            Moves = new MoveHistoryViewModel(board.Turns, board);
-            Stats = new GameStatsViewModel(board);
-            Board = board;
-            if (board != null)
+            Moves = new MoveHistoryViewModel(bvm);
+            Stats = new GameStatsViewModel(bvm?.Board);
+            Board = bvm?.Board;
+            if (bvm?.Board != null)
                 Board.GameOver += OnGameOver;
 
             Content = Moves;
@@ -26,7 +28,7 @@ namespace Chess.ViewModels
 
         public MoveHistoryViewModel Moves { get; init; }
         public GameStatsViewModel Stats { get; init; }
-        public BoardViewModel Board { get; init; }
+        public ChessBoard Board { get; init; }
         private ViewModelBase? content;
         public ViewModelBase? Content
         {

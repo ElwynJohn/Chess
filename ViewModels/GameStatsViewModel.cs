@@ -7,7 +7,7 @@ namespace Chess.ViewModels
 {
     public class GameStatsViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public GameStatsViewModel(BoardViewModel board)
+        public GameStatsViewModel(ChessBoard board)
         {
             Board = board;
             if (board != null)
@@ -18,7 +18,7 @@ namespace Chess.ViewModels
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public BoardViewModel Board { get; set; }
+        public ChessBoard Board { get; set; }
         public string Result { get
             {
                 if (Board.Status == GameStatus.WhiteWon)

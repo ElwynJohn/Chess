@@ -3,6 +3,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using Chess.ViewModels;
+using Chess.Models;
 
 namespace Chess.Views
 {
@@ -45,13 +46,16 @@ namespace Chess.Views
                     menuVM.Buttons.Add("Statistics");
                     break;
                 case "Online":
-                    mainWindowVM.List = new PlayViewModel(new BoardViewModel());
+                    mainWindowVM.List = new PlayViewModel
+                        (new BoardViewModel(new AIChessBoard()));
                     break;
                 case "vs Computer":
-                    mainWindowVM.List = new PlayViewModel(new AIBoardViewModel());
+                    mainWindowVM.List = new PlayViewModel
+                        (new BoardViewModel(new AIChessBoard()));
                     break;
                 case "Local":
-                    mainWindowVM.List = new PlayViewModel(new BoardViewModel());
+                    mainWindowVM.List = new PlayViewModel
+                        (new BoardViewModel(new ChessBoard()));
                     break;
                 case "Match History":
                     mainWindowVM.List = new HistoryViewModel();

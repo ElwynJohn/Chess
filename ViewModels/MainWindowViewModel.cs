@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Chess.Models;
 
 namespace Chess.ViewModels
 {
@@ -7,7 +8,7 @@ namespace Chess.ViewModels
     {
         public MainWindowViewModel()
         {
-            List = new PlayViewModel(new AIBoardViewModel());
+            List = new PlayViewModel(new BoardViewModel(new AIChessBoard()));
         }
 
         private ViewModelBase? list;

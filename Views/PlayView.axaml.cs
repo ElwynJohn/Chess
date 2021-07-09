@@ -20,8 +20,6 @@ namespace Chess.Views
         {
             var panel = sender as Panel;
 
-            var pvm = (PlayViewModel?)this.DataContext;
-
             if (panel != null)
             {
                 ChessPiece promotion = Queen;
@@ -41,13 +39,9 @@ namespace Chess.Views
                         break;
                 }
 
-                if (pvm == null)
-                    return;
-
-                var bvm = pvm.Board;
-                bvm.RequestPromotion(promotion);
-                bvm.SyncBoardState();
-                pvm.IsPromoting = false;
+                var pvm = (PlayViewModel?)this.DataContext;
+                if (pvm != null)
+                    pvm.Bvm?.Board?.PromoteTo(promotion);
             }
         }
 

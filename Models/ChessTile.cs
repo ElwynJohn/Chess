@@ -8,6 +8,34 @@ namespace Chess.Models
 {
     public class ChessTile : INotifyPropertyChanged
     {
+        public ChessTile(ChessBoard board, int pos, bool displayOverlay = true)
+        {
+            Position = (byte)pos;
+            DisplayOverlay = displayOverlay;
+
+            int file = pos % 8;
+            int rank = pos / 8;
+
+            bool isWhite = (rank % 2 == 1) ? (pos % 2 == 0) : (pos % 2 == 1);
+
+            if (isWhite)
+            {
+                NormalFill = new SolidColorBrush(0xFFD2CACA);
+                HighlightedFill = new SolidColorBrush(0xFFFFABCA);
+                TextToDisplayColour = new SolidColorBrush(0xFF383D64);
+            }
+            else
+            {
+                NormalFill = new SolidColorBrush(0xFF383D64);
+                HighlightedFill = new SolidColorBrush(0xFF682D44);
+                TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
+            }
+
+            AssetPath = PieceToAssetMap.GetValueOrDefault(board[pos]);
+            if (AssetPath != null)
+                PieceBitmap = new Bitmap(AssetPath);
+        }
+
         public byte Position { get; set; }
         public bool DisplayOverlay { get; set; }
         // FileToDisplay and RankToDisplay are the strings that are displayed
@@ -48,12 +76,6 @@ namespace Chess.Models
         }
         public IBrush? HighlightedFill { get; set; }
         public IBrush? NormalFill { get; set; }
-        private ChessBoard board;
-        public ChessPiece PieceType
-        {
-            get { return board[Position]; }
-            set { board[Position] = value; NotifyPropertyChanged(); }
-        }
         private Bitmap? pPieceBitmap;
         public Bitmap? PieceBitmap
         {
@@ -62,7 +84,7 @@ namespace Chess.Models
         }
         public string? AssetPath { get; set; }
 
-        public void Update()
+        public void Update(ChessBoard board)
         {
             AssetPath = PieceToAssetMap.GetValueOrDefault(board[Position]);
             if (AssetPath != null)
@@ -93,35 +115,5 @@ namespace Chess.Models
             {ChessPiece.King | ChessPiece.IsWhite, "./Assets/piece_white_king.png"},
             {ChessPiece.Pawn | ChessPiece.IsWhite, "./Assets/piece_white_pawn.png"},
         };
-
-        public ChessTile(ChessBoard board, int pos, bool displayOverlay = true)
-        {
-            this.board = board;
-
-            Position = (byte)pos;
-            DisplayOverlay = displayOverlay;
-
-            int file = pos % 8;
-            int rank = pos / 8;
-
-            bool isWhite = (rank % 2 == 1) ? (pos % 2 == 0) : (pos % 2 == 1);
-
-            if (isWhite)
-            {
-                NormalFill = new SolidColorBrush(0xFFD2CACA);
-                HighlightedFill = new SolidColorBrush(0xFFFFABCA);
-                TextToDisplayColour = new SolidColorBrush(0xFF383D64);
-            }
-            else
-            {
-                NormalFill = new SolidColorBrush(0xFF383D64);
-                HighlightedFill = new SolidColorBrush(0xFF682D44);
-                TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
-            }
-
-            AssetPath = PieceToAssetMap.GetValueOrDefault(board[pos]);
-            if (AssetPath != null)
-                PieceBitmap = new Bitmap(AssetPath);
-        }
     }
 }

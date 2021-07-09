@@ -1,35 +1,30 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Chess.Models;
 
 namespace Chess.ViewModels
 {
     public class PlayViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public PlayViewModel(BoardViewModel board)
+        public PlayViewModel(BoardViewModel bvm)
         {
-            Board = board;
-            Board.pvm = this;
+            Bvm = bvm;
             Menu = new MenuViewModel();
-            GamePanel = new GamePanelViewModel(board);
+            GamePanel = new GamePanelViewModel(bvm);
+
+            Bvm.Board.Update += BoardUpdated;
         }
 
-        public BoardViewModel Board { get; }
+        public BoardViewModel Bvm { get; }
         public MenuViewModel Menu { get; }
         public GamePanelViewModel GamePanel { get; }
+        public bool IsPromoting { get => Bvm.Board.IsPromoting; }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        private bool isPromoting = false;
-        public bool IsPromoting
-        {
-            get => isPromoting;
-            set
-            {
-                isPromoting = value;
-                NotifyPropertyChanged();
-            }
-        }
+        public void BoardUpdated(object sender, BoardUpdateEventArgs e)
+            => NotifyPropertyChanged(nameof(IsPromoting));
     }
 }
