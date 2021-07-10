@@ -31,8 +31,6 @@ namespace Chess.ViewModels
             } }
 
         public void OnGameOver(object? sender, EventArgs e)
-        {
-            NotifyPropertyChanged(nameof(Result));
-        }
+            => NotifyPropertyChanged(nameof(Result));
     }
 }

@@ -15,7 +15,7 @@ namespace Chess.ViewModels
             Stats = new GameStatsViewModel(bvm.Board);
             Board = bvm.Board;
             if (bvm?.Board != null)
-                Board.GameOver += OnGameOver;
+                Board.Update += OnGameOver;
 
             Content = Moves;
         }
@@ -57,7 +57,26 @@ namespace Chess.ViewModels
 
         public void OnGameOver(object? sender, EventArgs e)
         {
-            Content = Stats;
+            // This is a hack to get around an Avalonia bug. When the bug gets
+            // fixed, this method can just be "Content = Stats". Everything
+            // else can be removed.
+            if (Board.Status == GameStatus.InProgress)
+            {
+                if (Content == Stats)
+                {
+                    Content = Moves;
+                    Content = Stats;
+                }
+                else
+                {
+                    Content = Stats;
+                    Content = Moves;
+                }
+            }
+            else
+            {
+                Content = Stats;
+            }
         }
     }
 }
