@@ -9,11 +9,15 @@ namespace Chess.Models
 {
     public class AIChessBoard : ChessBoard
     {
-        public AIChessBoard(string fen = "r/1/b/q/k/b/2/p/1/ppppp/1/2/n/2/n/2/1/p/6/8/3/K/4/7/r/7/q w - - 0 1",
+        // Starting fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        public AIChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - 0 1",
             string gameRecordPath = "") : base(fen, gameRecordPath) {  }
 
         public override void MakeMove(ChessMove move, bool serverMove = false)
         {
+            if (Status != GameStatus.InProgress)
+                return;
+
             base.MakeMove(move, serverMove);
 
             var t = new Task<ChessMove>(() =>

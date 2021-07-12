@@ -9,13 +9,19 @@ namespace Chess.ViewModels
 {
     public class GamePanelViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public GamePanelViewModel(BoardViewModel bvm)
+        public GamePanelViewModel(BoardViewModel bvm, ChessTimer? whiteTimer, ChessTimer? blackTimer)
         {
             Moves = new MoveHistoryViewModel(bvm);
             Stats = new GameStatsViewModel(bvm.Board);
             Board = bvm.Board;
             if (bvm?.Board != null)
                 Board.Update += OnGameOver;
+            WhiteTimer = whiteTimer;
+            BlackTimer = blackTimer;
+            if (WhiteTimer != null)
+                WhiteTimer.Update += OnTimeChanged;
+            if (BlackTimer != null)
+                BlackTimer.Update += OnTimeChanged;
 
             Content = Moves;
         }
@@ -29,6 +35,8 @@ namespace Chess.ViewModels
         public MoveHistoryViewModel Moves { get; init; }
         public GameStatsViewModel Stats { get; init; }
         public ChessBoard Board { get; init; }
+        public ChessTimer? WhiteTimer { get; }
+        public ChessTimer? BlackTimer { get; }
         private ViewModelBase? content;
         public ViewModelBase? Content
         {
@@ -54,6 +62,17 @@ namespace Chess.ViewModels
 
         private IBrush lightFill = new SolidColorBrush(0xFF323240);
         private IBrush fill = new SolidColorBrush(0xFF28283D);
+
+        public void OnTimeChanged(object? sender, EventArgs e)
+        {
+            ChessTimer? timer = sender as ChessTimer;
+            if (timer == null)
+                return;
+            if (timer.IsWhite)
+                NotifyPropertyChanged(nameof(WhiteTimer));
+            if (!timer.IsWhite)
+                NotifyPropertyChanged(nameof(BlackTimer));
+        }
 
         public void OnGameOver(object? sender, EventArgs e)
         {

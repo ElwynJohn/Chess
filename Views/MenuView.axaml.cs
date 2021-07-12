@@ -46,16 +46,22 @@ namespace Chess.Views
                     menuVM.Buttons.Add("Statistics");
                     break;
                 case "Online":
-                    mainWindowVM.List = new PlayViewModel
-                        (new BoardViewModel(new AIChessBoard()));
+                    var bvm = new BoardViewModel(new AIChessBoard());
+                    var gamePanel = new GamePanelViewModel(bvm, null, null);
+                    mainWindowVM.List = new PlayViewModel(bvm, gamePanel);
                     break;
                 case "vs Computer":
-                    mainWindowVM.List = new PlayViewModel
-                        (new BoardViewModel(new AIChessBoard()));
+                    bvm = new BoardViewModel(new AIChessBoard());
+                    var whiteTimer = new ChessTimer(bvm.Board, true, 120);
+                    var blackTimer = new ChessTimer(bvm.Board, false, 120);
+                    gamePanel = new GamePanelViewModel(bvm, whiteTimer, blackTimer);
+                    mainWindowVM.List = new PlayViewModel(bvm, gamePanel);
+                    whiteTimer.Start();
                     break;
                 case "Local":
-                    mainWindowVM.List = new PlayViewModel
-                        (new BoardViewModel(new ChessBoard()));
+                    bvm = new BoardViewModel(new ChessBoard());
+                    gamePanel = new GamePanelViewModel(bvm, null, null);
+                    mainWindowVM.List = new PlayViewModel(bvm, gamePanel);
                     break;
                 case "Match History":
                     mainWindowVM.List = new HistoryViewModel();

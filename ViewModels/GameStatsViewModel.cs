@@ -11,7 +11,7 @@ namespace Chess.ViewModels
         {
             Board = board;
             if (board != null)
-                board.GameOver += OnGameOver;
+                board.Update += UpdateStats;
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
@@ -30,7 +30,7 @@ namespace Chess.ViewModels
                 return "Game in Progress";
             } }
 
-        public void OnGameOver(object? sender, EventArgs e)
+        public void UpdateStats(object? sender, EventArgs e)
             => NotifyPropertyChanged(nameof(Result));
     }
 }

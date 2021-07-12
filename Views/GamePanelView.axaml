@@ -10,7 +10,7 @@
     <StackPanel Margin="20" Height="940" Width="300" VerticalAlignment="Top">
 
         <Panel Width="300" Height="70" Background="#383D64">
-            <TextBlock Text="Time here" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding BlackTimer}" VerticalAlignment="Center"/>
             <TextBlock Text="Pieces captured here" VerticalAlignment="Center" HorizontalAlignment="Right"/>
         </Panel>
 
@@ -28,7 +28,7 @@
         <ContentControl Content="{Binding Content}"/>
 
         <Panel Width="300" Height="70" Background="#D2CACA">
-            <TextBlock Text="Time here" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding WhiteTimer}" VerticalAlignment="Center"/>
             <TextBlock Text="Pieces captured here" VerticalAlignment="Center" HorizontalAlignment="Right"/>
         </Panel>
 

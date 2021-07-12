@@ -16,7 +16,7 @@ namespace Chess.Models
             int file = pos % 8;
             int rank = pos / 8;
 
-            bool isWhite = (rank % 2 == 1) ? (pos % 2 == 0) : (pos % 2 == 1);
+            bool isWhite = (rank % 2 == 1) ? (pos % 2 == 1) : (pos % 2 == 0);
 
             if (isWhite)
             {

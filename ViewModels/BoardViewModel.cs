@@ -26,7 +26,10 @@ namespace Chess.ViewModels
             LiveBoard = board;
             board.Update += UpdateTiles;
             board.Update += (object sender, BoardUpdateEventArgs e) =>
-                { if (e.Move !=null && isInteractable) currentBoard++; };
+            {
+                if (e.Move !=null && isInteractable)
+                    currentBoard++;
+            };
 
             Rows = new ObservableCollection<ChessRow>();
 

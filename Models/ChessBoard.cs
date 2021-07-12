@@ -26,9 +26,10 @@ namespace Chess.Models
             filePath = board.filePath;
 
             for (int i = 0; i < 64; i++)
-                state[i] = board.state[i];
+                state[i] = board[i];
         }
 
+        // Starting fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         public ChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             string gameRecordPath = "")
         {
@@ -51,8 +52,6 @@ namespace Chess.Models
             Status = GameStatus.InProgress;
         }
 
-        public event EventHandler? GameOver;
-        protected void OnGameOver() => GameOver?.Invoke(this, new EventArgs());
         public event BoardUpdateEventHandler? Update;
         protected void OnUpdate(ChessMove? move) => Update?.Invoke
             (this, new BoardUpdateEventArgs(this, move));
@@ -60,8 +59,17 @@ namespace Chess.Models
         // We use the same pipe instance for all board views
         public static NamedPipeClientStream message_client = new NamedPipeClientStream("ChessIPC_Messages");
         public bool IsWhitesMove { get; private set; } = true;
-        public bool IsPromoting { get; protected set; }
-        public GameStatus Status { get; private set; } = GameStatus.InProgress;
+        public bool IsPromoting { get; protected set; } = false;
+        private GameStatus status = GameStatus.InProgress;
+        public GameStatus Status
+        {
+            get => status;
+            set
+            {
+                status = value;
+                OnUpdate(null);
+            }
+        }
         public ObservableCollection<ChessBoard> Boards { get; private set; }
         public ObservableCollection<ChessMove> Moves { get; private set; }
         /// <summary>64 based representation of the board</summary>
@@ -86,6 +94,9 @@ namespace Chess.Models
 
         public virtual void MakeMove(ChessMove move, bool serverMove)
         {
+            if (Status != GameStatus.InProgress)
+                return;
+
             if (!serverMove)
                 SendMoveToServer(move);
 
@@ -98,10 +109,7 @@ namespace Chess.Models
                 // After making a move, we check if our opponent is in checkmate
                 IsWhitesMove = !IsWhitesMove;
                 if (IsInCheckMate(this))
-                {
                     Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
-                    OnGameOver();
-                }
                 SaveGame();
             }
             Boards.Add(new ChessBoard(this));
@@ -111,15 +119,15 @@ namespace Chess.Models
 
         public void PromoteTo(ChessPiece promoteTo)
         {
+            if (Status != GameStatus.InProgress)
+                return;
+
             RequestPromotion(promoteTo);
             IsPromoting = false;
             SyncBoardState();
             IsWhitesMove = !IsWhitesMove;
             if (IsInCheckMate(this))
-            {
                 Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
-                OnGameOver();
-            }
             SaveGame();
             OnUpdate(null);
         }
@@ -140,6 +148,23 @@ namespace Chess.Models
                 response = BitConverter.ToInt32(mess_in.Bytes);
 
             return response == 1;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder rv = new StringBuilder();
+            for (int i = 0; i < 64; i++)
+            {
+                int file = File(i);
+                char c = FenToPieceMap.FirstOrDefault(x => x.Value.Equals(this[i])).Key;
+                rv.Append(c != '\0' ? c : '0');
+                if (file == 7)
+                    rv.Append("\n");
+                else
+                    rv.Append(" ");
+            }
+            rv.Remove(rv.Length - 1, 1); // Get rid of trailing newline;
+            return rv.ToString();
         }
 
         public static Dictionary<char, ChessPiece> FenToPieceMap = new Dictionary<char, ChessPiece>
@@ -205,23 +230,6 @@ namespace Chess.Models
         public static int Rank(int pos, bool pos0x88 = false)
         {
             return pos / (pos0x88 ? 16 : 8);
-        }
-
-        public override string ToString()
-        {
-            StringBuilder rv = new StringBuilder();
-            for (int i = 0; i < 64; i++)
-            {
-                int file = File(i);
-                char c = FenToPieceMap.FirstOrDefault(x => x.Value.Equals(this[i])).Key;
-                rv.Append(c != '\0' ? c : '0');
-                if (file == 7)
-                    rv.Append("\n");
-                else
-                    rv.Append(" ");
-            }
-            rv.Remove(rv.Length - 1, 1); // Get rid of trailing newline;
-            return rv.ToString();
         }
 
         public static ChessMove[] LoadGame(string gameRecordPath)

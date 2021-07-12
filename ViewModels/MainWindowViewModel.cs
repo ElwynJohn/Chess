@@ -8,7 +8,9 @@ namespace Chess.ViewModels
     {
         public MainWindowViewModel()
         {
-            List = new PlayViewModel(new BoardViewModel(new AIChessBoard()));
+            var bvm = new BoardViewModel(new AIChessBoard());
+            var gamePanel = new GamePanelViewModel(bvm, null, null);
+            List = new PlayViewModel(bvm, gamePanel);
         }
 
         private ViewModelBase? list;
