@@ -45,7 +45,7 @@ namespace Chess.ViewModels
             }
         }
 
-        public void Default(string buttonText)
+        private void Default(string buttonText)
         {
             switch (buttonText)
             {
@@ -59,7 +59,7 @@ namespace Chess.ViewModels
                     break;
             }
         }
-        public void GameMode(string buttonText)
+        private void GameMode(string buttonText)
         {
             switch (buttonText)
             {
@@ -78,7 +78,7 @@ namespace Chess.ViewModels
             }
             DisplayTime();
         }
-        public void Time(string buttonText)
+        private void Time(string buttonText)
         {
             if (bvm == null)
                 return;
