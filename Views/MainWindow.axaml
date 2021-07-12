@@ -7,5 +7,5 @@
         Title="Chess"
         Background="#312e2b"
         WindowStartupLocation="CenterScreen"
-        Content="{Binding List}">
+        Content="{Binding ChildViews}">
 </Window>

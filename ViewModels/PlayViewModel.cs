@@ -6,10 +6,10 @@ namespace Chess.ViewModels
 {
     public class PlayViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public PlayViewModel(BoardViewModel bvm, GamePanelViewModel gamePanel)
+        public PlayViewModel(BoardViewModel bvm, GamePanelViewModel gamePanel, MenuViewModel menuVM)
         {
             Bvm = bvm;
-            Menu = new MenuViewModel();
+            Menu = menuVM;
             GamePanel = gamePanel;
 
             Bvm.Board.Update += BoardUpdated;

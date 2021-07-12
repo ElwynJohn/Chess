@@ -10,18 +10,18 @@ namespace Chess.ViewModels
         {
             var bvm = new BoardViewModel(new AIChessBoard());
             var gamePanel = new GamePanelViewModel(bvm, null, null);
-            List = new PlayViewModel(bvm, gamePanel);
+            var menuVM = new MenuViewModel(this);
+            ChildViews = new PlayViewModel(bvm, gamePanel, menuVM);
         }
 
-        private ViewModelBase? list;
-        public ViewModelBase? List
+        private ViewModelBase? childViews;
+        public ViewModelBase? ChildViews
         {
-            get { return list; }
-            set { list = value; NotifyPropertyChanged(); }
+            get { return childViews; }
+            set { childViews = value; NotifyPropertyChanged(); }
         }
 
         new public event PropertyChangedEventHandler? PropertyChanged;
-
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
