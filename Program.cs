@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
 using System.Diagnostics;
+using Chess.Models;
+using System.IO;
 
 namespace Chess
 {
@@ -11,6 +13,11 @@ namespace Chess
         // yet and stuff might break.
         public static void Main(string[] args)
         {
+            var sw = new StreamWriter("chess_test.log");
+            sw.AutoFlush = true;
+            Logger.Writers.Add(sw);
+            Logger.Writers.Add(System.Console.Error);
+
             Trace.Listeners.Add(new TextWriterTraceListener("chess_debug.log"));
             Trace.Listeners.Add(new TextWriterTraceListener(System.Console.Error));
             Trace.AutoFlush = true;
