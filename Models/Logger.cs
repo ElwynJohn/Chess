@@ -20,42 +20,45 @@ namespace Chess.Models
             } }
         public static List<TextWriter> Writers { get; set; } = new List<TextWriter>();
 
-        public static void EWrite(string message, [CallerFilePath] string filePath="",
-                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
-        {
-            WriteHeader(Error, filePath, line, callerName);
-            Write(message);
-            StackTrace st = new StackTrace();
-            Write(st.ToString());
-        }
-        public static void WWrite(string message, [CallerFilePath] string filePath="",
-                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
-        {
-            WriteHeader(Warning, filePath, line, callerName);
-            Write(message);
-        }
-        public static void IWrite(string message, [CallerFilePath] string filePath="",
-                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
-        {
-            WriteHeader(Info, filePath, line, callerName);
-            Write(message);
-        }
-        public static void DWrite(string message, [CallerFilePath] string filePath="",
-                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
-        {
-            WriteHeader(DebugLevel.Debug, filePath, line, callerName);
-            Write(message);
-        }
+        // If you want to write multiple messages under the same header then write
+        // to BufMes (buffered message) first, then call xWrite() with no message argument
+        public static string BufMes { get; set; } = "";
 
-        private static void Write(string message)
+        public static void EWrite(string message="", [CallerFilePath] string filePath="",
+                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
+            => Write(message, Error, filePath, line, callerName);
+
+        public static void WWrite(string message="", [CallerFilePath] string filePath="",
+                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
+            => Write(message, Warning, filePath, line, callerName);
+
+        public static void IWrite(string message="", [CallerFilePath] string filePath="",
+                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
+            => Write(message, Info, filePath, line, callerName);
+
+        public static void DWrite(string message="", [CallerFilePath] string filePath="",
+                [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
+            => Write(message, DebugLevel.Debug, filePath, line, callerName);
+
+        private static void Write(string message, DebugLevel level,
+                string filePath, int line, string callerName)
         {
+            string header = GenerateHeader(level, filePath, line, callerName);
+            StackTrace st = new StackTrace();
             foreach (TextWriter writer in Writers)
             {
-                writer.Write(message);
+                writer.Write(header);
+                if (message == "")
+                    writer.Write(BufMes);
+                else
+                    writer.Write(message);
+                writer.Write('\n');
+                if (level == Error)
+                    writer.Write(st.ToString());
             }
         }
 
-        private static void WriteHeader(DebugLevel level, string filePath,
+        private static string GenerateHeader(DebugLevel level, string filePath,
                 int line, string callerName)
         {
             StringBuilder sb = new StringBuilder();
@@ -79,7 +82,7 @@ namespace Chess.Models
             sb.Append($"[{DateTime.UtcNow.ToString("s")}] ");
 
             sb.Append($"{GetRelativePath(filePath)}:{line}:{callerName}: ");
-            Write(sb.ToString());
+            return sb.ToString();
         }
 
         private static string GetRelativePath(string fullPath)
