@@ -21,7 +21,7 @@ namespace Chess
             swColour.AutoFlush = true;
             Logger.AddWriter(sw, false);
             Logger.AddWriter(swColour, true);
-            Logger.AddWriter(System.Console.Error, false);
+            Logger.AddWriter(System.Console.Error, true);
             Logger.DebugLevelT = DebugLevel.All;
             Logger.DWrite("hello");
             Logger.IWrite("hello");
