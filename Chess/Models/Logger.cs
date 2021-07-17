@@ -108,6 +108,8 @@ namespace Chess.Models
                 Action<string> writeMessage = message => {
                         if (level == Error)
                             message = pastel(message, ERR_COL);
+                        if (level == Warning)
+                            message = pastel(message, WAR_COL);
                         writer.writer.Write(message);
                         writer.writer.Write('\n');
                 };
