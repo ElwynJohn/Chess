@@ -27,6 +27,18 @@ namespace Chess
 #else
             Logger.DebugLevelT = DebugLevel.Info;
 #endif
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs args) =>
+            {
+                Exception e = (Exception)args.ExceptionObject;
+                // We remove Console.Error because this stops the exception message
+                // being printed twics: once by Logger and once by the system.
+                // @@FIXME: Can we stop the CLR from printing the exception message and
+                // print it using our own logger? Also, does this exception message
+                // get printed in the same way on other platforms?
+                Logger.RemoveWriter(Console.Error);
+                Logger.ExceptionWrite(e, "Unhandled exception.");
+            };
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }

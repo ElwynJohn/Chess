@@ -52,12 +52,28 @@ namespace Chess.Models
         public static void AddWriter(TextWriter writer, bool isColoured)
             => Writers.Add(new Writer(writer, isColoured));
         public static void ClearWriters() => Writers.Clear();
+        public static void RemoveWriter(TextWriter writerToRemove)
+        {
+            for (int i = 0; i < Writers.Count; i++)
+            {
+                if (Writers[i].writer == writerToRemove)
+                    Writers.RemoveAt(i);
+            }
+        }
+
+        public static void ExceptionWrite(Exception e, string message="",
+                [CallerFilePath] string filePath="", [CallerLineNumber] int line=0,
+                [CallerMemberName] string callerName="")
+        {
+            message += " " + e.ToString() + ": " + e.Message;
+            Write(message, Error, filePath, line, callerName);
+        }
 
         public static void EWrite(string message="", [CallerFilePath] string filePath="",
                 [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
         {
             if (DebugLevelT >= Error)
-                Write(message, Error, filePath, line, callerName);
+                Write(message, Error, filePath, line, callerName, true);
         }
 
         public static void WWrite(string message="", [CallerFilePath] string filePath="",
@@ -82,7 +98,7 @@ namespace Chess.Models
         }
 
         private static void Write(string message, DebugLevel level,
-                string filePath, int line, string callerName)
+                string filePath, int line, string callerName, bool writeStackTrace = false)
         {
             StackTrace st = new StackTrace();
             Func<string,string,string> pastel;
@@ -105,7 +121,7 @@ namespace Chess.Models
                 else
                     writeMessage(message);
 
-                if (level == Error)
+                if (writeStackTrace)
                     writer.writer.Write(pastel(st.ToString(), ERR_COL));
             }
             Buffer = "";
