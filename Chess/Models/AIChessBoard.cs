@@ -33,7 +33,7 @@ namespace Chess.Models
             {
                 // AI doesn't require promotion options
                 IsPromoting = false;
-                Console.WriteLine("Got move: {0}", t.Result);
+                Logger.IWrite($"Received server's move: {t.Result}");
                 base.MakeMove(t.Result, true);
             });
         }

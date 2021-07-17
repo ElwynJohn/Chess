@@ -23,8 +23,6 @@ namespace Chess.Models
             public bool isColoured;
         }
 
-        private static AsyncLocal<DebugLevel> prevDebugLevelT = new AsyncLocal<DebugLevel>();
-        public static void SetLevelToPrev() => DebugLevelT = prevDebugLevelT.Value;
         private static AsyncLocal<DebugLevel> debugLevelT = new AsyncLocal<DebugLevel>();
         public static DebugLevel DebugLevelT { get => debugLevelT.Value;
             set {
@@ -32,11 +30,6 @@ namespace Chess.Models
                 debugLevelT.Value = value;
                 prevDebugLevelT.Value = temp;
             } }
-        private static List<Writer> Writers = new List<Writer>();
-        public static void AddWriter(TextWriter writer, bool isColoured)
-            => Writers.Add(new Writer(writer, isColoured));
-        public static void ClearWriters() => Writers.Clear();
-
         // If you want to write multiple messages under the same header then write
         // to Buffer first, then call xWrite() with no message argument
         private static AsyncLocal<string> buffer = new AsyncLocal<string>();
@@ -45,12 +38,20 @@ namespace Chess.Models
             set => buffer.Value = value; }
 
 
+        private static AsyncLocal<DebugLevel> prevDebugLevelT = new AsyncLocal<DebugLevel>();
+        private static List<Writer> Writers = new List<Writer>();
         private const string LOC_COL = "#076672";
         private const string ERR_COL = "#aa322F";
         private const string WAR_COL = "#B59D00";
         private const string INF_COL = "#35C15A";
         private const string DBG_COL = "#586DD2";
 
+
+        public static void SetLevelToPrev() => DebugLevelT = prevDebugLevelT.Value;
+
+        public static void AddWriter(TextWriter writer, bool isColoured)
+            => Writers.Add(new Writer(writer, isColoured));
+        public static void ClearWriters() => Writers.Clear();
 
         public static void EWrite(string message="", [CallerFilePath] string filePath="",
                 [CallerLineNumber] int line=0, [CallerMemberName] string callerName="")
@@ -115,31 +116,20 @@ namespace Chess.Models
         {
             StringBuilder sb = new StringBuilder();
             if (level == Error)
-            {
                 sb.Append(pastel("ERROR: ", ERR_COL));
-            }
             else if (level == Warning)
-            {
                 sb.Append(pastel("WARN : ", WAR_COL));
-            }
             else if (level == Info)
-            {
                 sb.Append(pastel("INFO : ", INF_COL));
-            }
             else if (level == DebugLevel.Debug)
-            {
                 sb.Append(pastel("DEBUG: ", DBG_COL));
-            }
 
             sb.Append($"[{DateTime.UtcNow.ToString("s")}] ");
 
-            sb.Append(pastel($"{GetRelativePath(filePath)}:{line}:{callerName}: ", LOC_COL));
+            string relativePath = Path.GetRelativePath
+                (Directory.GetCurrentDirectory(), filePath);
+            sb.Append(pastel($"{relativePath}:{line}:{callerName}: ", LOC_COL));
             return sb.ToString();
-        }
-
-        private static string GetRelativePath(string fullPath)
-        {
-            return "." + Regex.Replace(fullPath, @".*chess", "", RegexOptions.IgnoreCase);
         }
     }
 }

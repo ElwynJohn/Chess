@@ -91,7 +91,7 @@ namespace Chess.ViewModels
                 stagedTile = null;
 
                 watch.Stop();
-                System.Console.WriteLine($"elapsed: {watch.ElapsedMilliseconds}");
+                Logger.DWrite($"Time taken to move player's piece: {watch.ElapsedMilliseconds}");
             }
         }
         public void RightClickTile(ChessTile clickedTile)

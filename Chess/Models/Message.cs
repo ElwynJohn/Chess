@@ -89,10 +89,10 @@ namespace Chess.Models
                 System.Threading.Thread.Sleep(10);
             isBusy = true;
 
-            Trace.Write($"DEBUG: Message.Send(): ({Type}) (len: {Length}) data: ");
+            Logger.Buffer = ($"(MessageType: {Type}) (len: {Length}) data: ");
             foreach (byte b in Bytes)
-                Trace.Write($"{(int)b} ");
-            Trace.Write("\n");
+                Logger.Buffer += $"{(int)b} ";
+            Logger.IWrite();
 
             client.Write(BitConverter.GetBytes(len), 0, sizeof(int));
             client.Write(BitConverter.GetBytes((int)type), 0, sizeof(int));
@@ -114,10 +114,10 @@ namespace Chess.Models
             Bytes = new byte[len];
             client.Read(data, 0, (int)len);
 
-            Trace.Write($"DEBUG: Message.Receive(): ({Type}) (len: {Length}) data: ");
+            Logger.Buffer = $"(MessageType: {Type}) (len: {Length}) data: ";
             foreach (byte b in Bytes)
-                Trace.Write($"{(int)b} ");
-            Trace.Write("\n");
+                Logger.Buffer += $"{(int)b} ";
+            Logger.IWrite();
             isBusy = false;
         }
 

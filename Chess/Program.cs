@@ -23,10 +23,6 @@ namespace Chess
             Logger.AddWriter(swColour, true);
             Logger.AddWriter(System.Console.Error, true);
             Logger.DebugLevelT = DebugLevel.All;
-            Logger.DWrite("hello");
-            Logger.IWrite("hello");
-            Logger.EWrite("hello");
-            Logger.WWrite("hello");
 
             Trace.Listeners.Add(new TextWriterTraceListener("chess_debug.log"));
             Trace.Listeners.Add(new TextWriterTraceListener(System.Console.Error));
