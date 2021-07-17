@@ -17,10 +17,6 @@ namespace Chess.Views
 
         public void on_pointer_released(object sender, PointerReleasedEventArgs e)
         {
-            Logger.DWrite("hello");
-            Logger.IWrite("hello");
-            Logger.WWrite("hello");
-            Logger.EWrite("hello");
             BoardViewModel? boardModel = (BoardViewModel?)this.DataContext;
             ChessTile? clickedTile = (ChessTile?)((Panel)sender).DataContext;
             if (clickedTile == null)

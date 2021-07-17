@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
+using System.IO;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
@@ -30,10 +32,7 @@ namespace Chess.Models
                 HighlightedFill = new SolidColorBrush(0xFF682D44);
                 TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
             }
-
-            AssetPath = PieceToAssetMap.GetValueOrDefault(board[pos]);
-            if (AssetPath != null)
-                PieceBitmap = new Bitmap(AssetPath);
+            SetNewPiece(board[pos]);
         }
 
         public byte Position { get; set; }
@@ -88,11 +87,7 @@ namespace Chess.Models
         {
             if (board == null)
                 return;
-            AssetPath = PieceToAssetMap.GetValueOrDefault(board[Position]);
-            if (AssetPath != null)
-                PieceBitmap = new Bitmap(AssetPath);
-            else
-                PieceBitmap = null;
+            SetNewPiece(board[Position]);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -102,6 +97,21 @@ namespace Chess.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public void SetNewPiece(ChessPiece piece)
+        {
+            AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
+            if (AssetPath != null)
+            {
+                // the relative asset path will be different depening on
+                // the directory that dotnet run is called from. This covers
+                // two common calling locations: ...Chess/ and ...Chess/Chess/
+                if (!File.Exists(AssetPath))
+                    AssetPath = Regex.Replace(AssetPath, @"\./Assets/", @"./Chess/Assets/");
+                PieceBitmap = new Bitmap(AssetPath);
+            }
+            else
+                PieceBitmap = null;
+        }
         public static Dictionary<ChessPiece, string> PieceToAssetMap = new Dictionary<ChessPiece, string>
         {
             {ChessPiece.Castle, "./Assets/piece_black_castle.png"},

@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
 using System.Diagnostics;
-using Chess.Models;
+using System;
 using System.IO;
+using Pastel;
+using Chess.Models;
 
 namespace Chess
 {
@@ -14,9 +16,17 @@ namespace Chess
         public static void Main(string[] args)
         {
             var sw = new StreamWriter("chess_test.log");
+            var swColour = new StreamWriter("chess_test_col.log");
             sw.AutoFlush = true;
-            Logger.Writers.Add(sw);
-            Logger.Writers.Add(System.Console.Error);
+            swColour.AutoFlush = true;
+            Logger.AddWriter(sw, false);
+            Logger.AddWriter(swColour, true);
+            Logger.AddWriter(System.Console.Error, false);
+            Logger.DebugLevelT = DebugLevel.All;
+            Logger.DWrite("hello");
+            Logger.IWrite("hello");
+            Logger.EWrite("hello");
+            Logger.WWrite("hello");
 
             Trace.Listeners.Add(new TextWriterTraceListener("chess_debug.log"));
             Trace.Listeners.Add(new TextWriterTraceListener(System.Console.Error));
