@@ -22,11 +22,12 @@ namespace Chess
             Logger.AddWriter(sw, false);
             Logger.AddWriter(swColour, true);
             Logger.AddWriter(System.Console.Error, true);
+#if DEBUG
             Logger.DebugLevelT = DebugLevel.All;
+#else
+            Logger.DebugLevelT = DebugLevel.Info;
+#endif
 
-            Trace.Listeners.Add(new TextWriterTraceListener("chess_debug.log"));
-            Trace.Listeners.Add(new TextWriterTraceListener(System.Console.Error));
-            Trace.AutoFlush = true;
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
