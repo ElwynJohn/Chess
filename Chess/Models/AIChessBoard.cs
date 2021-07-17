@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 using Chess.Models;
 using Chess.ViewModels;
@@ -20,12 +21,14 @@ namespace Chess.Models
 
             base.MakeMove(move, serverMove);
 
+            var sw = new Stopwatch();
             var t = new Task<ChessMove>(() =>
             {
                 // if the player is picking what piece to promote to,
                 // wait till they have made their choice
                 while (IsPromoting)
                         System.Threading.Thread.Sleep(10);
+                sw.Start();
                 return GetServerMove();
             });
             t.Start();
@@ -33,7 +36,8 @@ namespace Chess.Models
             {
                 // AI doesn't require promotion options
                 IsPromoting = false;
-                Logger.IWrite($"Received server's move: {t.Result}");
+                sw.Stop();
+                Logger.IWrite($"Received server's move, {t.Result}, in {sw.Elapsed.Minutes * 60 + sw.Elapsed.Seconds} seconds");
                 base.MakeMove(t.Result, true);
             });
         }
