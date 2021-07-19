@@ -1,8 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Collections.ObjectModel;
 using Avalonia.Media;
-
+using Avalonia.Media.Imaging;
 using Chess.Models;
 
 namespace Chess.ViewModels
@@ -15,7 +16,11 @@ namespace Chess.ViewModels
             Stats = new GameStatsViewModel(bvm.Board);
             Board = bvm.Board;
             if (bvm?.Board != null)
-                Board.Update += OnGameOver;
+                Board.Update += OnBoardUpdate;
+            DeadWhitePieces = new ObservableCollection<Bitmap>();
+            DeadWhitePawns = new ObservableCollection<Bitmap>();
+            DeadBlackPieces = new ObservableCollection<Bitmap>();
+            DeadBlackPawns = new ObservableCollection<Bitmap>();
             WhiteTimer = whiteTimer;
             BlackTimer = blackTimer;
             if (WhiteTimer != null)
@@ -37,6 +42,13 @@ namespace Chess.ViewModels
         public ChessBoard Board { get; init; }
         public ChessTimer? WhiteTimer { get; }
         public ChessTimer? BlackTimer { get; }
+        // We display pawns seperately and below other pieces. This is so that
+        // we can better make use of the available space. This is why we have a
+        // collection for pawns as well as other pieces.
+        public ObservableCollection<Bitmap> DeadWhitePieces { get; }
+        public ObservableCollection<Bitmap> DeadWhitePawns { get; }
+        public ObservableCollection<Bitmap> DeadBlackPieces { get; }
+        public ObservableCollection<Bitmap> DeadBlackPawns { get; }
         private ViewModelBase? content;
         public ViewModelBase? Content
         {
@@ -74,11 +86,27 @@ namespace Chess.ViewModels
                 NotifyPropertyChanged(nameof(BlackTimer));
         }
 
-        public void OnGameOver(object? sender, EventArgs e)
+        public void OnBoardUpdate(object? sender, BoardUpdateEventArgs e)
         {
             // This is a hack to get around an Avalonia bug. When the bug gets
             // fixed, this method can just be "Content = Stats". Everything
             // else can be removed.
+            if (e.PieceTaken != ChessPiece.None)
+            {
+                Bitmap? bitmap = ChessTile.BitmapFromChessPiece(e.PieceTaken);
+                if (bitmap != null)
+                    if ((e.PieceTaken & ChessPiece.IsWhite) == ChessPiece.IsWhite)
+                        if ((e.PieceTaken & ChessPiece.Pawn) == ChessPiece.Pawn)
+                            DeadWhitePawns.Add(bitmap);
+                        else
+                            DeadWhitePieces.Add(bitmap);
+                    else
+                        if ((e.PieceTaken & ChessPiece.Pawn) == ChessPiece.Pawn)
+                            DeadBlackPawns.Add(bitmap);
+                        else
+                            DeadBlackPieces.Add(bitmap);
+            }
+
             if (Board.Status == GameStatus.InProgress)
             {
                 if (Content == Stats)

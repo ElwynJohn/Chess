@@ -61,7 +61,7 @@ namespace Chess.Models
             }
         }
 
-        public static void ExceptionWrite(Exception e, string message="",
+        public static void EWrite(Exception e, string message="",
                 [CallerFilePath] string filePath="", [CallerLineNumber] int line=0,
                 [CallerMemberName] string callerName="")
         {

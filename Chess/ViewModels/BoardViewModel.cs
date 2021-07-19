@@ -106,7 +106,7 @@ namespace Chess.ViewModels
 
             IsInteractable = false;
             Board = Board.Boards[currentBoard];
-            UpdateTiles(null, new BoardUpdateEventArgs(Board, null));
+            UpdateTiles(null, new BoardUpdateEventArgs(Board, null, ChessPiece.None));
         }
 
         public void NextMove()
@@ -121,7 +121,7 @@ namespace Chess.ViewModels
             }
             else
                 Board = Board.Boards[currentBoard];
-            UpdateTiles(null, new BoardUpdateEventArgs(Board, null));
+            UpdateTiles(null, new BoardUpdateEventArgs(Board, null, ChessPiece.None));
         }
 
         public void UpdateTiles(object? sender, BoardUpdateEventArgs e)
@@ -130,7 +130,7 @@ namespace Chess.ViewModels
             {
                 if (row.RowTiles == null)
                 {
-                    Console.WriteLine("ERROR: rowTiles is null");
+                    Logger.EWrite("rowTiles is null");
                     continue;
                 }
                 foreach (ChessTile tile in row.RowTiles.AsEnumerable())

@@ -6,12 +6,67 @@
              xmlns:vm="clr-namespace:Chess.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Chess.Views.GamePanelView">
+<UserControl.Styles>
+    <Style Selector="Image.taken_piece">
+        <Setter Property="Height" Value="29"/>
+        <Setter Property="Width"  Value="31"/>
+        <Setter Property="Margin" Value="1,5,1,5"/>
+        <Setter Property="Source" Value="{Binding}"/>
+    </Style>
+    <Style Selector="Image.taken_pawn">
+        <Setter Property="Height" Value="25"/>
+        <Setter Property="Width"  Value="27"/>
+        <Setter Property="Margin" Value="3,5,3,5"/>
+        <Setter Property="Source" Value="{Binding}"/>
+    </Style>
+    <Style Selector="StackPanel.taken_pieces">
+        <Setter Property="Orientation"          Value="Horizontal"/>
+        <Setter Property="HorizontalAlignment"  Value="Right"/>
+        <Setter Property="Margin"               Value="0,0,2,0"/>
+        <Setter Property="VerticalAlignment"    Value="Top"/>
+    </Style>
+    <Style Selector="StackPanel.taken_pawns">
+        <Setter Property="Orientation"          Value="Horizontal"/>
+        <Setter Property="HorizontalAlignment"  Value="Right"/>
+        <Setter Property="Margin"               Value="0,0,2,0"/>
+        <Setter Property="VerticalAlignment"    Value="Bottom"/>
+    </Style>
+</UserControl.Styles>
 
     <StackPanel Margin="20" Height="940" Width="300" VerticalAlignment="Top">
 
         <Panel Width="300" Height="70" Background="#383D64">
             <TextBlock Text="{Binding BlackTimer}" VerticalAlignment="Center"/>
-            <TextBlock Text="Pieces captured here" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+
+<!-- @@Rework: Use a template or something instead of repeating the code here and at the bottom-->
+
+            <!--We display pawns seperately and below other pieces. This is so that
+                we can better make use of the available space. DeadBlack pieces
+                and at the bottom of the panel-->
+            <ItemsControl Items="{Binding DeadWhitePieces}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Classes="taken_pieces"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image Classes="taken_piece"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl Items="{Binding DeadWhitePawns}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Classes="taken_pawns"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image Classes="taken_pawn"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Panel>
 
         <StackPanel Orientation="Horizontal" Height="50" Background="Black">
@@ -29,7 +84,30 @@
 
         <Panel Width="300" Height="70" Background="#D2CACA">
             <TextBlock Text="{Binding WhiteTimer}" VerticalAlignment="Center"/>
-            <TextBlock Text="Pieces captured here" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            <ItemsControl Items="{Binding DeadBlackPieces}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Classes="taken_pieces"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image Classes="taken_piece"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl Items="{Binding DeadBlackPawns}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Classes="taken_pawns"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image Classes="taken_pawn"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Panel>
 
     </StackPanel>

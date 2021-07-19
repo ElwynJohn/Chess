@@ -25,6 +25,9 @@ namespace Chess.Models
             dirPath = board.dirPath;
             filePath = board.filePath;
 
+            PiecesCaptured = new List<ChessPiece>(board.PiecesCaptured.Count);
+            for (int i = 0; i < board.PiecesCaptured.Count; i++)
+                PiecesCaptured.Add(board.PiecesCaptured[i]);
             for (int i = 0; i < 64; i++)
                 state[i] = board[i];
         }
@@ -46,6 +49,7 @@ namespace Chess.Models
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
             filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");
 
+            PiecesCaptured = new List<ChessPiece>(32);
             Moves = new ObservableCollection<ChessMove>(LoadGame(gameRecordPath));
             Boards = new ObservableCollection<ChessBoard>();
             Boards.Add(new ChessBoard(this));
@@ -53,11 +57,13 @@ namespace Chess.Models
         }
 
         public event BoardUpdateEventHandler? Update;
-        protected void OnUpdate(ChessMove? move) => Update?.Invoke
-            (this, new BoardUpdateEventArgs(this, move));
+        protected void OnUpdate() => Update?.Invoke
+            (this, new BoardUpdateEventArgs(this, null, ChessPiece.None));
+        protected void OnUpdate(BoardUpdateEventArgs args) => Update?.Invoke(this, args);
 
         // We use the same pipe instance for all board views
         public static NamedPipeClientStream message_client = new NamedPipeClientStream("ChessIPC_Messages");
+        public List<ChessPiece> PiecesCaptured { get; private set; }
         public bool IsWhitesMove { get; private set; } = true;
         public bool IsPromoting { get; protected set; } = false;
         private GameStatus status = GameStatus.InProgress;
@@ -67,7 +73,7 @@ namespace Chess.Models
             set
             {
                 status = value;
-                OnUpdate(null);
+                OnUpdate();
             }
         }
         public ObservableCollection<ChessBoard> Boards { get; private set; }
@@ -97,6 +103,10 @@ namespace Chess.Models
             if (Status != GameStatus.InProgress)
                 return;
 
+            ChessPiece pieceTaken = state[move.To];
+            if (pieceTaken != ChessPiece.None)
+                PiecesCaptured.Add(state[move.To]);
+
             if (!serverMove)
                 SendMoveToServer(move);
 
@@ -114,7 +124,7 @@ namespace Chess.Models
             }
             Boards.Add(new ChessBoard(this));
             Moves.Add(move);
-            OnUpdate(move);
+            OnUpdate(new BoardUpdateEventArgs(this, move, pieceTaken));
         }
 
         public void PromoteTo(ChessPiece promoteTo)
@@ -129,7 +139,7 @@ namespace Chess.Models
             if (IsInCheckMate(this))
                 Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
             SaveGame();
-            OnUpdate(null);
+            OnUpdate();
         }
 
         public bool IsLegalMove(ChessMove move)

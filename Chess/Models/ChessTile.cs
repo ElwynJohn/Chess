@@ -98,21 +98,23 @@ namespace Chess.Models
         }
 
         public void SetNewPiece(ChessPiece piece)
+            => PieceBitmap = BitmapFromChessPiece(piece);
+
+        public static Bitmap? BitmapFromChessPiece(ChessPiece piece)
         {
-            AssetPath = PieceToAssetMap.GetValueOrDefault(piece);
-            if (AssetPath != null)
+            string? assetPath = PieceToAssetMap.GetValueOrDefault(piece);
+            if (assetPath != null)
             {
                 // the relative asset path will be different depening on
                 // the directory that dotnet run is called from. This covers
                 // two common calling locations: ...Chess/ and ...Chess/Chess/
-                if (!File.Exists(AssetPath))
-                    AssetPath = Regex.Replace(AssetPath, @"\./Assets/", @"./Chess/Assets/");
-                PieceBitmap = new Bitmap(AssetPath);
+                if (!File.Exists(assetPath))
+                    assetPath = Regex.Replace(assetPath, @"\./Assets/", @"./Chess/Assets/");
+                return new Bitmap(assetPath);
             }
-            else
-                PieceBitmap = null;
+            return null;
         }
-        public static Dictionary<ChessPiece, string> PieceToAssetMap = new Dictionary<ChessPiece, string>
+        private static Dictionary<ChessPiece, string> PieceToAssetMap = new Dictionary<ChessPiece, string>
         {
             {ChessPiece.Castle, "./Assets/piece_black_castle.png"},
             {ChessPiece.Knight, "./Assets/piece_black_knight.png"},

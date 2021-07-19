@@ -11,7 +11,7 @@ namespace Chess.Models
     public class AIChessBoard : ChessBoard
     {
         // Starting fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        public AIChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - 0 1",
+        public AIChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             string gameRecordPath = "") : base(fen, gameRecordPath) {  }
 
         public override void MakeMove(ChessMove move, bool serverMove = false)

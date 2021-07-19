@@ -38,7 +38,7 @@ namespace Chess
                 // get printed in the same way on other platforms?
                 Logger.WWrite("Removing Console.Error from Logger's writers.");
                 Logger.RemoveWriter(Console.Error);
-                Logger.ExceptionWrite(e, "Unhandled exception.");
+                Logger.EWrite(e, "Unhandled exception.");
             };
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
