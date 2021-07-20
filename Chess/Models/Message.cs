@@ -96,7 +96,8 @@ namespace Chess.Models
 
             client.Write(BitConverter.GetBytes(len), 0, sizeof(int));
             client.Write(BitConverter.GetBytes((int)type), 0, sizeof(int));
-            client.Write(data, 0, (int)len);
+            if (len > 0)
+                client.Write(data, 0, (int)len);
             isBusy = false;
         }
 
@@ -112,7 +113,8 @@ namespace Chess.Models
             client.Read(message_type, 0, 4);
             Type = (MessageType)BitConverter.ToUInt32(message_type, 0);
             Bytes = new byte[len];
-            client.Read(data, 0, (int)len);
+            if (len > 0)
+                client.Read(data, 0, (int)len);
 
             Logger.Buffer = $"(MessageType: {Type}) (len: {Length}) data: ";
             foreach (byte b in Bytes)
