@@ -31,6 +31,27 @@ namespace Chess.ViewModels
                     currentBoard++;
             };
 
+            board.Update += (object sender, BoardUpdateEventArgs e) =>
+            {
+                if (e.Move == null)
+                    return;
+
+                Logger.DWrite($"Move.From: {e.Move.From}\n");
+                Logger.DWrite($"Move.To: {e.Move.To}\n");
+
+                foreach (ChessTile? tile in tiles_to_clear)
+                    if (tile != null)
+                        tile.IsHighlighted = false;
+
+                tiles[e.Move.From].HighlightedFill = new SolidColorBrush(0xFF00FFFF);
+                tiles[e.Move.From].IsHighlighted = true;
+                tiles[e.Move.To].HighlightedFill = new SolidColorBrush(0xFF00FFFF);
+                tiles[e.Move.To].IsHighlighted = true;
+
+                tiles_to_clear[0] = tiles[e.Move.From];
+                tiles_to_clear[1] = tiles[e.Move.To];
+            };
+
             Rows = new ObservableCollection<ChessRow>();
 
             for (int y = 0; y < 8; y++)
@@ -61,6 +82,7 @@ namespace Chess.ViewModels
         public bool IsInteractable { get; private set; }
 
         private ChessTile[] tiles = new ChessTile[64];
+        private ChessTile?[] tiles_to_clear = new ChessTile?[2];
         private ChessTile? stagedTile;
         private int currentBoard = 0;
 
