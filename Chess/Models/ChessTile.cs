@@ -108,8 +108,8 @@ namespace Chess.Models
                 // the relative asset path will be different depening on
                 // the directory that dotnet run is called from. This covers
                 // two common calling locations: ...Chess/ and ...Chess/Chess/
-                if (!File.Exists(assetPath))
-                    assetPath = Regex.Replace(assetPath, @"\./Assets/", @"./Chess/Assets/");
+                /* if (!File.Exists(assetPath)) */
+                /*     assetPath = Regex.Replace(assetPath, @"\./Assets/", @"./Chess/Assets/"); */
                 return new Bitmap(assetPath);
             }
             return null;
