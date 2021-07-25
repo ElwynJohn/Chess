@@ -38,9 +38,14 @@ namespace Chess.Models
         {
             if (!message_client.IsConnected)
             {
-                try { message_client.Connect(200); }
-                catch (TimeoutException) { Logger.EWrite
-                    ($"Timed out connecting to client"); };
+                for (;;)
+                {
+                    try { message_client.Connect(1000); }
+                    catch (TimeoutException) { Logger.EWrite
+                        ($"Timed out connecting to client"); };
+                    if (message_client.IsConnected)
+                        break;
+                }
             }
 
             SetBoardState(fen);

@@ -13,6 +13,7 @@ namespace Chess
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
         // yet and stuff might break.
+        private static Process? engine;
         public static void Main(string[] args)
         {
             var sw = new StreamWriter("chess_test.log");
@@ -41,6 +42,25 @@ namespace Chess
                 Logger.EWrite(e, "Unhandled exception.");
             };
 
+            string? exe_dir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location);
+            if (exe_dir != null)
+            {
+                Directory.SetCurrentDirectory(exe_dir);
+                Logger.IWrite(exe_dir);
+            }
+            string engine_path = Path.Join(exe_dir, "ChessEngineMain");
+            Logger.IWrite(engine_path);
+            engine = Process.Start(new ProcessStartInfo {
+                    UseShellExecute = true,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Normal,
+                    FileName = engine_path,
+                    RedirectStandardError = false,
+                    RedirectStandardOutput = false,
+                    });
+
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
+
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
@@ -50,5 +70,10 @@ namespace Chess
                 .UsePlatformDetect()
                 .LogToTrace()
                 .UseReactiveUI();
+
+        static void OnExit(object? sender, EventArgs e)
+        {
+            engine?.CloseMainWindow();
+        }
     }
 }

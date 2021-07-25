@@ -6,3 +6,7 @@ bin/
 obj/
 
 *.user
+
+*.log
+.cache
+build
