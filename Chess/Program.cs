@@ -73,7 +73,9 @@ namespace Chess
 
         static void OnExit(object? sender, EventArgs e)
         {
-            engine?.CloseMainWindow();
+            bool? did_close = engine?.CloseMainWindow();
+            if (did_close != null && !(bool)did_close)
+                engine?.Kill();
         }
     }
 }
