@@ -57,6 +57,10 @@ namespace Chess.Models
                 return (8 - Position / 8).ToString();
             }
         }
+        public static SolidColorBrush defaultFill = new SolidColorBrush(0xFFD2CACA);
+        public static SolidColorBrush defaultHighlight = new SolidColorBrush(0xFFFFABCA);
+        public static SolidColorBrush defaultHighlightMove = new SolidColorBrush(0xFFFFFF00);
+        public static SolidColorBrush defaultHighlightCheck = new SolidColorBrush(0xFFFF0000);
         public IBrush? TextToDisplayColour { get; set; }
         public IBrush? Fill
         {

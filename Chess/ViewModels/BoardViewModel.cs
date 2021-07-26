@@ -36,16 +36,13 @@ namespace Chess.ViewModels
                 if (e.Move == null)
                     return;
 
-                Logger.DWrite($"Move.From: {e.Move.From}\n");
-                Logger.DWrite($"Move.To: {e.Move.To}\n");
-
                 foreach (ChessTile? tile in tiles_to_clear)
                     if (tile != null)
                         tile.IsHighlighted = false;
 
-                tiles[e.Move.From].HighlightedFill = new SolidColorBrush(0xFF00FFFF);
+                tiles[e.Move.From].HighlightedFill = ChessTile.defaultHighlightMove;
                 tiles[e.Move.From].IsHighlighted = true;
-                tiles[e.Move.To].HighlightedFill = new SolidColorBrush(0xFF00FFFF);
+                tiles[e.Move.To].HighlightedFill = ChessTile.defaultHighlightMove;
                 tiles[e.Move.To].IsHighlighted = true;
 
                 tiles_to_clear[0] = tiles[e.Move.From];
