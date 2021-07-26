@@ -22,24 +22,29 @@ namespace Chess.Models
             base.MakeMove(move, serverMove);
 
             var sw = new Stopwatch();
-            var t = new Task<ChessMove>(() =>
+            var t = new Task(() =>
             {
-                // if the player is picking what piece to promote to,
-                // wait till they have made their choice
-                while (IsPromoting)
+                try
+                {
+                    // if the player is picking what piece to promote to,
+                    // wait till they have made their choice
+                    while (IsPromoting)
                         System.Threading.Thread.Sleep(10);
-                sw.Start();
-                return GetServerMove();
+                    sw.Start();
+                    var server_move = GetServerMove();
+
+                    // AI doesn't require promotion options
+                    IsPromoting = false;
+                    sw.Stop();
+                    Logger.IWrite($"Received server's move, {server_move}, in {sw.Elapsed.Minutes * 60 + sw.Elapsed.Seconds} seconds");
+                    base.MakeMove(server_move, true);
+                }
+                catch (Exception e)
+                {
+                    Logger.EWrite(e);
+                }
             });
             t.Start();
-            t.ContinueWith((x) =>
-            {
-                // AI doesn't require promotion options
-                IsPromoting = false;
-                sw.Stop();
-                Logger.IWrite($"Received server's move, {t.Result}, in {sw.Elapsed.Minutes * 60 + sw.Elapsed.Seconds} seconds");
-                base.MakeMove(t.Result, true);
-            });
         }
 
         // Note: This method will probably block for quite a while
