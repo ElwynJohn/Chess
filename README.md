@@ -7,7 +7,7 @@ engines in the future) to let you play chess!
 
 # Building and Running
 
-Building Chess and it's dependencies has been tested with Clang 12 and dotnet
+Building Chess and its dependencies has been tested with Clang 12 and dotnet
 5.0.
 
 On Windows, librgl requires that you have pthreads-win32 installed as a CMake
