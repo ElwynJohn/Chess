@@ -25,6 +25,8 @@ namespace Chess.ViewModels
                     return "White Won";
                 if (Board.Status == GameStatus.BlackWon)
                     return "Black Won";
+                if (Board.Status == GameStatus.Draw)
+                    return "Draw";
                 if (Board.Status == GameStatus.InProgress)
                     return "Game in Progress";
                 return "Game in Progress";

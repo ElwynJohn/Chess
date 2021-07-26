@@ -4,6 +4,7 @@ namespace Chess.Models
     {
         WhiteWon,
         BlackWon,
+        Draw,
         InProgress
     }
 }

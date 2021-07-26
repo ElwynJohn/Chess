@@ -123,6 +123,8 @@ namespace Chess.Models
             {
                 // After making a move, we check if our opponent is in checkmate
                 IsWhitesMove = !IsWhitesMove;
+                if (IsInStaleMate())
+                    Status = GameStatus.Draw;
                 if (IsInCheckMate(this))
                     Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
                 SaveGame();
@@ -401,9 +403,32 @@ namespace Chess.Models
                 if (reply.Length > 0)
                     return false;
             }
-            return true;
+            return IsInCheck();
         }
 
+        private bool IsInStaleMate()
+        {
+            for (int i = 0; i < 64; i++)
+            {
+                if (this[i] == ChessPiece.None)
+                    continue;
+                if (IsWhitesMove && (this[i] & ChessPiece.IsWhite) == 0)
+                    continue;
+                if (!IsWhitesMove && (this[i] & ChessPiece.IsWhite) != 0)
+                    continue;
 
+                Message request = new Message(BitConverter.GetBytes(i), sizeof(int), GetMovesRequest);
+                request.Send(message_client);
+
+                Message reply = new Message(GetMovesReply);
+                reply.Receive(message_client);
+                if (reply.Length > 0)
+                    return false;
+            }
+
+            // If we haven't already returned false we have no moves so all
+            // that's left is to check if we're not in check.
+            return !IsInCheck();
+        }
     }
 }
