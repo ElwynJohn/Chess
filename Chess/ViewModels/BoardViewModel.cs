@@ -49,6 +49,20 @@ namespace Chess.ViewModels
                 tiles_to_clear[1] = tiles[e.Move.To];
             };
 
+            board.Update += (object sender, BoardUpdateEventArgs e) =>
+            {
+                if (board.IsInCheck())
+                {
+                    tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlightCheck;
+                    tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = true;
+                }
+                else
+                {
+                    tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlight;
+                    tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = false;
+                }
+            };
+
             Rows = new ObservableCollection<ChessRow>();
 
             for (int y = 0; y < 8; y++)

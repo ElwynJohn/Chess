@@ -323,6 +323,63 @@ namespace Chess.Models
             reply.Receive(message_client);
         }
 
+        public int FindKing(bool isWhite)
+        {
+            int king_pos = -1;
+            for (int i = 0; i < 64; i++)
+                if (this[i] == (ChessPiece.King | (isWhite ? ChessPiece.IsWhite : 0)))
+                {
+                    king_pos = i;
+                    break;
+                }
+
+            return king_pos;
+        }
+
+        // @@Rework make this and IsInCheckMate engine requests. This is kinda
+        // messy at the moment since we're mixing state between the engine and
+        // the GUI.
+        public bool IsInCheck()
+        {
+            int king_pos = FindKing(IsWhitesMove);
+
+            SyncBoardState();
+
+            for (int i = 0; i < 64; i++)
+            {
+
+                if (this[i] == ChessPiece.None)
+                    continue;
+
+                // Want to check the moves of our opponent
+                if (!IsWhitesMove && (this[i] & ChessPiece.IsWhite) == 0)
+                    continue;
+                if (IsWhitesMove && (this[i] & ChessPiece.IsWhite) != 0)
+                    continue;
+
+                Message request = new Message(BitConverter.GetBytes(i), sizeof(int), GetMovesRequest);
+                request.Send(message_client);
+
+                Message reply = new Message(GetMovesReply);
+                reply.Receive(message_client);
+
+                var moves = new System.Collections.Generic.List<ChessMove>();
+                // @@FIXME: This is bound to break if the size of the Move
+                // struct in the engine changes
+                for (int j = 0; j < reply.Length; j += 8)
+                {
+                    var move = new ChessMove(new byte[]
+                    {
+                        reply.Bytes[j], reply.Bytes[j + 1]
+                    });
+                    if (move.To == king_pos)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         private bool IsInCheckMate(ChessBoard board)
         {
             for (int i = 0; i < 64; i++)
