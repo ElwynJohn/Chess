@@ -7,23 +7,27 @@
 
     <StackPanel Height="630" Width="300" VerticalAlignment="Top" Background="#323240">
 
-        <ItemsControl Items="{Binding Turns}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
+        <Panel Height="580">
+            <ScrollViewer>
+                <ItemsControl Items="{Binding Turns}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
 
-                    <StackPanel Orientation="Horizontal" Width="300" Background="{Binding Fill}">
-                        <TextBlock Text="{Binding Turn}" Margin="0,10" Width="50" TextAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="{Binding WhiteMove}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
-                        <TextBlock Text="{Binding BlackMove}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
-                    </StackPanel>
+                            <StackPanel Orientation="Horizontal" Width="300" Background="{Binding Fill}">
+                                <TextBlock Text="{Binding Turn}" Margin="0,10" Width="50" TextAlignment="Center" Foreground="White"/>
+                                <TextBlock Text="{Binding WhiteMove}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
+                                <TextBlock Text="{Binding BlackMove}" Padding="0,10" Width="90" TextAlignment="Center" Foreground="White"/>
+                            </StackPanel>
 
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Panel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-            <Button Margin="10,20" Content="Prev" Click="previous_move"/>
-            <Button Margin="10,20" Content="Next" Click="next_move"/>
+            <Button Margin="10" Content="Prev" Click="previous_move"/>
+            <Button Margin="10" Content="Next" Click="next_move"/>
         </StackPanel>
 
     </StackPanel>
