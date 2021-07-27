@@ -14,6 +14,7 @@ namespace Chess
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
         // yet and stuff might break.
         private static Process? engine;
+        private static Avalonia.Logging.LogEventLevel avaloniaLogLevel;
         public static void Main(string[] args)
         {
             var sw = new StreamWriter("chess_test.log");
@@ -25,8 +26,10 @@ namespace Chess
             Logger.AddWriter(System.Console.Error, true);
 #if DEBUG
             Logger.DebugLevelT = DebugLevel.All;
+            avaloniaLogLevel = Avalonia.Logging.LogEventLevel.Verbose;
 #else
             Logger.DebugLevelT = DebugLevel.Info;
+            avaloniaLogLevel = Avalonia.Logging.LogEventLevel.Information;
 #endif
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs args) =>
@@ -61,6 +64,8 @@ namespace Chess
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
 
+            Trace.Listeners.Add(new TextWriterTraceListener("chess_trace.log"));
+
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 
@@ -68,7 +73,7 @@ namespace Chess
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace()
+                .LogToTrace(avaloniaLogLevel)
                 .UseReactiveUI();
 
         static void OnExit(object? sender, EventArgs e)
