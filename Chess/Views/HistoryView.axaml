@@ -4,7 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:views="clr-namespace:Chess.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Chess.Views.HistoryView">
+             x:Class="Chess.Views.HistoryView"
+             Name="HistoryUserControl"
+             Width="1200"
+             LayoutUpdated="HistoryViewLoaded">
     <UserControl.Styles>
         <Style Selector="Rectangle.chess-tile">
             <Setter Property="Height" 			Value="20"/>
@@ -22,21 +25,33 @@
         </Style>
     </UserControl.Styles>
 
-    <StackPanel Orientation="Horizontal">
-
-        <views:MenuView DataContext="{Binding Menu}"/>
-
-        <ItemsControl Items="{Binding Boards}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Background="#323240" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">
-                        <views:BoardView/>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-    </StackPanel>
+        <ScrollViewer Initialized="InitScrollViewer" HorizontalAlignment="Center">
+            <ItemsControl Items="{Binding Histories}" Margin="40,20">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Panel Height="{Binding ElementName=HistoryUserControl, Path=DataContext.Height}" Width="600" VerticalAlignment="Top"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Canvas>
+                        <Border Background="#787DA4" BorderThickness="0" CornerRadius="8" Canvas.Top="{Binding Position}">
+                            <StackPanel Orientation="Horizontal" Height="{Binding Height}" Width="{Binding Width}">
+                                <TextBlock Text="{Binding Number}" VerticalAlignment="Center" Margin="10,0"/>
+                                <Image Source="{Binding BoardImage}" Height="{Binding BoardImageSize}" Initialized="InitImage"/>
+                                <StackPanel VerticalAlignment="Center" Margin="30,0">
+                                    <TextBlock Text="Gamemode: " Margin="0,10"/>
+                                    <TextBlock Text="Time limit: " Margin="0,10"/>
+                                    <TextBlock Text="Status: " Margin="0,10"/>
+                                    <TextBlock Text="Date Played: " Margin="0,10"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        </Canvas>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
 
 </UserControl>
 

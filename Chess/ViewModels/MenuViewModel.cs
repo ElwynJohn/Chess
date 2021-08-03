@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Chess.Models;
+using Chess.Views;
 
 namespace Chess.ViewModels
 {
@@ -53,9 +54,14 @@ namespace Chess.ViewModels
                     DisplayGameMode();
                     break;
                  case "Match History":
+                    HistoryView.sw.Start();
+                    HistoryView.doTime = true;
                     parentWindow.ChildViews = new HistoryViewModel(this);
                     break;
                 case "Statistics":
+                    StatsView.sw.Start();
+                    StatsView.doTime = true;
+                    parentWindow.ChildViews = new StatsViewModel();
                     break;
             }
         }

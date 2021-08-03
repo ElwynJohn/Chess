@@ -6,6 +6,14 @@
         Width="1500" Height="860"
         Title="Chess"
         Background="#312e2b"
-        WindowStartupLocation="CenterScreen"
-        Content="{Binding ChildViews}">
+        WindowStartupLocation="CenterScreen">
+
+    <StackPanel Orientation="Horizontal">
+
+        <views:MenuView DataContext="{Binding Menu}"/>
+
+        <ContentControl Content="{Binding ChildViews}"/>
+
+    </StackPanel>
+
 </Window>

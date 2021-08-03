@@ -10,8 +10,8 @@ namespace Chess.ViewModels
         {
             var bvm = new BoardViewModel(new AIChessBoard());
             var gamePanel = new GamePanelViewModel(bvm, null, null);
-            var menuVM = new MenuViewModel(this);
-            ChildViews = new PlayViewModel(bvm, gamePanel, menuVM);
+            Menu = new MenuViewModel(this);
+            ChildViews = new PlayViewModel(bvm, gamePanel, Menu);
         }
 
         private ViewModelBase? childViews;
@@ -20,6 +20,7 @@ namespace Chess.ViewModels
             get { return childViews; }
             set { childViews = value; NotifyPropertyChanged(); }
         }
+        public MenuViewModel Menu { get; set; }
 
         new public event PropertyChangedEventHandler? PropertyChanged;
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")

@@ -23,7 +23,6 @@
     </UserControl.Styles>
 
     <StackPanel Orientation="Horizontal">
-        <views:MenuView DataContext="{Binding Menu}"/>
 
         <Canvas Opacity="{Binding IsPromoting}" IsEnabled="{Binding IsPromoting}">
             <StackPanel Orientation="Vertical" Canvas.Left="0" Canvas.Top="30">

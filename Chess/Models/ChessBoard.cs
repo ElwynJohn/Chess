@@ -1,4 +1,6 @@
 using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading.Tasks;
@@ -47,12 +49,10 @@ namespace Chess.Models
                         break;
                 }
             }
-
             SetBoardState(fen);
-
             state = ParseFen(fen);
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
-            filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}.json");
+            filePath = Path.Combine(dirPath, $@"{Guid.NewGuid()}");
 
             PiecesCaptured = new List<ChessPiece>(32);
             Moves = new ObservableCollection<ChessMove>(LoadGame(gameRecordPath));
@@ -100,7 +100,7 @@ namespace Chess.Models
         }
 
         private string dirPath;
-        private string filePath;
+        public string filePath;
 
 
         public virtual void MakeMove(ChessMove move, bool serverMove)
@@ -265,8 +265,44 @@ namespace Chess.Models
         private void SaveGame()
         {
             Directory.CreateDirectory(dirPath);
-            using (StreamWriter writer = new StreamWriter(filePath))
+            using (StreamWriter writer = new StreamWriter($"{filePath}.json"))
                 writer.Write(JsonSerializer.Serialize<ChessMove[]>(Moves.ToArray<ChessMove>()));
+
+            using (var bitmap = new Bitmap(160, 160))
+            {
+                using (var canvas = Graphics.FromImage(bitmap))
+                {
+                    canvas.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    var whiteSquare = new SolidBrush(Color.FromArgb(0xFF,0xD2,0xCA,0xCA));
+                    var blackSquare = new SolidBrush(Color.FromArgb(0xFF,0x38,0x3D,0x64));
+                    int size = 20;
+                    int pieceSize = 18;
+                    for (int i = 0; i < 64; i++)
+                    {
+                        int file = i % 8;
+                        int rank = i / 8;
+                        int xPos = file * 20;
+                        int yPos = rank * 20;
+                        bool isWhite = (rank % 2 == 1) ? (i % 2 == 1) : (i % 2 == 0);
+                        if (isWhite)
+                            canvas.FillRectangle(whiteSquare, xPos, yPos, size, size);
+                        else
+                            canvas.FillRectangle(blackSquare, xPos, yPos, size, size);
+
+                        var piecePath = ChessTile.PieceToAssetMap.GetValueOrDefault(state[i]);
+                        if (piecePath == null)
+                            continue;
+                        using (var pieceBm = new Bitmap(piecePath))
+                        {
+                            // Add one to xPos and yPos because pieceSize is smaller than size.
+                            // Adding one centres the piece in its containing square.
+                            canvas.DrawImage(pieceBm, xPos + 1, yPos + 1, pieceSize, pieceSize);
+                        }
+                    }
+                    canvas.Save();
+                }
+                bitmap.Save($"{filePath}.png", System.Drawing.Imaging.ImageFormat.Png);
+            }
         }
 
         // Gets the board state from the server
