@@ -35,7 +35,7 @@
 
     <StackPanel Margin="0,20" Height="940" Width="300" VerticalAlignment="Top">
 
-    <Border BorderThickness="0" CornerRadius="8,0" Background="#383D64">
+    <Border BorderThickness="0" CornerRadius="8,0" Background="#2E3673">
         <Panel Width="300" Height="70">
             <TextBlock Text="{Binding BlackTimer}" VerticalAlignment="Center" Foreground="#DBCEE1" Margin="5,0"/>
 
@@ -84,7 +84,7 @@
 
         <ContentControl Content="{Binding Content}"/>
 
-    <Border BorderThickness="0" CornerRadius="0,8" Background="#D2CACA">
+    <Border BorderThickness="0" CornerRadius="0,8" Background="#DBCEE1">
         <Panel Width="300" Height="70">
             <TextBlock Text="{Binding WhiteTimer}" VerticalAlignment="Center" Margin="5,0"/>
             <ItemsControl Items="{Binding DeadBlackPieces}">

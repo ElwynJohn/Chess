@@ -60,19 +60,19 @@ namespace Chess.Models
         public static SolidColorBrush WhiteFill { get; }
             = new SolidColorBrush(0xFFDBCEE1);
         public static SolidColorBrush BlackFill { get; }
-            = new SolidColorBrush(0XFF383D64);
+            = new SolidColorBrush(0XFF2E3673);
         public static SolidColorBrush WhiteHighlightFill { get; }
             = new SolidColorBrush(0XFFB8E6D2);
         public static SolidColorBrush BlackHighlightFill { get; }
-            = new SolidColorBrush(0XFF558F86);
+            = new SolidColorBrush(0XFF4A877E);
         public static SolidColorBrush WhiteMoveFill { get; }
-            = new SolidColorBrush(0XFFC9A4D9);
+            = new SolidColorBrush(0XFFC597D9);
         public static SolidColorBrush BlackMoveFill { get; }
-            = new SolidColorBrush(0XFF563864);
+            = new SolidColorBrush(0XFF6C4081);
         public static SolidColorBrush WhiteCheckFill { get; }
             = new SolidColorBrush(0XFFD95555);
         public static SolidColorBrush BlackCheckFill { get; }
-            = new SolidColorBrush(0XFFA11616);
+            = new SolidColorBrush(0XFFA13030);
         public IBrush? TextToDisplayColour { get; set; }
         public IBrush? Fill
         {
