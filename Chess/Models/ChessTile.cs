@@ -15,27 +15,23 @@ namespace Chess.Models
             Position = (byte)pos;
             DisplayOverlay = displayOverlay;
 
-            int file = pos % 8;
-            int rank = pos / 8;
-
-            bool isWhite = (rank % 2 == 1) ? (pos % 2 == 1) : (pos % 2 == 0);
-
-            if (isWhite)
+            if (IsWhite)
             {
-                NormalFill = new SolidColorBrush(0xFFD2CACA);
-                HighlightedFill = new SolidColorBrush(0xFFFFABCA);
+                NormalFill = WhiteFill;
                 TextToDisplayColour = new SolidColorBrush(0xFF383D64);
             }
             else
             {
-                NormalFill = new SolidColorBrush(0xFF383D64);
-                HighlightedFill = new SolidColorBrush(0xFF682D44);
+                NormalFill = BlackFill;
                 TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
             }
             SetNewPiece(board[pos]);
         }
 
-        public byte Position { get; set; }
+        public byte Position { get; init; }
+        public int File { get => Position % 8; }
+        public int Rank { get => Position / 8; }
+        public bool IsWhite { get => (Rank % 2 == 1) ? (Position % 2 == 1) : (Position % 2 == 0); }
         public bool DisplayOverlay { get; set; }
         // FileToDisplay and RankToDisplay are the strings that are displayed
         // on the board. Only the left and bottom tiles should display a string.
@@ -43,9 +39,9 @@ namespace Chess.Models
         {
             get
             {
-                if (!DisplayOverlay || Position / 8 != 7)
+                if (!DisplayOverlay || Rank != 7)
                     return "";
-                return ((char)('a' + Position % 8)).ToString();
+                return ((char)('a' + File)).ToString();
             }
         }
         public string RankToDisplay
@@ -57,17 +53,33 @@ namespace Chess.Models
                 return (8 - Position / 8).ToString();
             }
         }
-        public static SolidColorBrush defaultFill = new SolidColorBrush(0xFFD2CACA);
-        public static SolidColorBrush defaultHighlight = new SolidColorBrush(0xFFFFABCA);
-        public static SolidColorBrush defaultHighlightMove = new SolidColorBrush(0xFFFFFF00);
-        public static SolidColorBrush defaultHighlightCheck = new SolidColorBrush(0xFFFF0000);
+        // @@Rework: might be nice to have all application colours retrieved from a
+        // centralised location such as a "Theme" class. Maybe we could have a
+        // factory return different instantiations of the Theme class based on the
+        // enum you give it such as Theme.Dark, or Theme.Light.
+        public static SolidColorBrush WhiteFill { get; }
+            = new SolidColorBrush(0xFFD2CACA);
+        public static SolidColorBrush BlackFill { get; }
+            = new SolidColorBrush(0xFF383D64);
+        public static SolidColorBrush WhiteHighlightFill { get; }
+            = new SolidColorBrush(0xFFFFABCA);
+        public static SolidColorBrush BlackHighlightFill { get; }
+            = new SolidColorBrush(0xFFFFABCA);
+        public static SolidColorBrush WhiteMoveFill { get; }
+            = new SolidColorBrush(0xFFFFFF00);
+        public static SolidColorBrush BlackMoveFill { get; }
+            = new SolidColorBrush(0xFFFFFF00);
+        public static SolidColorBrush WhiteCheckFill { get; }
+            = new SolidColorBrush(0xFFFF0000);
+        public static SolidColorBrush BlackCheckFill { get; }
+            = new SolidColorBrush(0xFFFF0000);
         public IBrush? TextToDisplayColour { get; set; }
         public IBrush? Fill
         {
             get
             {
                 if (IsHighlighted)
-                    return HighlightedFill;
+                    return IsWhite ? WhiteHighlightFill : BlackHighlightFill;
                 return NormalFill;
             }
         }
@@ -77,8 +89,12 @@ namespace Chess.Models
             get { return isHighlighted; }
             set { isHighlighted = value; NotifyPropertyChanged("Fill"); }
         }
-        public IBrush? HighlightedFill { get; set; }
-        public IBrush? NormalFill { get; set; }
+        public IBrush? normalFill;
+        public IBrush? NormalFill { get => normalFill; set {
+            normalFill = value;
+            if (!IsHighlighted)
+                NotifyPropertyChanged("Fill");
+        }}
         private Bitmap? pPieceBitmap;
         public Bitmap? PieceBitmap
         {

@@ -377,6 +377,9 @@ namespace Chess.Models
         // @@Rework make this and IsInCheckMate engine requests. This is kinda
         // messy at the moment since we're mixing state between the engine and
         // the GUI.
+        // @@FIXME: if king is put in check, then taken out of check, the king is
+        // still highlighted red for one move. This is probably because IsInCheck
+        // doesn't take a parameter specifying which colour to check for.
         public bool IsInCheck()
         {
             int king_pos = FindKing(IsWhitesMove);
