@@ -45,7 +45,7 @@
             </StackPanel>
         </Canvas>
 
-        <Border Background="#323240" Margin="100,10,10,10" VerticalAlignment="Top" BorderThickness="20">
+        <Border Background="#383D64" Margin="120,10,10,10" VerticalAlignment="Top" BorderThickness="20" CornerRadius="8">
             <views:BoardView DataContext="{Binding Bvm}"/>
         </Border>
 

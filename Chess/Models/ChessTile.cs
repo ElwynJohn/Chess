@@ -58,21 +58,21 @@ namespace Chess.Models
         // factory return different instantiations of the Theme class based on the
         // enum you give it such as Theme.Dark, or Theme.Light.
         public static SolidColorBrush WhiteFill { get; }
-            = new SolidColorBrush(0xFFD2CACA);
+            = new SolidColorBrush(0xFFDBCEE1);
         public static SolidColorBrush BlackFill { get; }
-            = new SolidColorBrush(0xFF383D64);
+            = new SolidColorBrush(0XFF383D64);
         public static SolidColorBrush WhiteHighlightFill { get; }
-            = new SolidColorBrush(0xFFFFABCA);
+            = new SolidColorBrush(0XFFB8E6D2);
         public static SolidColorBrush BlackHighlightFill { get; }
-            = new SolidColorBrush(0xFFFFABCA);
+            = new SolidColorBrush(0XFF558F86);
         public static SolidColorBrush WhiteMoveFill { get; }
-            = new SolidColorBrush(0xFFFFFF00);
+            = new SolidColorBrush(0XFFC9A4D9);
         public static SolidColorBrush BlackMoveFill { get; }
-            = new SolidColorBrush(0xFFFFFF00);
+            = new SolidColorBrush(0XFF563864);
         public static SolidColorBrush WhiteCheckFill { get; }
-            = new SolidColorBrush(0xFFFF0000);
+            = new SolidColorBrush(0XFFD95555);
         public static SolidColorBrush BlackCheckFill { get; }
-            = new SolidColorBrush(0xFFFF0000);
+            = new SolidColorBrush(0XFFA11616);
         public IBrush? TextToDisplayColour { get; set; }
         public IBrush? Fill
         {
@@ -89,6 +89,10 @@ namespace Chess.Models
             get { return isHighlighted; }
             set { isHighlighted = value; NotifyPropertyChanged("Fill"); }
         }
+        // @@Rework: Consider making NormalFill/normalFill an enum that specifies the tile
+        // colour state (default or move or check or highlighted). Have the Fill getter
+        // return a colour based on the enum and IsWhite. This allows code
+        // that sets NormalFill to not have to worry about whether the tile is white.
         public IBrush? normalFill;
         public IBrush? NormalFill { get => normalFill; set {
             normalFill = value;
