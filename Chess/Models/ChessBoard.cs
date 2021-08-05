@@ -69,7 +69,7 @@ namespace Chess.Models
         // We use the same pipe instance for all board views
         public static NamedPipeClientStream message_client = new NamedPipeClientStream("ChessIPC_Messages");
         public List<ChessPiece> PiecesCaptured { get; private set; }
-        public bool IsWhitesMove { get; private set; } = true;
+        public bool IsWhitesMove { get; set; } = true;
         public bool IsPromoting { get; protected set; } = false;
         private GameStatus status = GameStatus.InProgress;
         public GameStatus Status

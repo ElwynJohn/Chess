@@ -51,15 +51,19 @@ namespace Chess.ViewModels
 
             board.Update += (object sender, BoardUpdateEventArgs e) =>
             {
-                if (board.IsInCheck())
+                for (int i = 0; i < 2; i++)
                 {
-                    tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlightCheck;
-                    tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = true;
-                }
-                else
-                {
-                    tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlight;
-                    tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = false;
+                    if (board.IsInCheck())
+                    {
+                        tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlightCheck;
+                        tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = true;
+                    }
+                    else
+                    {
+                        tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlight;
+                        tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = false;
+                    }
+                    board.IsWhitesMove = !board.IsWhitesMove;
                 }
             };
 
