@@ -64,7 +64,10 @@ namespace Chess.ViewModels
                     if (isInCheck[i])
                         kingTile.NormalFill = kingTile.IsWhite ?
                             ChessTile.WhiteCheckFill : ChessTile.BlackCheckFill;
-                    else
+// Only reset kingTile fill if it is currently red (marked as in check).
+// This stops other colours, such as lilac, from being reset.
+                    else if (kingTile.NormalFill == ChessTile.WhiteCheckFill
+                            || kingTile.NormalFill == ChessTile.BlackCheckFill)
                         kingTile.NormalFill = kingTile.IsWhite ?
                             ChessTile.WhiteFill : ChessTile.BlackFill;
                 }
