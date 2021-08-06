@@ -54,20 +54,19 @@ namespace Chess.ViewModels
             {
                 if (e.Move == null)
                     return;
-                for (int i = 0; i < 2; i++)
+
+                bool[] isInCheck = board.IsInCheck();
+                for(int i = 0; i < 2; i++)
                 {
-                    ChessTile kingTile = tiles[board.FindKing(board.IsWhitesMove)];
-                    if (board.IsInCheck())
-                    {
+                    bool isWhite = i == 0 ? true : false;
+                    ChessTile kingTile = tiles[board.FindKing(isWhite)];
+
+                    if (isInCheck[i])
                         kingTile.NormalFill = kingTile.IsWhite ?
                             ChessTile.WhiteCheckFill : ChessTile.BlackCheckFill;
-                    }
                     else
-                    {
                         kingTile.NormalFill = kingTile.IsWhite ?
                             ChessTile.WhiteFill : ChessTile.BlackFill;
-                    }
-                    board.IsWhitesMove = !board.IsWhitesMove;
                 }
             };
 

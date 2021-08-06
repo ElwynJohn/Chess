@@ -58,6 +58,12 @@ namespace Chess.Models
             SetBoardReply,
             PromotionRequest,
             PromotionReply,
+            IsInCheckRequest,
+            IsInCheckReply,
+            IsInCheckmateRequest,
+            IsInCheckmateReply,
+            IsInStalemateRequest,
+            IsInStalemateReply,
         }
 
         public UInt32 Length

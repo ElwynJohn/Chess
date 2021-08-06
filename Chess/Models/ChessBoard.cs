@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -69,7 +70,7 @@ namespace Chess.Models
         // We use the same pipe instance for all board views
         public static NamedPipeClientStream message_client = new NamedPipeClientStream("ChessIPC_Messages");
         public List<ChessPiece> PiecesCaptured { get; private set; }
-        public bool IsWhitesMove { get; set; } = true;
+        public bool IsWhitesMove { get; private set; } = true;
         public bool IsPromoting { get; protected set; } = false;
         private GameStatus status = GameStatus.InProgress;
         public GameStatus Status
@@ -125,7 +126,7 @@ namespace Chess.Models
                 IsWhitesMove = !IsWhitesMove;
                 if (IsInStaleMate())
                     Status = GameStatus.Draw;
-                if (IsInCheckMate(this))
+                if (IsInCheckMate())
                     Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
                 SaveGame();
             }
@@ -143,7 +144,7 @@ namespace Chess.Models
             IsPromoting = false;
             SyncBoardState();
             IsWhitesMove = !IsWhitesMove;
-            if (IsInCheckMate(this))
+            if (IsInCheckMate())
                 Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
             SaveGame();
             OnUpdate();
@@ -374,100 +375,78 @@ namespace Chess.Models
             return king_pos;
         }
 
-        // @@Rework make this and IsInCheckMate engine requests. This is kinda
-        // messy at the moment since we're mixing state between the engine and
-        // the GUI.
-        // @@FIXME: if king is put in check, then taken out of check, the king is
-        // still highlighted red for one move. This is probably because IsInCheck
-        // doesn't take a parameter specifying which colour to check for.
-        public bool IsInCheck()
+        // The 1st element of the return array defines white, the 2nd defines black
+        public bool[] IsInCheck()
         {
-            int king_pos = FindKing(IsWhitesMove);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-            SyncBoardState();
+            Message request = new Message(IsInCheckRequest);
+            request.Send(message_client);
 
-            for (int i = 0; i < 64; i++)
+            bool[] rv = new bool[2];
+            Message reply = new Message(IsInCheckReply);
+            reply.Receive(message_client);
+            if (reply.Length != rv.Length)
             {
-
-                if (this[i] == ChessPiece.None)
-                    continue;
-
-                // Want to check the moves of our opponent
-                if (!IsWhitesMove && (this[i] & ChessPiece.IsWhite) == 0)
-                    continue;
-                if (IsWhitesMove && (this[i] & ChessPiece.IsWhite) != 0)
-                    continue;
-
-                Message request = new Message(BitConverter.GetBytes(i), sizeof(int), GetMovesRequest);
-                request.Send(message_client);
-
-                Message reply = new Message(GetMovesReply);
-                reply.Receive(message_client);
-
-                var moves = new System.Collections.Generic.List<ChessMove>();
-                // @@FIXME: This is bound to break if the size of the Move
-                // struct in the engine changes
-                for (int j = 0; j < reply.Length; j += 8)
-                {
-                    var move = new ChessMove(new byte[]
-                    {
-                        reply.Bytes[j], reply.Bytes[j + 1]
-                    });
-                    if (move.To == king_pos)
-                        return true;
-                }
+                // @@Rework: should we throw an exception here?
+                Logger.EWrite($"Message of type {reply.Type} should be of length {rv.Length} but is of length {reply.Length}.");
+                return rv;
             }
+            for (int i = 0; i < rv.Length; i++)
+            {
+                rv[i] = reply.Bytes[i] != 0 ? true : false;
+            }
+            sw.Stop();
+            Logger.DWrite($"IsInCheck took {sw.ElapsedMilliseconds}ms.");
 
-            return false;
+            return rv;
         }
 
-        private bool IsInCheckMate(ChessBoard board)
+        private bool IsInCheckMate()
         {
-            for (int i = 0; i < 64; i++)
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
+            Message request = new Message(messagePayload, 1, IsInCheckmateRequest);
+            request.Send(message_client);
+
+            Message reply = new Message(IsInCheckmateReply);
+            reply.Receive(message_client);
+            if (reply.Length != 1)
             {
-                if (board[i] == ChessPiece.None)
-                    continue;
-                if (IsWhitesMove && (board[i] & ChessPiece.IsWhite) == 0)
-                    continue;
-                if (!IsWhitesMove && (board[i] & ChessPiece.IsWhite) != 0)
-                    continue;
-
-                Message request = new Message(BitConverter.GetBytes(i), sizeof(int), GetMovesRequest);
-                request.Send(message_client);
-
-                Message reply = new Message(GetMovesReply);
-                reply.Receive(message_client);
-                // If the message length is non-zero then we've found at least
-                // one legal move
-                if (reply.Length > 0)
-                    return false;
+                // @@Rework: should we throw an exception here?
+                Logger.EWrite($"Message of type {reply.Type} should be of length 1 but is of length {reply.Length}.");
+                return false;
             }
-            return IsInCheck();
+
+            sw.Stop();
+            Logger.DWrite($"IsInCheckMate took {sw.ElapsedMilliseconds}ms.");
+
+            return reply.Bytes[0] == 0 ? false : true;
         }
 
         private bool IsInStaleMate()
         {
-            for (int i = 0; i < 64; i++)
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
+            Message request = new Message(messagePayload, 1, IsInStalemateRequest);
+            request.Send(message_client);
+
+            Message reply = new Message(IsInStalemateReply);
+            reply.Receive(message_client);
+            if (reply.Length != 1)
             {
-                if (this[i] == ChessPiece.None)
-                    continue;
-                if (IsWhitesMove && (this[i] & ChessPiece.IsWhite) == 0)
-                    continue;
-                if (!IsWhitesMove && (this[i] & ChessPiece.IsWhite) != 0)
-                    continue;
-
-                Message request = new Message(BitConverter.GetBytes(i), sizeof(int), GetMovesRequest);
-                request.Send(message_client);
-
-                Message reply = new Message(GetMovesReply);
-                reply.Receive(message_client);
-                if (reply.Length > 0)
-                    return false;
+                // @@Rework: should we throw an exception here?
+                Logger.EWrite($"Message of type {reply.Type} should be of length 1 but is of length {reply.Length}.");
+                return false;
             }
+            sw.Stop();
+            Logger.DWrite($"IsInStaleMate took {sw.ElapsedMilliseconds}ms.");
 
-            // If we haven't already returned false we have no moves so all
-            // that's left is to check if we're not in check.
-            return !IsInCheck();
+            return reply.Bytes[0] == 0 ? false : true;
         }
     }
 }
