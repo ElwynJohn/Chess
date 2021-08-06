@@ -15,7 +15,9 @@ namespace Chess.Models
 
             board.Update += (object sender, BoardUpdateEventArgs e) =>
             {
-                if (IsWhite & board.IsWhitesMove)
+                if (board.Status != GameStatus.InProgress)
+                    Stop();
+                else if (IsWhite & board.IsWhitesMove)
                     Start();
                 else if (!IsWhite & !board.IsWhitesMove)
                     Start();
@@ -57,12 +59,12 @@ namespace Chess.Models
             int prevSec = 0;
             while (ElapsedSeconds < GameTime)
             {
-                System.Threading.Thread.Sleep(50);
                 if (prevSec != ElapsedSeconds)
                 {
                     prevSec = ElapsedSeconds;
                     OnUpdate();
                 }
+                System.Threading.Thread.Sleep(50);
             }
             if (board.Status == GameStatus.InProgress)
             {
