@@ -25,6 +25,9 @@ namespace Chess.Models
             Status = board.Status;
             Boards = board.Boards;
             Moves = board.Moves;
+            LastMove = board.LastMove;
+            IsBlackInCheck = board.IsBlackInCheck;
+            IsWhiteInCheck = board.IsWhiteInCheck;
             dirPath = board.dirPath;
             filePath = board.filePath;
 
@@ -83,7 +86,13 @@ namespace Chess.Models
             }
         }
         public ObservableCollection<ChessBoard> Boards { get; private set; }
+        // Moves is a collection of all moves made in this game, both in the
+        // past and future.
         public ObservableCollection<ChessMove> Moves { get; private set; }
+        // LastMove is the move that was made to get to this board state
+        public ChessMove? LastMove { get; private set; } = null;
+        public bool IsWhiteInCheck { get; private set; } = false;
+        public bool IsBlackInCheck { get; private set; } = false;
         /// <summary>64 based representation of the board</summary>
         private ChessPiece[] state = new ChessPiece[64];
         /// <summary>Get or set the board state by 64 (default) or 0x88 based
@@ -115,6 +124,10 @@ namespace Chess.Models
 
             if (!serverMove)
                 SendMoveToServer(move);
+            LastMove = move;
+            bool[] isInCheck = IsInCheck();
+            IsWhiteInCheck = isInCheck[0];
+            IsBlackInCheck = isInCheck[1];
 
             SyncBoardState();
 
