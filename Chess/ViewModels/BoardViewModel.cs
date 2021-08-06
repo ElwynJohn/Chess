@@ -1,19 +1,12 @@
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using System.Linq;
 using System;
-using System.IO;
-using System.IO.Pipes;
-using System.Text;
-using System.Text.Json;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using Avalonia.Media;
+
 using Chess.Models;
-using static Chess.Models.Message.MessageType;
-using static Chess.Models.ChessBoard;
+using Chess.Views;
 
 namespace Chess.ViewModels
 {
@@ -90,6 +83,7 @@ namespace Chess.ViewModels
             IsInteractable = isInteractable;
         }
 
+        public PlayViewModel? pvm;
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
@@ -165,6 +159,29 @@ namespace Chess.ViewModels
             else
                 Board = Board.Boards[currentBoard];
             UpdateTiles(null, new BoardUpdateEventArgs(Board, null, ChessPiece.None));
+        }
+
+        public void UpdateTileSizes(object? sender, EventArgs e)
+        {
+            ChessTile.Width = (int)(100 * (MainWindow.sWidth / 1500));
+            ChessTile.Height = (int)(100 * (MainWindow.sHeight / 860));
+            foreach (ChessRow row in Rows.AsEnumerable())
+            {
+                if (row.RowTiles == null)
+                {
+                    Logger.EWrite("rowTiles is null");
+                    continue;
+                }
+                foreach (ChessTile tile in row.RowTiles.AsEnumerable())
+                {
+                    tile.NotifyPropertyChanged(nameof(ChessTile.Width));
+                    tile.NotifyPropertyChanged(nameof(ChessTile.Height));
+                    tile.NotifyPropertyChanged(nameof(ChessTile.ImageWidth));
+                    tile.NotifyPropertyChanged(nameof(ChessTile.ImageHeight));
+                }
+            }
+            pvm?.NotifyPropertyChanged(nameof(pvm.Width));
+            pvm?.NotifyPropertyChanged(nameof(pvm.Height));
         }
 
         public void UpdateTiles(object? sender, BoardUpdateEventArgs e)
