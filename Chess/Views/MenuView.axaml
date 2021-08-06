@@ -18,14 +18,14 @@
         </Style>
     </UserControl.Styles>
 
-    <StackPanel Spacing="20" Background="#2a2829" Width="200">
+    <StackPanel Spacing="20" Background="#323240" Width="200">
 
         <TextBlock FontSize="30" FontWeight="600" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,25,0,0">Chess</TextBlock>
 
         <ItemsControl Items="{Binding Buttons}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel Spacing="20" Background="#2a2829" Width="200"/>
+                    <StackPanel Spacing="20" Background="#323240" Width="200"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
 

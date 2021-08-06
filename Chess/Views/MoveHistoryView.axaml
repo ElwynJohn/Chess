@@ -7,7 +7,7 @@
 
     <StackPanel Height="630" Width="300" VerticalAlignment="Top" Background="#323240">
 
-        <Panel Height="580">
+        <Panel Height="555">
             <ScrollViewer>
                 <ItemsControl Items="{Binding Turns}">
                     <ItemsControl.ItemTemplate>
@@ -26,8 +26,8 @@
         </Panel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-            <Button Margin="10" Content="Prev" Click="previous_move"/>
-            <Button Margin="10" Content="Next" Click="next_move"/>
+            <Button Margin="15" Content="Prev" Click="previous_move" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="40" Width="70" Background="#28283D" Foreground="#DBCEE1"/>
+            <Button Margin="10" Content="Next" Click="next_move" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="40" Width="70" Background="#28283D" Foreground="#DBCEE1"/>
         </StackPanel>
 
     </StackPanel>

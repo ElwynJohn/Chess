@@ -38,12 +38,13 @@ namespace Chess.ViewModels
 
                 foreach (ChessTile? tile in tiles_to_clear)
                     if (tile != null)
-                        tile.IsHighlighted = false;
+                        tile.NormalFill = tile.IsWhite ? ChessTile.WhiteFill
+                            : ChessTile.BlackFill;
 
-                tiles[e.Move.From].HighlightedFill = ChessTile.defaultHighlightMove;
-                tiles[e.Move.From].IsHighlighted = true;
-                tiles[e.Move.To].HighlightedFill = ChessTile.defaultHighlightMove;
-                tiles[e.Move.To].IsHighlighted = true;
+                tiles[e.Move.From].NormalFill = tiles[e.Move.From].IsWhite ?
+                    ChessTile.WhiteMoveFill : ChessTile.BlackMoveFill;
+                tiles[e.Move.To].NormalFill = tiles[e.Move.To].IsWhite ?
+                    ChessTile.WhiteMoveFill : ChessTile.BlackMoveFill;
 
                 tiles_to_clear[0] = tiles[e.Move.From];
                 tiles_to_clear[1] = tiles[e.Move.To];
@@ -51,17 +52,20 @@ namespace Chess.ViewModels
 
             board.Update += (object sender, BoardUpdateEventArgs e) =>
             {
+                if (e.Move == null)
+                    return;
                 for (int i = 0; i < 2; i++)
                 {
+                    ChessTile kingTile = tiles[board.FindKing(board.IsWhitesMove)];
                     if (board.IsInCheck())
                     {
-                        tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlightCheck;
-                        tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = true;
+                        kingTile.NormalFill = kingTile.IsWhite ?
+                            ChessTile.WhiteCheckFill : ChessTile.BlackCheckFill;
                     }
                     else
                     {
-                        tiles[board.FindKing(board.IsWhitesMove)].HighlightedFill = ChessTile.defaultHighlight;
-                        tiles[board.FindKing(board.IsWhitesMove)].IsHighlighted = false;
+                        kingTile.NormalFill = kingTile.IsWhite ?
+                            ChessTile.WhiteFill : ChessTile.BlackFill;
                     }
                     board.IsWhitesMove = !board.IsWhitesMove;
                 }
