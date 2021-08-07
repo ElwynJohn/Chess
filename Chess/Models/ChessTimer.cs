@@ -66,6 +66,7 @@ namespace Chess.Models
                 }
                 System.Threading.Thread.Sleep(50);
             }
+            OnUpdate();
             if (board.Status == GameStatus.InProgress)
             {
                 if (IsWhite)

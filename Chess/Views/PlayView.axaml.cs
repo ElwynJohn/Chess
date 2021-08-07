@@ -40,7 +40,10 @@ namespace Chess.Views
                 }
 
                 var pvm = (PlayViewModel?)this.DataContext;
-                if (pvm != null)
+                if (pvm == null)
+                    return;
+                var bvm = pvm.Bvm;
+                if (bvm != null && bvm.IsInteractable)
                     pvm.Bvm?.Board?.PromoteTo(promotion);
             }
         }

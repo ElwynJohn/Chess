@@ -17,12 +17,10 @@ namespace Chess.Models
 
             if (IsWhite)
             {
-                NormalFill = WhiteFill;
                 TextToDisplayColour = new SolidColorBrush(0xFF383D64);
             }
             else
             {
-                NormalFill = BlackFill;
                 TextToDisplayColour = new SolidColorBrush(0xFFD2CACA);
             }
             SetNewPiece(board[pos]);
@@ -78,26 +76,29 @@ namespace Chess.Models
         {
             get
             {
-                if (IsHighlighted)
+                if (Highlighted)
                     return IsWhite ? WhiteHighlightFill : BlackHighlightFill;
-                return NormalFill;
+                if (Moved)
+                    return IsWhite ? WhiteMoveFill : BlackMoveFill;
+                if (InCheck)
+                    return IsWhite ? WhiteCheckFill : BlackCheckFill;
+                return IsWhite ? WhiteFill : BlackFill;
             }
         }
-        private bool isHighlighted = false;
-        public bool IsHighlighted
-        {
-            get { return isHighlighted; }
-            set { isHighlighted = value; NotifyPropertyChanged("Fill"); }
-        }
-        // @@Rework: Consider making NormalFill/normalFill an enum that specifies the tile
-        // colour state (default or move or check or highlighted). Have the Fill getter
-        // return a colour based on the enum and IsWhite. This allows code
-        // that sets NormalFill to not have to worry about whether the tile is white.
-        public IBrush? normalFill;
-        public IBrush? NormalFill { get => normalFill; set {
-            normalFill = value;
-            if (!IsHighlighted)
-                NotifyPropertyChanged("Fill");
+        private bool highlighted = false;
+        public bool Highlighted { get => highlighted; set {
+            highlighted = value;
+            NotifyPropertyChanged("Fill");
+        }}
+        private bool moved = false;
+        public bool Moved { get => moved; set {
+            moved = value;
+            NotifyPropertyChanged("Fill");
+        }}
+        private bool inCheck = false;
+        public bool InCheck { get => inCheck; set {
+            inCheck = value;
+            NotifyPropertyChanged("Fill");
         }}
         private Bitmap? pPieceBitmap;
         public Bitmap? PieceBitmap

@@ -72,12 +72,13 @@ namespace Chess.ViewModels
 
         private ChessTile[] tiles = new ChessTile[64];
         private ChessTile?[] tiles_to_clear = new ChessTile?[2];
+        private ChessTile? checkedTileToClear = null;
         private ChessTile? stagedTile;
         private int currentBoard = 0;
 
         public void LeftClickTile(ChessTile clickedTile)
         {
-            if (!IsInteractable)
+            if (!IsInteractable || Board.IsPromoting)
                 return;
 
             if (stagedTile == null)
@@ -107,7 +108,7 @@ namespace Chess.ViewModels
         }
         public void RightClickTile(ChessTile clickedTile)
             { if (clickedTile != null)
-                { clickedTile.IsHighlighted = !clickedTile.IsHighlighted; } }
+                { clickedTile.Highlighted = !clickedTile.Highlighted; } }
 
         public void PreviousMove()
         {
@@ -191,16 +192,13 @@ namespace Chess.ViewModels
         {
             foreach (ChessTile? tile in tiles_to_clear)
                 if (tile != null)
-                    tile.NormalFill = tile.IsWhite ? ChessTile.WhiteFill
-                        : ChessTile.BlackFill;
+                    tile.Moved = false;
 
             if (move == null)
                 return;
 
-            tiles[move.From].NormalFill = tiles[move.From].IsWhite ?
-                ChessTile.WhiteMoveFill : ChessTile.BlackMoveFill;
-            tiles[move.To].NormalFill = tiles[move.To].IsWhite ?
-                ChessTile.WhiteMoveFill : ChessTile.BlackMoveFill;
+            tiles[move.From].Moved = true;
+            tiles[move.To].Moved = true;
 
             tiles_to_clear[0] = tiles[move.From];
             tiles_to_clear[1] = tiles[move.To];
@@ -213,15 +211,17 @@ namespace Chess.ViewModels
                 bool isWhite = i == 0 ? true : false;
                 ChessTile kingTile = tiles[Board.FindKing(isWhite)];
 
+                if (checkedTileToClear != null)
+                    checkedTileToClear.InCheck = false;
                 if (isInCheck[i])
-                    kingTile.NormalFill = kingTile.IsWhite ?
-                        ChessTile.WhiteCheckFill : ChessTile.BlackCheckFill;
-//Only reset kingTile fill if it is currently red (marked as in check).
-//This stops other colours, such as lilac, from being reset.
-                else if (kingTile.NormalFill == ChessTile.WhiteCheckFill
-                        || kingTile.NormalFill == ChessTile.BlackCheckFill)
-                    kingTile.NormalFill = kingTile.IsWhite ?
-                        ChessTile.WhiteFill : ChessTile.BlackFill;
+                {
+                    kingTile.InCheck = true;
+                    checkedTileToClear = kingTile;
+                }
+                else
+                {
+                    kingTile.InCheck = false;
+                }
             }
         }
     }

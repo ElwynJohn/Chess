@@ -39,7 +39,7 @@ namespace Chess.Models
         }
 
         // Starting fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        public ChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        public ChessBoard(string fen = "7k/5QP1/8/8/8/8/8/K7 w - - 0 1",
             string gameRecordPath = "")
         {
             if (!message_client.IsConnected)
@@ -125,12 +125,12 @@ namespace Chess.Models
             if (!serverMove)
                 SendMoveToServer(move);
             LastMove = move;
-            bool[] isInCheck = IsInCheck();
-            IsWhiteInCheck = isInCheck[0];
-            IsBlackInCheck = isInCheck[1];
 
             SyncBoardState();
 
+            bool[] isInCheck = IsInCheck();
+            IsWhiteInCheck = isInCheck[0];
+            IsBlackInCheck = isInCheck[1];
             if ((state[move.To] & ChessPiece.Pawn) != 0 && Rank(move.To) == (IsWhitesMove ? 0 : 7))
                 IsPromoting = true;
             else
@@ -157,8 +157,15 @@ namespace Chess.Models
             IsPromoting = false;
             SyncBoardState();
             IsWhitesMove = !IsWhitesMove;
+            bool[] isInCheck = IsInCheck();
+            IsWhiteInCheck = isInCheck[0];
+            IsBlackInCheck = isInCheck[1];
+            if (IsInStaleMate())
+                Status = GameStatus.Draw;
             if (IsInCheckMate())
                 Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
+            Boards.RemoveAt(Boards.Count - 1);
+            Boards.Add(new ChessBoard(this));
             SaveGame();
             OnUpdate();
         }
@@ -388,6 +395,8 @@ namespace Chess.Models
             return king_pos;
         }
 
+        // @@REWORK: only the player whose turn it is, can be in check. Therefore,
+        // IsInCheck should probably not calculate IsInCheck for white and black.
         // The 1st element of the return array defines white, the 2nd defines black
         public bool[] IsInCheck()
         {
