@@ -1,6 +1,3 @@
-using Avalonia;
-using Avalonia.ReactiveUI;
-using System.Diagnostics;
 using System;
 using System.IO;
 using System.Diagnostics;
@@ -108,6 +105,20 @@ namespace Chess
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
 
             Trace.Listeners.Add(new TextWriterTraceListener("chess_trace.log"));
+
+            while (!Message.client_w.IsConnected)
+            {
+                try {Message.client_w.Connect(200);}
+                catch (TimeoutException) {}
+            }
+            while (!Message.client_r.IsConnected)
+            {
+                try {Message.client_r.Connect(200);}
+                catch (TimeoutException) {}
+            }
+
+            Message.replyThread.Start();
+            Message.requestThread.Start();
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }

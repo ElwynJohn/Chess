@@ -42,17 +42,6 @@ namespace Chess.Models
         public ChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             string gameRecordPath = "")
         {
-            if (!message_client.IsConnected)
-            {
-                for (;;)
-                {
-                    try { message_client.Connect(1000); }
-                    catch (TimeoutException) { Logger.EWrite
-                        ($"Timed out connecting to client"); };
-                    if (message_client.IsConnected)
-                        break;
-                }
-            }
             SetBoardState(fen);
             state = ParseFen(fen);
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
@@ -360,7 +349,7 @@ namespace Chess.Models
             foreach (char c in fen)
                 fen_cstr[idx++] = (byte)c;
             fen_cstr[idx] =  0;
-            Message request = new Message(fen_cstr, (uint)(fen.Length + 1), SetBoardRequest);
+            Message request = new Message(fen_cstr, (fen.Length + 1), SetBoardRequest);
             request.Send(message_client);
 
             Message reply = new Message(SetBoardReply);
