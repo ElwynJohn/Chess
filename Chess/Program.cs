@@ -130,7 +130,7 @@ namespace Chess
                 .LogToTrace(avaloniaLogLevel)
                 .UseReactiveUI();
 
-        static void OnExit(object? sender, EventArgs e)
+        public static void OnExit(object? sender, EventArgs e)
         {
             bool? did_close = engine?.CloseMainWindow();
             if (did_close != null && !(bool)did_close)

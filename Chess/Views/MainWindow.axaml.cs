@@ -8,6 +8,8 @@ namespace Chess.Views
     {
         public MainWindow()
         {
+            Closed += Program.OnExit;
+            Closed += (sender, e) => System.Environment.Exit(0);
             InitializeComponent();
 #if DEBUG
             this.AttachDevTools();
