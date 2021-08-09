@@ -3,11 +3,54 @@ using Avalonia.ReactiveUI;
 using System.Diagnostics;
 using System;
 using System.IO;
-using Pastel;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+using Avalonia;
+using Avalonia.ReactiveUI;
+
 using Chess.Models;
 
 namespace Chess
 {
+    public static class Extensions
+    {
+        public static byte[] ToByteArray<T>(this T obj)
+        {
+            if (obj == null)
+                return new byte[0];
+
+            int size = Marshal.SizeOf(obj);
+            byte[] arr = new byte[size];
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr<T>(obj, ptr, true);
+            Marshal.Copy(ptr, arr, 0, size);
+            Marshal.FreeHGlobal(ptr);
+            return arr;
+        }
+
+        public static T? ConvertTo<T>(this byte[] data)
+        {
+            int size = Marshal.SizeOf<T>();
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            Marshal.Copy(data, 0, ptr, size);
+            T? result = Marshal.PtrToStructure<T>(ptr);
+            Marshal.FreeHGlobal(ptr);
+            return result;
+        }
+
+        public static UInt32 ToUInt32(this byte[] data)
+        {
+            return BitConverter.ToUInt32(data);
+        }
+
+        public static Int32 ToInt32(this byte[] data)
+        {
+            return BitConverter.ToInt32(data);
+        }
+    }
+
     class Program
     {
         // Initialization code. Don't use any Avalonia, third-party APIs or any
