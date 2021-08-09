@@ -150,7 +150,11 @@ namespace Chess.ViewModels
                     continue;
                 }
                 foreach (ChessTile tile in row.RowTiles.AsEnumerable())
-                    tile?.Update(e.Board);
+                {
+                    if (e.Move != null)
+                        tile.Highlighted = false;
+                    tile.Update(e.Board);
+                }
             }
         }
 
