@@ -45,8 +45,6 @@ namespace Chess.Models
 
         public static NamedPipeClientStream client_w = new NamedPipeClientStream("ChessIPC_Requests");
         public static NamedPipeClientStream client_r = new NamedPipeClientStream("ChessIPC_Replies");
-        /* // @@Rework Consider changing these to a hash map. Then we can just do */
-        /* // replies[mess.guid] instead of Find(...) */
         public static List<Message> requests = new List<Message>();
         public static Dictionary<Guid, Message> replies = new Dictionary<Guid, Message>();
 
