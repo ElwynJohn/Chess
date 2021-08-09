@@ -110,7 +110,10 @@ namespace Chess.Models
         public void Receive(NamedPipeClientStream client)
         {
             while (isBusy)
+            {
+                Logger.DWrite("sleeping");
                 System.Threading.Thread.Sleep(10);
+            }
             isBusy = true;
             byte[] message_len = new byte[4];
             byte[] message_type = new byte[4];

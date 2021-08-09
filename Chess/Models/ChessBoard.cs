@@ -122,11 +122,14 @@ namespace Chess.Models
             if (pieceTaken != ChessPiece.None)
                 PiecesCaptured.Add(state[move.To]);
 
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
             if (!serverMove)
                 SendMoveToServer(move);
             LastMove = move;
 
             SyncBoardState();
+                Logger.DWrite($"Time taken to Send and Sync: {sw.ElapsedMilliseconds}");
 
             bool[] isInCheck = IsInCheck();
             IsWhiteInCheck = isInCheck[0];
@@ -141,11 +144,15 @@ namespace Chess.Models
                     Status = GameStatus.Draw;
                 if (IsInCheckMate())
                     Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
+                    sw.Restart();
                 SaveGame();
+                    Logger.DWrite($"Time taken to SaveGame: {sw.ElapsedMilliseconds}");
             }
             Boards.Add(new ChessBoard(this));
             Moves.Add(move);
+                    sw.Restart();
             OnUpdate(new BoardUpdateEventArgs(this, move, pieceTaken));
+                    Logger.DWrite($"Time taken to Update: {sw.ElapsedMilliseconds}");
         }
 
         public void PromoteTo(ChessPiece promoteTo)
@@ -406,9 +413,13 @@ namespace Chess.Models
             Message request = new Message(IsInCheckRequest);
             request.Send(message_client);
 
+            Stopwatch sw2 = new Stopwatch();
+            sw2.Start();
             bool[] rv = new bool[2];
             Message reply = new Message(IsInCheckReply);
             reply.Receive(message_client);
+            sw2.Stop();
+            Logger.DWrite($"Receiving IsInCheck reply took {sw2.ElapsedMilliseconds}ms.");
             if (reply.Length != rv.Length)
             {
                 // @@Rework: should we throw an exception here?
