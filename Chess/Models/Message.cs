@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ namespace Chess.Models
         /* // @@Rework Consider changing these to a hash map. Then we can just do */
         /* // replies[mess.guid] instead of Find(...) */
         public static List<Message> requests = new List<Message>();
-        public static List<Message> replies = new List<Message>();
+        public static Dictionary<Guid, Message> replies = new Dictionary<Guid, Message>();
 
         private static void message_send(Message mess)
         {
@@ -113,7 +114,7 @@ namespace Chess.Models
                 try
                 {
                     Message mess = message_receive();
-                    replies.Add(mess);
+                    replies.Add(mess.guid, mess);
                 }
                 catch (Exception e)
                 {
@@ -190,36 +191,33 @@ namespace Chess.Models
             }
         }
 
-        public void Send(NamedPipeClientStream client)
+        public void Send()
         {
-            mtx_w.WaitOne();
-
             requests.Add(this);
-
-            mtx_w.ReleaseMutex();
         }
 
-        public void Receive(NamedPipeClientStream client)
+        public void Receive()
         {
             Message? tmp;
             for (;;)
             {
-                mtx_r.WaitOne();
-                tmp = replies.Find(x => x.Type == this.Type);
-                mtx_r.ReleaseMutex();
+                bool foundMess = replies.TryGetValue(this.guid, out tmp);
 
-                if (tmp != null)
+                if (foundMess)
                     break;
 
                 Thread.Sleep(5);
             }
+
+            Debug.Assert(tmp != null);
+            Debug.Assert(tmp.guid == this.guid);
 
             len = tmp.len;
             type = tmp.type;
             guid = tmp.guid;
             data = tmp.data;
 
-            replies.Remove(tmp);
+            replies.Remove(tmp.guid);
         }
 
         public Message(MessageType type)
