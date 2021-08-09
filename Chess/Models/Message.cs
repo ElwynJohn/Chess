@@ -197,15 +197,8 @@ namespace Chess.Models
         public void Receive()
         {
             Message? tmp;
-            for (;;)
-            {
-                bool foundMess = replies.TryGetValue(this.guid, out tmp);
-
-                if (foundMess)
-                    break;
-
+            while (!replies.TryGetValue(this.guid, out tmp))
                 Thread.Sleep(5);
-            }
 
             Debug.Assert(tmp != null);
             Debug.Assert(tmp.guid == this.guid);
