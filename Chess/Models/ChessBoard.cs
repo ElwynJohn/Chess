@@ -328,6 +328,7 @@ namespace Chess.Models
         {
             Message mess = new Message(move.data, 2, MakeMoveRequest);
             mess.Send();
+            mess.Receive();
         }
         private void SyncBoardState()
         {
@@ -345,11 +346,13 @@ namespace Chess.Models
 
             Message mess = new Message(fen_cstr, (fen.Length + 1), SetBoardRequest);
             mess.Send();
+            mess.Receive();
         }
         private void RequestPromotion(ChessPiece piece)
         {
             Message mess = new Message(BitConverter.GetBytes((int)piece), sizeof(int), PromotionRequest);
             mess.Send();
+            mess.Receive();
         }
 
         public int FindKing(bool isWhite)
