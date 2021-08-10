@@ -1,19 +1,9 @@
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using System.Linq;
-using System;
-using System.IO;
-using System.IO.Pipes;
-using System.Text;
-using System.Text.Json;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using Avalonia.Media;
 using Chess.Models;
-using static Chess.Models.Message.MessageType;
-using static Chess.Models.ChessBoard;
 
 namespace Chess.ViewModels
 {
