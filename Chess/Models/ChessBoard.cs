@@ -39,7 +39,7 @@ namespace Chess.Models
         }
 
         // Starting fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        public ChessBoard(string fen = "7k/5QP1/8/8/8/8/8/K7 w - - 0 1",
+        public ChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             string gameRecordPath = "")
         {
             SetBoardState(fen);
