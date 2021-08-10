@@ -1,10 +1,11 @@
 using System;
-using System.IO.Pipes;
 using System.Diagnostics;
+using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 /* ##########################################################################
-   Anytime you send a message you should immediately attempt to receive the
-   response from the server.
 
    The server processes messages in a separate thread that loops forever
    listening for messages and then sending responses. e.g.
@@ -23,9 +24,6 @@ using System.Diagnostics;
      message_send(mess_out, ...); // Send the reply
    }
 
-   Note that a reply should always be sent even if that reply doesn't contain
-   any actual data. For now, all transactions must send AT LEAST ONE BYTE.
-
    ########################################################################## */
 
 namespace Chess.Models
@@ -34,15 +32,113 @@ namespace Chess.Models
     public class Message
     {
         // First 4 bytes indicate length of the message
-        private UInt32 len;
-        // Then we have (hopefully) another 4 bytes to indicate the type
+        private int len;
+        // Then we have  another 4 bytes to indicate the type
         private MessageType type;
+        // 16 bytes for GUID
+        private Guid guid = Guid.NewGuid();
+        public Guid Guid {get => guid;}
+        // Remaining bytes are for data
         private byte[] data;
 
-        // Mutex
-        private static bool isBusy = false;
+        private static Mutex mtx_w = new Mutex();
+        private static Mutex mtx_r = new Mutex();
 
-        public enum MessageType
+        public static NamedPipeClientStream client_w = new NamedPipeClientStream("ChessIPC_Requests");
+        public static NamedPipeClientStream client_r = new NamedPipeClientStream("ChessIPC_Replies");
+        public static List<Message> requests = new List<Message>();
+        public static Dictionary<Guid, Message> replies = new Dictionary<Guid, Message>();
+
+        private static void message_send(Message mess)
+        {
+            mtx_w.WaitOne();
+
+            if (!client_w.IsConnected)
+                client_w.Dispose();
+
+            byte[] header = mess.ToByteArray();
+            client_w.Write(header, 0, header.Length);
+            if (mess.len > 0)
+                client_w.Write(mess.data, 0, mess.len);
+
+            Logger.Buffer = $"(MessageType: {mess.type}) (len: {mess.len}) (GUID: {mess.guid}) data: ";
+            foreach (byte b in mess.data)
+                Logger.Buffer += $"{(int)b} ";
+            Logger.IWrite();
+
+            mtx_w.ReleaseMutex();
+        }
+
+        private static Message message_receive()
+        {
+            mtx_r.WaitOne();
+
+            if (!client_r.IsConnected)
+                client_r.Dispose();
+
+            byte[] header = new byte[24];
+            client_r.Read(header, 0, header.Length);
+            int len = new ArraySegment<byte>(header, 0, sizeof(int)).ToArray().ToInt32();
+            MessageType type = (MessageType) new ArraySegment<byte>(
+                    header, sizeof(int), sizeof(int)).ToArray().ToInt32();
+            Guid guid = new Guid(new ArraySegment<byte>(header, 2 * sizeof(int), 16).ToArray());
+            byte[] message_data = new byte[len];
+            if (len > 0)
+                client_r.Read(message_data, 0, len);
+
+            Logger.Buffer = $"(MessageType: {type}) (len: {len}) (GUID: {guid}) data: ";
+            foreach (byte b in message_data)
+                Logger.Buffer += $"{(int)b} ";
+            Logger.IWrite();
+
+            Message rv = new Message(message_data, len, type)
+            {
+                guid = guid,
+            };
+
+            mtx_r.ReleaseMutex();
+
+            return rv;
+        }
+
+        public static Task replyThread = new Task(() =>
+        {
+            for (;;)
+            {
+                try
+                {
+                    Message mess = message_receive();
+                    replies.Add(mess.guid, mess);
+                }
+                catch (Exception e)
+                {
+                    Logger.EWrite(e);
+                    break;
+                }
+            }
+        });
+
+        public static Task requestThread = new Task(() =>
+        {
+            for (;;)
+            {
+                try
+                {
+                    while (requests.Count == 0)
+                        Thread.Sleep(5);
+
+                    message_send(requests[0]);
+                    requests.RemoveAt(0);
+                }
+                catch (Exception e)
+                {
+                    Logger.EWrite(e);
+                    break;
+                }
+            }
+        });
+
+        public enum MessageType : int
         {
             LegalMoveRequest,
             LegalMoveReply,
@@ -66,7 +162,7 @@ namespace Chess.Models
             IsInStalemateReply,
         }
 
-        public UInt32 Length
+        public int Length
         {
             get => len;
             set => len = value;
@@ -83,50 +179,32 @@ namespace Chess.Models
             get => data;
             set
             {
-                len = (uint)value.GetLength(0);
+                len = value.Length;
                 data = new byte[len];
                 data = value;
             }
         }
 
-        public void Send(NamedPipeClientStream client)
+        public void Send()
         {
-            while (isBusy)
-                System.Threading.Thread.Sleep(10);
-            isBusy = true;
-
-            Logger.Buffer = ($"(MessageType: {Type}) (len: {Length}) data: ");
-            foreach (byte b in Bytes)
-                Logger.Buffer += $"{(int)b} ";
-            Logger.IWrite();
-
-            client.Write(BitConverter.GetBytes(len), 0, sizeof(int));
-            client.Write(BitConverter.GetBytes((int)type), 0, sizeof(int));
-            if (len > 0)
-                client.Write(data, 0, (int)len);
-            isBusy = false;
+            requests.Add(this);
         }
 
-        public void Receive(NamedPipeClientStream client)
+        public void Receive()
         {
-            while (isBusy)
-                System.Threading.Thread.Sleep(10);
-            isBusy = true;
-            byte[] message_len = new byte[4];
-            byte[] message_type = new byte[4];
-            client.Read(message_len, 0, 4);
-            Length = BitConverter.ToUInt32(message_len, 0);
-            client.Read(message_type, 0, 4);
-            Type = (MessageType)BitConverter.ToUInt32(message_type, 0);
-            Bytes = new byte[len];
-            if (len > 0)
-                client.Read(data, 0, (int)len);
+            Message? tmp;
+            while (!replies.TryGetValue(this.guid, out tmp))
+                Thread.Sleep(5);
 
-            Logger.Buffer = $"(MessageType: {Type}) (len: {Length}) data: ";
-            foreach (byte b in Bytes)
-                Logger.Buffer += $"{(int)b} ";
-            Logger.IWrite();
-            isBusy = false;
+            Debug.Assert(tmp != null);
+            Debug.Assert(tmp.guid == this.guid);
+
+            len = tmp.len;
+            type = tmp.type;
+            guid = tmp.guid;
+            data = tmp.data;
+
+            replies.Remove(tmp.guid);
         }
 
         public Message(MessageType type)
@@ -136,7 +214,7 @@ namespace Chess.Models
             Type = type;
         }
 
-        public Message(byte[] data, UInt32 size, MessageType type) : this(type)
+        public Message(byte[] data, int size, MessageType type) : this(type)
         {
             this.data = data;
             len = size;

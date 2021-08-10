@@ -42,17 +42,6 @@ namespace Chess.Models
         public ChessBoard(string fen = "7k/5QP1/8/8/8/8/8/K7 w - - 0 1",
             string gameRecordPath = "")
         {
-            if (!message_client.IsConnected)
-            {
-                for (;;)
-                {
-                    try { message_client.Connect(1000); }
-                    catch (TimeoutException) { Logger.EWrite
-                        ($"Timed out connecting to client"); };
-                    if (message_client.IsConnected)
-                        break;
-                }
-            }
             SetBoardState(fen);
             state = ParseFen(fen);
             dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Chess", "GameHistorys");
@@ -172,20 +161,11 @@ namespace Chess.Models
 
         public bool IsLegalMove(ChessMove move)
         {
-            Message mess_out = new Message(move.data, 2, LegalMoveRequest);
-            mess_out.Send(message_client);
+            Message mess = new Message(move.data, 2, LegalMoveRequest);
+            mess.Send();
+            mess.Receive();
 
-            Message mess_in = new Message(LegalMoveReply);
-            mess_in.Receive(message_client);
-
-            int response = 0;
-
-            // @@Implement Maybe add some exception or something here if the
-            // message response type isnt what we expect
-            if (mess_in.Type == LegalMoveReply)
-                response = BitConverter.ToInt32(mess_in.Bytes);
-
-            return response == 1;
+            return mess.Bytes.ToInt32() == 1;
         }
 
         public override string ToString()
@@ -329,16 +309,14 @@ namespace Chess.Models
         // Gets the board state from the server
         private ChessPiece[] GetBoardState()
         {
-            Message request = new Message(BoardStateRequest);
-            request.Send(message_client);
-
-            Message reply = new Message(BoardStateReply);
-            reply.Receive(message_client);
+            Message mess = new Message(BoardStateRequest);
+            mess.Send();
+            mess.Receive();
 
             ChessPiece[] state = new ChessPiece[64];
             for (int i = 0; i < 64; i++)
             {
-                var arrSeg = new ArraySegment<byte>(reply.Bytes, i * 4, 4);
+                var arrSeg = new ArraySegment<byte>(mess.Bytes, i * 4, 4);
                 int piece = BitConverter.ToInt32(arrSeg);
                 state[i] = (ChessPiece)piece;
             }
@@ -348,11 +326,8 @@ namespace Chess.Models
         // Tells the server what move we're making
         private void SendMoveToServer(ChessMove move)
         {
-            Message mess_out = new Message(move.data, 2, MakeMoveRequest);
-            mess_out.Send(message_client);
-
-            Message mess_in = new Message(MakeMoveReply);
-            mess_in.Receive(message_client);
+            Message mess = new Message(move.data, 2, MakeMoveRequest);
+            mess.Send();
         }
         private void SyncBoardState()
         {
@@ -367,19 +342,14 @@ namespace Chess.Models
             foreach (char c in fen)
                 fen_cstr[idx++] = (byte)c;
             fen_cstr[idx] =  0;
-            Message request = new Message(fen_cstr, (uint)(fen.Length + 1), SetBoardRequest);
-            request.Send(message_client);
 
-            Message reply = new Message(SetBoardReply);
-            reply.Receive(message_client);
+            Message mess = new Message(fen_cstr, (fen.Length + 1), SetBoardRequest);
+            mess.Send();
         }
         private void RequestPromotion(ChessPiece piece)
         {
-            Message request = new Message(BitConverter.GetBytes((int)piece), sizeof(int), PromotionRequest);
-            request.Send(message_client);
-
-            Message reply = new Message(PromotionReply);
-            reply.Receive(message_client);
+            Message mess = new Message(BitConverter.GetBytes((int)piece), sizeof(int), PromotionRequest);
+            mess.Send();
         }
 
         public int FindKing(bool isWhite)
@@ -403,21 +373,20 @@ namespace Chess.Models
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            Message request = new Message(IsInCheckRequest);
-            request.Send(message_client);
+            Message mess = new Message(IsInCheckRequest);
+            mess.Send();
+            mess.Receive();
 
             bool[] rv = new bool[2];
-            Message reply = new Message(IsInCheckReply);
-            reply.Receive(message_client);
-            if (reply.Length != rv.Length)
+            if (mess.Length != rv.Length)
             {
                 // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {reply.Type} should be of length {rv.Length} but is of length {reply.Length}.");
+                Logger.EWrite($"Message of type {mess.Type} should be of length {rv.Length} but is of length {mess.Length}.");
                 return rv;
             }
             for (int i = 0; i < rv.Length; i++)
             {
-                rv[i] = reply.Bytes[i] != 0 ? true : false;
+                rv[i] = mess.Bytes[i] != 0 ? true : false;
             }
             sw.Stop();
             Logger.DWrite($"IsInCheck took {sw.ElapsedMilliseconds}ms.");
@@ -431,22 +400,21 @@ namespace Chess.Models
             sw.Start();
 
             byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
-            Message request = new Message(messagePayload, 1, IsInCheckmateRequest);
-            request.Send(message_client);
+            Message mess = new Message(messagePayload, 1, IsInCheckmateRequest);
+            mess.Send();
+            mess.Receive();
 
-            Message reply = new Message(IsInCheckmateReply);
-            reply.Receive(message_client);
-            if (reply.Length != 1)
+            if (mess.Length != 1)
             {
                 // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {reply.Type} should be of length 1 but is of length {reply.Length}.");
+                Logger.EWrite($"Message of type {mess.Type} should be of length 1 but is of length {mess.Length}.");
                 return false;
             }
 
             sw.Stop();
             Logger.DWrite($"IsInCheckMate took {sw.ElapsedMilliseconds}ms.");
 
-            return reply.Bytes[0] == 0 ? false : true;
+            return mess.Bytes[0] == 0 ? false : true;
         }
 
         private bool IsInStaleMate()
@@ -454,21 +422,20 @@ namespace Chess.Models
             Stopwatch sw = new Stopwatch();
             sw.Start();
             byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
-            Message request = new Message(messagePayload, 1, IsInStalemateRequest);
-            request.Send(message_client);
+            Message mess = new Message(messagePayload, 1, IsInStalemateRequest);
+            mess.Send();
+            mess.Receive();
 
-            Message reply = new Message(IsInStalemateReply);
-            reply.Receive(message_client);
-            if (reply.Length != 1)
+            if (mess.Length != 1)
             {
                 // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {reply.Type} should be of length 1 but is of length {reply.Length}.");
+                Logger.EWrite($"Message of type {mess.Type} should be of length 1 but is of length {mess.Length}.");
                 return false;
             }
             sw.Stop();
             Logger.DWrite($"IsInStaleMate took {sw.ElapsedMilliseconds}ms.");
 
-            return reply.Bytes[0] == 0 ? false : true;
+            return mess.Bytes[0] == 0 ? false : true;
         }
     }
 }
