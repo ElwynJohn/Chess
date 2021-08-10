@@ -16,7 +16,7 @@ namespace Chess.Models
 
         public override void MakeMove(ChessMove move, bool serverMove = false)
         {
-            if (Status != GameStatus.InProgress)
+            if (Status != GameStatus.InProgress || !IsWhitesMove)
                 return;
 
             base.MakeMove(move, serverMove);
