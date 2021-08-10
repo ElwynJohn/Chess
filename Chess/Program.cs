@@ -27,6 +27,34 @@ namespace Chess
             return arr;
         }
 
+        public static byte[] ToByteArray(this Message mess)
+        {
+            var b = new byte[24];
+            mess.Length.ToByteArray<int>().CopyTo(b, 0);
+            ((int)mess.Type).ToByteArray<int>().CopyTo(b, sizeof(int));
+            mess.Guid.ToByteArray().CopyTo(b, 2 * sizeof(int));
+
+            return b;
+        }
+
+        public static byte[] Concat(this byte[] a, params byte[][] arrays)
+        {
+            int resultLen = a.Length;
+            foreach (byte[] b in arrays)
+                resultLen += b.Length;
+            int currentOffset = 0;
+            byte[] result = new byte[resultLen];
+            a.CopyTo(result, currentOffset);
+            currentOffset += a.Length;
+            foreach (byte[] b in arrays)
+            {
+                b.CopyTo(result, currentOffset);
+                currentOffset += b.Length;
+            }
+
+            return result;
+        }
+
         public static T? ConvertTo<T>(this byte[] data)
         {
             int size = Marshal.SizeOf<T>();

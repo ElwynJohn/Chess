@@ -37,6 +37,7 @@ namespace Chess.Models
         private MessageType type;
         // 16 bytes for GUID
         private Guid guid = Guid.NewGuid();
+        public Guid Guid {get => guid;}
         // Remaining bytes are for data
         private byte[] data;
 
@@ -55,9 +56,8 @@ namespace Chess.Models
             if (!client_w.IsConnected)
                 client_w.Dispose();
 
-            client_w.Write(mess.len.ToByteArray<int>(), 0, sizeof(int));
-            client_w.Write(((int)mess.type).ToByteArray<int>(), 0, sizeof(int));
-            client_w.Write(mess.guid.ToByteArray(), 0, 16);
+            byte[] header = mess.ToByteArray();
+            client_w.Write(header, 0, header.Length);
             if (mess.len > 0)
                 client_w.Write(mess.data, 0, mess.len);
 
@@ -76,28 +76,24 @@ namespace Chess.Models
             if (!client_r.IsConnected)
                 client_r.Dispose();
 
-            byte[] message_len = new byte[4];
-            byte[] message_type = new byte[4];
-            byte[] message_guid = new byte[16];
-            client_r.Read(message_len, 0, 4);
-            client_r.Read(message_type, 0, 4);
-            client_r.Read(message_guid, 0, 16);
-            byte[] message_data = new byte[message_len.ToUInt32()];
-            if (message_len.ToInt32() > 0)
-                client_r.Read(message_data, 0, message_len.ToInt32());
+            byte[] header = new byte[24];
+            client_r.Read(header, 0, header.Length);
+            int len = new ArraySegment<byte>(header, 0, sizeof(int)).ToArray().ToInt32();
+            MessageType type = (MessageType) new ArraySegment<byte>(
+                    header, sizeof(int), sizeof(int)).ToArray().ToInt32();
+            Guid guid = new Guid(new ArraySegment<byte>(header, 2 * sizeof(int), 16).ToArray());
+            byte[] message_data = new byte[len];
+            if (len > 0)
+                client_r.Read(message_data, 0, len);
 
-            MessageType type = (MessageType)message_type.ConvertTo<int>();
-            int len = BitConverter.ToInt32(message_len);
-
-            Logger.Buffer = $"(MessageType: {type}) (len: {len}) (GUID: {new Guid(message_guid)}) data: ";
+            Logger.Buffer = $"(MessageType: {type}) (len: {len}) (GUID: {guid}) data: ";
             foreach (byte b in message_data)
                 Logger.Buffer += $"{(int)b} ";
             Logger.IWrite();
 
-            Message rv = new Message(message_data, message_len.ToInt32(),
-                    (MessageType)BitConverter.ToInt32(message_type))
+            Message rv = new Message(message_data, len, type)
             {
-                guid = new Guid(message_guid),
+                guid = guid,
             };
 
             mtx_r.ReleaseMutex();
