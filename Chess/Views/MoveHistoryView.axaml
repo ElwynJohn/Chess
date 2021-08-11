@@ -8,7 +8,7 @@
     <StackPanel Height="630" Width="300" VerticalAlignment="Top" Background="#323240">
 
         <Panel Height="555">
-            <ScrollViewer>
+            <ScrollViewer Initialized="SvOnInitialized">
                 <ItemsControl Items="{Binding Turns}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
