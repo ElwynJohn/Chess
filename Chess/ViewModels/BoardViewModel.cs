@@ -1,19 +1,9 @@
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using System.Linq;
-using System;
-using System.IO;
-using System.IO.Pipes;
-using System.Text;
-using System.Text.Json;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using Avalonia.Media;
 using Chess.Models;
-using static Chess.Models.Message.MessageType;
-using static Chess.Models.ChessBoard;
 
 namespace Chess.ViewModels
 {
@@ -72,7 +62,7 @@ namespace Chess.ViewModels
 
         private ChessTile[] tiles = new ChessTile[64];
         private ChessTile?[] tiles_to_clear = new ChessTile?[2];
-        private ChessTile? checkedTileToClear = null;
+        private ChessTile[] checkedTileToClear = new ChessTile[2];
         private ChessTile? stagedTile;
         private int currentBoard = 0;
 
@@ -158,7 +148,11 @@ namespace Chess.ViewModels
                     continue;
                 }
                 foreach (ChessTile tile in row.RowTiles.AsEnumerable())
-                    tile?.Update(e.Board);
+                {
+                    if (e.Move != null)
+                        tile.Highlighted = false;
+                    tile.Update(e.Board);
+                }
             }
             Logger.DWrite($"Time taken to UpdateTiles: {sw.ElapsedMilliseconds}");
         }
@@ -214,22 +208,19 @@ namespace Chess.ViewModels
         }
         private void UpdateCheckFill()
         {
+            for(int i = 0; i < 2; i++)
+                if (checkedTileToClear[i] != null)
+                    checkedTileToClear[i].InCheck = false;
+
             bool[] isInCheck = { Board.IsWhiteInCheck, Board.IsBlackInCheck };
             for(int i = 0; i < 2; i++)
             {
                 bool isWhite = i == 0 ? true : false;
                 ChessTile kingTile = tiles[Board.FindKing(isWhite)];
-
-                if (checkedTileToClear != null)
-                    checkedTileToClear.InCheck = false;
                 if (isInCheck[i])
                 {
                     kingTile.InCheck = true;
-                    checkedTileToClear = kingTile;
-                }
-                else
-                {
-                    kingTile.InCheck = false;
+                    checkedTileToClear[i] = kingTile;
                 }
             }
         }

@@ -16,7 +16,7 @@ namespace Chess.Models
 
         public override void MakeMove(ChessMove move, bool serverMove = false)
         {
-            if (Status != GameStatus.InProgress)
+            if (Status != GameStatus.InProgress || !IsWhitesMove)
                 return;
 
             base.MakeMove(move, serverMove);
@@ -50,13 +50,11 @@ namespace Chess.Models
         // Note: This method will probably block for quite a while
         private ChessMove GetServerMove()
         {
-            Message request = new Message(new byte[1], 1, BestMoveRequest);
-            request.Send(message_client);
+            Message mess = new Message(new byte[1], 1, BestMoveRequest);
+            mess.Send();
+            mess.Receive();
 
-            Message reply = new Message(BestMoveReply);
-            reply.Receive(message_client);
-
-            var move = new ChessMove(reply.Bytes);
+            var move = new ChessMove(mess.Bytes);
 
             return move;
         }

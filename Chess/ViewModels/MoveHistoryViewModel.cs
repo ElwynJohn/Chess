@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System;
 using Avalonia.Media;
+using Avalonia.Controls;
 using Chess.Models;
 
 namespace Chess.ViewModels
@@ -16,6 +17,8 @@ namespace Chess.ViewModels
 
         public BoardViewModel Bvm { get; private init; }
         public ObservableCollection<TurnData> Turns { get; set; }
+        public ScrollViewer? sv { get; set; }
+        private bool scrollToEnd = false;
 
         public void UpdateTurns(object sender, BoardUpdateEventArgs e)
         {
@@ -45,6 +48,22 @@ namespace Chess.ViewModels
                     BlackMove = e.Move,
                     Fill = temp.Fill
                 };
+            }
+
+            scrollToEnd = true;
+        }
+
+        public void SvLayoutUpdated(object? sender, EventArgs e)
+        {
+            if (sv == null)
+            {
+                Logger.EWrite("Null reference.");
+                return;
+            }
+            if (scrollToEnd)
+            {
+                sv.ScrollToEnd();
+                scrollToEnd = false;
             }
         }
     }
