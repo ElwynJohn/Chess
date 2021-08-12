@@ -7,18 +7,18 @@
              x:Class="Chess.Views.PlayView">
     <UserControl.Styles>
         <Style Selector="Rectangle.chess-tile">
-            <Setter Property="Height" 			Value="100"/>
-            <Setter Property="Width" 			Value="100"/>
+            <Setter Property="Height" 			Value="{Binding Height}"/>
+            <Setter Property="Width" 			Value="{Binding Width}"/>
             <Setter Property="Margin" 			Value="0"/>
         </Style>
         <Style Selector="Image.chess-tile">
-            <Setter Property="Height" 			Value="70"/>
-            <Setter Property="Width" 			Value="70"/>
+            <Setter Property="Height" 			Value="{Binding ImageHeight}"/>
+            <Setter Property="Width" 			Value="{Binding ImageWidth}"/>
             <Setter Property="Margin" 			Value="0"/>
         </Style>
         <Style Selector="Panel.chess-tile">
-            <Setter Property="Height" 			Value="100"/>
-            <Setter Property="Width" 			Value="100"/>
+            <Setter Property="Height" 			Value="{Binding Height}"/>
+            <Setter Property="Width" 			Value="{Binding Width}"/>
         </Style>
     </UserControl.Styles>
 

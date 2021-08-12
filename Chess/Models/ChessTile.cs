@@ -108,6 +108,11 @@ namespace Chess.Models
         }
         public string? AssetPath { get; set; }
 
+        public static int Height {get; set;}
+        public static int Width {get; set;}
+        public static int ImageHeight {get => (int)(0.7 * Height);}
+        public static int ImageWidth {get => (int)(0.7 * Width);}
+
         public void Update(ChessBoard? board)
         {
             if (board == null)
@@ -117,7 +122,7 @@ namespace Chess.Models
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

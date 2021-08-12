@@ -15,13 +15,16 @@ namespace Chess.ViewModels
             Bvm.Board.Update += BoardUpdated;
         }
 
+        public int Height {get => ChessTile.Height;}
+        public int Width {get => ChessTile.Width;}
+
         public BoardViewModel Bvm { get; }
         public MenuViewModel Menu { get; }
         public GamePanelViewModel GamePanel { get; }
         public bool IsPromoting { get => Bvm.Board.IsPromoting; }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public void BoardUpdated(object sender, BoardUpdateEventArgs e)

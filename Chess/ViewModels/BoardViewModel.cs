@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
@@ -8,6 +9,7 @@ using Avalonia.Controls;
 using Avalonia.VisualTree;
 
 using Chess.Models;
+using Chess.Views;
 
 namespace Chess.ViewModels
 {
@@ -52,6 +54,7 @@ namespace Chess.ViewModels
             IsInteractable = isInteractable;
         }
 
+        public PlayViewModel? pvm;
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
@@ -132,6 +135,29 @@ namespace Chess.ViewModels
             UpdateTiles(null, new BoardUpdateEventArgs(Board, null, ChessPiece.None));
             UpdateMoveFill(Board.LastMove);
             UpdateCheckFill();
+        }
+
+        public void UpdateTileSizes(object? sender, EventArgs e)
+        {
+            ChessTile.Width = (int)(100 * (Window.Width / 1500));
+            ChessTile.Height = (int)(100 * (Window.Height / 860));
+            foreach (ChessRow row in Rows.AsEnumerable())
+            {
+                if (row.RowTiles == null)
+                {
+                    Logger.EWrite("rowTiles is null");
+                    continue;
+                }
+                foreach (ChessTile tile in row.RowTiles.AsEnumerable())
+                {
+                    tile.NotifyPropertyChanged(nameof(ChessTile.Width));
+                    tile.NotifyPropertyChanged(nameof(ChessTile.Height));
+                    tile.NotifyPropertyChanged(nameof(ChessTile.ImageWidth));
+                    tile.NotifyPropertyChanged(nameof(ChessTile.ImageHeight));
+                }
+            }
+            pvm?.NotifyPropertyChanged(nameof(pvm.Width));
+            pvm?.NotifyPropertyChanged(nameof(pvm.Height));
         }
 
         public void UpdateTiles(object? sender, BoardUpdateEventArgs e)
