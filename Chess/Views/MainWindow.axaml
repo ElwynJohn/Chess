@@ -10,7 +10,7 @@
 
     <StackPanel Orientation="Horizontal">
 
-        <views:MenuView DataContext="{Binding Menu}"/>
+        <ContentControl Content="{Binding Menu}"/>
 
         <ContentControl Content="{Binding ChildViews}"/>
 

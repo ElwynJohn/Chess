@@ -14,7 +14,6 @@ namespace Chess.Views
         public MenuView()
         {
             Initialized += Util.InitialiseViewModelBase;
-            LayoutUpdated += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 
