@@ -164,6 +164,8 @@ namespace Chess.Models
             IsInCheckmateReply,
             IsInStalemateRequest,
             IsInStalemateReply,
+            CheckInfoRequest,
+            CheckInfoReply,
         }
 
         public int Length

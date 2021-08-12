@@ -52,6 +52,9 @@ namespace Chess.Models
             Boards = new ObservableCollection<ChessBoard>();
             Boards.Add(new ChessBoard(this));
             Status = GameStatus.InProgress;
+
+            // Reset checkInfo after a move
+            Update += (o, e) => checkInfo = null;
         }
 
         public event BoardUpdateEventHandler? Update;
@@ -377,81 +380,59 @@ namespace Chess.Models
             return king_pos;
         }
 
+        private enum CheckInfoT : byte
+        {
+            None,
+            Check,
+            Checkmate,
+            Stalemate,
+        }
+
+        private byte[]? checkInfo = null;
+        private byte[] CheckInfo
+        {
+            get
+            {
+                if (checkInfo != null)
+                    return checkInfo;
+
+                checkInfo = new byte[2];
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                for (int i = 0; i < 2; i++)
+                {
+                    Message mess = new Message(new byte[] {(byte)((i + 1) % 2)}, 1, CheckInfoRequest);
+                    mess.Send();
+                    mess.Receive();
+                    checkInfo[i] = mess.Bytes[0];
+                }
+                sw.Stop();
+                Logger.DWrite($"Getting CheckInfo took {sw.ElapsedMilliseconds}ms");
+
+                return checkInfo;
+            }
+        }
+
         // @@REWORK: only the player whose turn it is, can be in check. Therefore,
         // IsInCheck should probably not calculate IsInCheck for white and black.
         // The 1st element of the return array defines white, the 2nd defines black
         public bool[] IsInCheck()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            Message mess = new Message(IsInCheckRequest);
-            mess.Send();
-            Stopwatch sw2 = new Stopwatch();
-            sw2.Start();
-            mess.Receive();
-            sw2.Stop();
-            Logger.DWrite($"Receiving IsInCheck reply took {sw2.ElapsedMilliseconds}ms.");
-
-            bool[] rv = new bool[2];
-            if (mess.Length != rv.Length)
+            return new bool[]
             {
-                // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {mess.Type} should be of length {rv.Length} but is of length {mess.Length}.");
-                return rv;
-            }
-            for (int i = 0; i < rv.Length; i++)
-            {
-                rv[i] = mess.Bytes[i] != 0 ? true : false;
-            }
-            sw.Stop();
-            Logger.DWrite($"IsInCheck took {sw.ElapsedMilliseconds}ms.");
-
-            return rv;
+                CheckInfo[0] == (byte)CheckInfoT.Check,
+                CheckInfo[1] == (byte)CheckInfoT.Check,
+            };
         }
 
         private bool IsInCheckMate()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
-            Message mess = new Message(messagePayload, 1, IsInCheckmateRequest);
-            mess.Send();
-            mess.Receive();
-
-            if (mess.Length != 1)
-            {
-                // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {mess.Type} should be of length 1 but is of length {mess.Length}.");
-                return false;
-            }
-
-            sw.Stop();
-            Logger.DWrite($"IsInCheckMate took {sw.ElapsedMilliseconds}ms.");
-
-            return mess.Bytes[0] == 0 ? false : true;
+            return CheckInfo.Any(x => x == (byte)CheckInfoT.Checkmate);
         }
 
         private bool IsInStaleMate()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
-            Message mess = new Message(messagePayload, 1, IsInStalemateRequest);
-            mess.Send();
-            mess.Receive();
-
-            if (mess.Length != 1)
-            {
-                // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {mess.Type} should be of length 1 but is of length {mess.Length}.");
-                return false;
-            }
-            sw.Stop();
-            Logger.DWrite($"IsInStaleMate took {sw.ElapsedMilliseconds}ms.");
-
-            return mess.Bytes[0] == 0 ? false : true;
+            return CheckInfo.Any(x => x == (byte)CheckInfoT.Stalemate);
         }
     }
 }
