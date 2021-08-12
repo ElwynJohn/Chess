@@ -10,6 +10,18 @@ namespace Chess.Views
     {
         public BoardView()
         {
+            Initialized += Util.InitialiseViewModelBase;
+            Initialized += (o, e) =>
+            {
+                var vm = DataContext as ViewModelBase;
+                if (vm == null)
+                {
+                    Logger.EWrite("Cast failed!");
+                    return;
+                }
+                EffectiveViewportChanged += (o, e) => Logger.IWrite($"New height is {vm.Window.Height}");
+                EffectiveViewportChanged += (o, e) => Logger.IWrite($"New width is {vm.Window.Width}");
+            };
             InitializeComponent();
         }
 

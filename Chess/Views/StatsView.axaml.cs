@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using System.Diagnostics;
@@ -11,6 +10,7 @@ namespace Chess.Views
     {
         public StatsView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

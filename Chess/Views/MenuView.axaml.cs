@@ -1,9 +1,11 @@
+using System;
+
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
-using Chess.ViewModels;
+
 using Chess.Models;
+using Chess.ViewModels;
 
 namespace Chess.Views
 {
@@ -11,6 +13,8 @@ namespace Chess.Views
     {
         public MenuView()
         {
+            Initialized += Util.InitialiseViewModelBase;
+            LayoutUpdated += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

@@ -11,6 +11,7 @@ namespace Chess.Views
     {
         public MoveHistoryView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

@@ -7,6 +7,7 @@ namespace Chess.Views
     {
         public GameStatsView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

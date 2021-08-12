@@ -9,6 +9,7 @@ namespace Chess.Views
     {
         public GamePanelView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

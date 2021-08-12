@@ -3,6 +3,10 @@ using System.Linq;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+
+using Avalonia.Controls;
+using Avalonia.VisualTree;
+
 using Chess.Models;
 
 namespace Chess.ViewModels

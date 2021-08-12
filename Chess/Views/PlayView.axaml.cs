@@ -13,6 +13,7 @@ namespace Chess.Views
     {
         public PlayView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

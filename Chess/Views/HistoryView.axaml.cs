@@ -1,9 +1,5 @@
 using Avalonia.Controls;
-using Avalonia.Controls.Presenters;
-using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using Avalonia.Layout;
-using Avalonia.LogicalTree;
 using System;
 using System.Diagnostics;
 
@@ -16,6 +12,7 @@ namespace Chess.Views
     {
         public HistoryView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 
