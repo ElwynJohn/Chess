@@ -3,7 +3,7 @@ using Avalonia.Markup.Xaml;
 
 namespace Chess.Views
 {
-    public partial class GameStatsView : UserControl
+    public partial class GameStatsView : ViewBase
     {
         public GameStatsView()
         {

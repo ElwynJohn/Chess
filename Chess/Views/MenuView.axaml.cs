@@ -1,15 +1,12 @@
-using System;
-
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 
-using Chess.Models;
 using Chess.ViewModels;
 
 namespace Chess.Views
 {
-    public partial class MenuView : UserControl
+    public partial class MenuView : ViewBase
     {
         public MenuView()
         {

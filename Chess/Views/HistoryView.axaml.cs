@@ -8,7 +8,7 @@ using Chess.ViewModels;
 
 namespace Chess.Views
 {
-    public partial class HistoryView : UserControl
+    public partial class HistoryView : ViewBase
     {
         public HistoryView()
         {

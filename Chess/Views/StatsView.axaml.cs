@@ -6,7 +6,7 @@ using Chess.Models;
 
 namespace Chess.Views
 {
-    public partial class StatsView : UserControl
+    public partial class StatsView : ViewBase
     {
         public StatsView()
         {
