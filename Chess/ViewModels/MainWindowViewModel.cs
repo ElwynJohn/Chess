@@ -13,7 +13,6 @@ namespace Chess.ViewModels
             var gamePanel = new GamePanelViewModel(bvm, null, null);
             Menu = new MenuViewModel(this);
             ChildViews = new PlayViewModel(bvm, gamePanel, Menu);
-            Logger.IWrite($"Constructed MWVM {this}");
         }
 
         private ViewModelBase? childViews;
