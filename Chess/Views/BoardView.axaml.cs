@@ -11,7 +11,7 @@ using Chess.ViewModels;
 
 namespace Chess.Views
 {
-    public partial class BoardView : UserControl
+    public partial class BoardView : ViewBase
     {
         public BoardView()
         {

@@ -83,8 +83,6 @@ namespace Chess
     {
         public static void InitialiseViewModelBase(object? sender, EventArgs e)
         {
-            if (sender != null)
-                Logger.DWrite(sender.ToString());
             var uc = sender as UserControl;
             if (uc == null)
             {
@@ -95,7 +93,7 @@ namespace Chess
             var vm = uc.DataContext as ViewModelBase;
             if (vm == null)
             {
-                Logger.EWrite($"{sender.ToString()}Model is null!");
+                Logger.EWrite($"{sender!.ToString()}Model is null!");
                 return;
             }
 
