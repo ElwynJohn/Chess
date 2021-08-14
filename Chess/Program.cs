@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -85,7 +86,7 @@ namespace Chess
         private static Avalonia.Logging.LogEventLevel avaloniaLogLevel;
         private static string traceLogFile = "chess_trace.log";
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             // Before we do anything else, cd to the directory that the
             // executable file is in.
@@ -137,16 +138,14 @@ namespace Chess
             System.IO.File.WriteAllText(traceLogFile, String.Empty);
             Trace.Listeners.Add(new TextWriterTraceListener(traceLogFile));
 
-            while (!Message.client_w.IsConnected)
-            {
-                try {Message.client_w.Connect(200);}
-                catch (TimeoutException) {}
-            }
-            while (!Message.client_r.IsConnected)
-            {
-                try {Message.client_r.Connect(200);}
-                catch (TimeoutException) {}
-            }
+            // If we haven't connected after 5 seconds, something is definitely
+            // wrong and we should just throw TimeoutException
+            int timeout = 5000;
+            var wConnect = Message.client_w.ConnectAsync(timeout);
+            var rConnect = Message.client_r.ConnectAsync(timeout);
+
+            await wConnect;
+            await rConnect;
 
             Message.replyThread.Start();
             Message.requestThread.Start();
