@@ -130,6 +130,7 @@ namespace Chess
                     RedirectStandardOutput = false,
                     });
 
+            Console.CancelKeyPress += OnExit;
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
 
             Trace.Listeners.Add(new TextWriterTraceListener("chess_trace.log"));
