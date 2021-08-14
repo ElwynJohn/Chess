@@ -14,6 +14,8 @@ namespace Chess.Views
         public PlayView()
         {
             Initialized += Util.InitialiseViewModelBase;
+            Initialized += (s, e) =>
+                ((PlayViewModel)DataContext).OnViewInitialised(s, e);
             InitializeComponent();
         }
 

@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Chess.ViewModels;
 
 namespace Chess.Views
 {
@@ -8,6 +9,8 @@ namespace Chess.Views
         public GameStatsView()
         {
             Initialized += Util.InitialiseViewModelBase;
+            Initialized += (s, e) =>
+                ((GameStatsViewModel)DataContext).OnViewInitialisation(s, e);
             InitializeComponent();
         }
 

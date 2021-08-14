@@ -83,7 +83,7 @@ namespace Chess
     {
         public static void InitialiseViewModelBase(object? sender, EventArgs e)
         {
-            var uc = sender as UserControl;
+            var uc = sender as ContentControl;
             if (uc == null)
             {
                 Logger.EWrite("Cast failed!");
@@ -98,7 +98,7 @@ namespace Chess
             }
 
             vm.View = uc;
-            vm.Window = uc.FindAncestorOfType<Window>();
+            vm.Window = uc.FindAncestorOfType<Window>(true);
         }
     }
 

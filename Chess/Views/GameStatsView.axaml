@@ -3,13 +3,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             Background="#323240"
              x:Class="Chess.Views.GameStatsView">
 
-    <StackPanel Height="630" Width="300" VerticalAlignment="Top" Background="#323240">
-        <Panel Width="200" Height="50" Margin="50,30">
+        <Panel Grid.Row="0" Width="200" Height="50" Margin="50,30">
             <Rectangle Fill="#28283D" Width="200" Height="50"/>
             <TextBlock Text="{Binding Result}" FontSize="20" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Panel>
-    </StackPanel>
 
 </UserControl>

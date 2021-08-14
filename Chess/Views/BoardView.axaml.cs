@@ -10,7 +10,9 @@ namespace Chess.Views
     {
         public BoardView()
         {
-            Initialized += Util.InitialiseViewModelBase;
+            AttachedToVisualTree += Util.InitialiseViewModelBase;
+            AttachedToVisualTree += (s, e) =>
+                ((BoardViewModel)DataContext).OnViewInitialised(s, e);
             InitializeComponent();
         }
 

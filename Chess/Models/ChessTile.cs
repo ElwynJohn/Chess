@@ -26,18 +26,22 @@ namespace Chess.Models
             SetNewPiece(board[pos]);
         }
 
+        // Size defines the height and width
+        public static int TileSize { get; set; }
+        public static int PieceSize { get; set; }
         public byte Position { get; init; }
         public int File { get => Position % 8; }
         public int Rank { get => Position / 8; }
         public bool IsWhite { get => (Rank % 2 == 1) ? (Position % 2 == 1) : (Position % 2 == 0); }
         public bool DisplayOverlay { get; set; }
+        private int displayTextThreshold = 60;
         // FileToDisplay and RankToDisplay are the strings that are displayed
         // on the board. Only the left and bottom tiles should display a string.
         public string FileToDisplay
         {
             get
             {
-                if (!DisplayOverlay || Rank != 7)
+                if (!DisplayOverlay || Rank != 7 || TileSize < displayTextThreshold)
                     return "";
                 return ((char)('a' + File)).ToString();
             }
@@ -46,7 +50,7 @@ namespace Chess.Models
         {
             get
             {
-                if (!DisplayOverlay || Position % 8 != 0)
+                if (!DisplayOverlay || Position % 8 != 0 || TileSize < displayTextThreshold)
                     return "";
                 return (8 - Position / 8).ToString();
             }
@@ -117,7 +121,7 @@ namespace Chess.Models
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

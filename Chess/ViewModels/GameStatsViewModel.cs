@@ -13,11 +13,20 @@ namespace Chess.ViewModels
             if (board != null)
                 board.Update += UpdateStats;
         }
+        public void OnViewInitialisation(object sender, EventArgs e)
+        {
+            View.EffectiveViewportChanged += (s, e) =>
+            {
+                Logger.DWrite($"GameStats View's Height: {Height}");
+                NotifyPropertyChanged(nameof(Height));
+            };
+        }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        public double Height { get => View.Bounds.Height; }
         public ChessBoard Board { get; set; }
         public string Result { get
             {
