@@ -85,8 +85,6 @@ namespace Chess
         private static Avalonia.Logging.LogEventLevel avaloniaLogLevel;
         public static void Main(string[] args)
         {
-            Debugger.Launch();
-
             var sw = new StreamWriter("chess_test.log");
             var swColour = new StreamWriter("chess_test_col.log");
             sw.AutoFlush = true;
