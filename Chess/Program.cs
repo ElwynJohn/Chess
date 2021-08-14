@@ -83,6 +83,8 @@ namespace Chess
         // yet and stuff might break.
         private static Process? engine;
         private static Avalonia.Logging.LogEventLevel avaloniaLogLevel;
+        private static string traceLogFile = "chess_trace.log";
+
         public static void Main(string[] args)
         {
             var sw = new StreamWriter("chess_test.log");
@@ -133,7 +135,9 @@ namespace Chess
             Console.CancelKeyPress += OnExit;
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
 
-            Trace.Listeners.Add(new TextWriterTraceListener("chess_trace.log"));
+            // Clear the trace file on startup. Otherwise it can get really big
+            System.IO.File.WriteAllText(traceLogFile, String.Empty);
+            Trace.Listeners.Add(new TextWriterTraceListener(traceLogFile));
 
             while (!Message.client_w.IsConnected)
             {
