@@ -87,6 +87,11 @@ namespace Chess
 
         public static void Main(string[] args)
         {
+            // Before we do anything else, cd to the directory that the
+            // executable file is in.
+            string? exe_dir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location);
+            Directory.SetCurrentDirectory(exe_dir!);
+
             var sw = new StreamWriter("chess_test.log");
             var swColour = new StreamWriter("chess_test_col.log");
             sw.AutoFlush = true;
@@ -115,14 +120,7 @@ namespace Chess
                 Logger.EWrite(e, "Unhandled exception.");
             };
 
-            string? exe_dir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location);
-            if (exe_dir != null)
-            {
-                Directory.SetCurrentDirectory(exe_dir);
-                Logger.IWrite(exe_dir);
-            }
             string engine_path = Path.Join(exe_dir, "ChessEngineMain");
-            Logger.IWrite(engine_path);
             engine = Process.Start(new ProcessStartInfo {
                     UseShellExecute = true,
                     CreateNoWindow = false,
