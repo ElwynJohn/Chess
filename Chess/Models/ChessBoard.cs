@@ -38,9 +38,11 @@ namespace Chess.Models
                 state[i] = board[i];
         }
 
-        // Starting fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        public ChessBoard(string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-            string gameRecordPath = "")
+        public ChessBoard() : this(StartingFen, String.Empty)
+        {
+        }
+
+        public ChessBoard(string fen, string gameRecordPath)
         {
             SetBoardState(fen);
             state = ParseFen(fen);
@@ -52,6 +54,23 @@ namespace Chess.Models
             Boards = new ObservableCollection<ChessBoard>();
             Boards.Add(new ChessBoard(this));
             Status = GameStatus.InProgress;
+        }
+
+        protected static string StartingFen
+        {
+            get
+            {
+                string defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+// @@TODO: It's possible we might want to read CHESS_FEN in Release, but this
+// behaviour shouldn't make it into any builds of Chess that we ship.
+#if DEBUG
+                // Read the starting FEN from the environment variable CHESS_FEN
+                // if it's set
+                return Environment.GetEnvironmentVariable("CHESS_FEN") ?? defaultFen;
+#else
+                return defaultFen;
+#endif
+            }
         }
 
         public event BoardUpdateEventHandler? Update;
