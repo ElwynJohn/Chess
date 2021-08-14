@@ -89,7 +89,13 @@ namespace Chess.ViewModels
 
                 ChessMove move = PiecePositions(stagedTile, clickedTile);
                 if (Board.IsLegalMove(move))
+                {
+                    Stopwatch watch2 = new Stopwatch();
+                    watch2.Start();
                     Board.MakeMove(move, false);
+                    watch2.Stop();
+                    Logger.DWrite($"Time taken to MakeMove: {watch2.ElapsedMilliseconds}");
+                }
                 stagedTile = null;
 
                 watch.Stop();
@@ -132,6 +138,8 @@ namespace Chess.ViewModels
 
         public void UpdateTiles(object? sender, BoardUpdateEventArgs e)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             foreach (ChessRow row in Rows.AsEnumerable())
             {
                 if (row.RowTiles == null)
@@ -146,6 +154,7 @@ namespace Chess.ViewModels
                     tile.Update(e.Board);
                 }
             }
+            Logger.DWrite($"Time taken to UpdateTiles: {sw.ElapsedMilliseconds}");
         }
 
         public ChessMove PiecePositions(ChessTile origin, ChessTile target)

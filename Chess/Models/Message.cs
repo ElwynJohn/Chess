@@ -43,6 +43,8 @@ namespace Chess.Models
 
         private static Mutex mtx_w = new Mutex();
         private static Mutex mtx_r = new Mutex();
+        private static EventWaitHandle send_handle = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private static EventWaitHandle receive_handle = new EventWaitHandle(false, EventResetMode.AutoReset);
 
         public static NamedPipeClientStream client_w = new NamedPipeClientStream("ChessIPC_Requests");
         public static NamedPipeClientStream client_r = new NamedPipeClientStream("ChessIPC_Replies");
@@ -109,6 +111,7 @@ namespace Chess.Models
                 {
                     Message mess = message_receive();
                     replies.Add(mess.guid, mess);
+                    receive_handle.Set();
                 }
                 catch (Exception e)
                 {
@@ -124,11 +127,12 @@ namespace Chess.Models
             {
                 try
                 {
-                    while (requests.Count == 0)
-                        Thread.Sleep(5);
-
-                    message_send(requests[0]);
-                    requests.RemoveAt(0);
+                    send_handle.WaitOne();
+                    while (requests.Count > 0 && requests[0] != null)
+                    {
+                        message_send(requests[0]);
+                        requests.RemoveAt(0);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -160,6 +164,8 @@ namespace Chess.Models
             IsInCheckmateReply,
             IsInStalemateRequest,
             IsInStalemateReply,
+            CheckInfoRequest,
+            CheckInfoReply,
         }
 
         public int Length
@@ -188,13 +194,17 @@ namespace Chess.Models
         public void Send()
         {
             requests.Add(this);
+            send_handle.Set();
         }
 
         public void Receive()
         {
             Message? tmp;
-            while (!replies.TryGetValue(this.guid, out tmp))
-                Thread.Sleep(5);
+            for (;;)
+            {
+                if (replies.TryGetValue(this.guid, out tmp))
+                    break;
+            }
 
             Debug.Assert(tmp != null);
             Debug.Assert(tmp.guid == this.guid);

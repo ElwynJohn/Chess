@@ -54,6 +54,9 @@ namespace Chess.Models
             Boards = new ObservableCollection<ChessBoard>();
             Boards.Add(new ChessBoard(this));
             Status = GameStatus.InProgress;
+
+            // Reset checkInfo after a move
+            Update += (o, e) => checkInfo = null;
         }
 
         protected static string StartingFen
@@ -130,11 +133,14 @@ namespace Chess.Models
             if (pieceTaken != ChessPiece.None)
                 PiecesCaptured.Add(state[move.To]);
 
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
             if (!serverMove)
                 SendMoveToServer(move);
             LastMove = move;
 
             SyncBoardState();
+                Logger.DWrite($"Time taken to Send and Sync: {sw.ElapsedMilliseconds}");
 
             bool[] isInCheck = IsInCheck();
             IsWhiteInCheck = isInCheck[0];
@@ -149,11 +155,16 @@ namespace Chess.Models
                     Status = GameStatus.Draw;
                 if (IsInCheckMate())
                     Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
-                SaveGame();
+                sw.Restart();
+                var copy = new ChessBoard(this);
+                new Task(() => SaveGame(copy)).Start();
+                    Logger.DWrite($"Time taken to SaveGame: {sw.ElapsedMilliseconds}");
             }
             Boards.Add(new ChessBoard(this));
             Moves.Add(move);
+                    sw.Restart();
             OnUpdate(new BoardUpdateEventArgs(this, move, pieceTaken));
+                    Logger.DWrite($"Time taken to Update: {sw.ElapsedMilliseconds}");
         }
 
         public void PromoteTo(ChessPiece promoteTo)
@@ -174,7 +185,8 @@ namespace Chess.Models
                 Status = IsWhitesMove ? GameStatus.BlackWon : GameStatus.WhiteWon;
             Boards.RemoveAt(Boards.Count - 1);
             Boards.Add(new ChessBoard(this));
-            SaveGame();
+            var copy = new ChessBoard(this);
+            new Task(() => SaveGame(copy)).Start();
             OnUpdate();
         }
 
@@ -282,11 +294,11 @@ namespace Chess.Models
             }
             return moves != null ? moves : new ChessMove[0];
         }
-        private void SaveGame()
+        private static void SaveGame(ChessBoard board)
         {
-            Directory.CreateDirectory(dirPath);
-            using (StreamWriter writer = new StreamWriter($"{filePath}.json"))
-                writer.Write(JsonSerializer.Serialize<ChessMove[]>(Moves.ToArray<ChessMove>()));
+            Directory.CreateDirectory(board.dirPath);
+            using (StreamWriter writer = new StreamWriter($"{board.filePath}.json"))
+                writer.Write(JsonSerializer.Serialize<ChessMove[]>(board.Moves.ToArray<ChessMove>()));
 
             using (var bitmap = new Bitmap(160, 160))
             {
@@ -309,7 +321,7 @@ namespace Chess.Models
                         else
                             canvas.FillRectangle(blackSquare, xPos, yPos, size, size);
 
-                        var piecePath = ChessTile.PieceToAssetMap.GetValueOrDefault(state[i]);
+                        var piecePath = ChessTile.PieceToAssetMap.GetValueOrDefault(board[i]);
                         if (piecePath == null)
                             continue;
                         using (var pieceBm = new Bitmap(piecePath))
@@ -321,7 +333,7 @@ namespace Chess.Models
                     }
                     canvas.Save();
                 }
-                bitmap.Save($"{filePath}.png", System.Drawing.Imaging.ImageFormat.Png);
+                bitmap.Save($"{board.filePath}.png", System.Drawing.Imaging.ImageFormat.Png);
             }
         }
 
@@ -387,77 +399,59 @@ namespace Chess.Models
             return king_pos;
         }
 
+        private enum CheckInfoT : byte
+        {
+            None,
+            Check,
+            Checkmate,
+            Stalemate,
+        }
+
+        private byte[]? checkInfo = null;
+        private byte[] CheckInfo
+        {
+            get
+            {
+                if (checkInfo != null)
+                    return checkInfo;
+
+                checkInfo = new byte[2];
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                for (int i = 0; i < 2; i++)
+                {
+                    Message mess = new Message(new byte[] {(byte)((i + 1) % 2)}, 1, CheckInfoRequest);
+                    mess.Send();
+                    mess.Receive();
+                    checkInfo[i] = mess.Bytes[0];
+                }
+                sw.Stop();
+                Logger.DWrite($"Getting CheckInfo took {sw.ElapsedMilliseconds}ms");
+
+                return checkInfo;
+            }
+        }
+
         // @@REWORK: only the player whose turn it is, can be in check. Therefore,
         // IsInCheck should probably not calculate IsInCheck for white and black.
         // The 1st element of the return array defines white, the 2nd defines black
         public bool[] IsInCheck()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            Message mess = new Message(IsInCheckRequest);
-            mess.Send();
-            mess.Receive();
-
-            bool[] rv = new bool[2];
-            if (mess.Length != rv.Length)
+            return new bool[]
             {
-                // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {mess.Type} should be of length {rv.Length} but is of length {mess.Length}.");
-                return rv;
-            }
-            for (int i = 0; i < rv.Length; i++)
-            {
-                rv[i] = mess.Bytes[i] != 0 ? true : false;
-            }
-            sw.Stop();
-            Logger.DWrite($"IsInCheck took {sw.ElapsedMilliseconds}ms.");
-
-            return rv;
+                CheckInfo[0] == (byte)CheckInfoT.Check,
+                CheckInfo[1] == (byte)CheckInfoT.Check,
+            };
         }
 
         private bool IsInCheckMate()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
-            Message mess = new Message(messagePayload, 1, IsInCheckmateRequest);
-            mess.Send();
-            mess.Receive();
-
-            if (mess.Length != 1)
-            {
-                // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {mess.Type} should be of length 1 but is of length {mess.Length}.");
-                return false;
-            }
-
-            sw.Stop();
-            Logger.DWrite($"IsInCheckMate took {sw.ElapsedMilliseconds}ms.");
-
-            return mess.Bytes[0] == 0 ? false : true;
+            return CheckInfo.Any(x => x == (byte)CheckInfoT.Checkmate);
         }
 
         private bool IsInStaleMate()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            byte[] messagePayload = new byte[1] { IsWhitesMove ? (byte)1 : (byte)0 };
-            Message mess = new Message(messagePayload, 1, IsInStalemateRequest);
-            mess.Send();
-            mess.Receive();
-
-            if (mess.Length != 1)
-            {
-                // @@Rework: should we throw an exception here?
-                Logger.EWrite($"Message of type {mess.Type} should be of length 1 but is of length {mess.Length}.");
-                return false;
-            }
-            sw.Stop();
-            Logger.DWrite($"IsInStaleMate took {sw.ElapsedMilliseconds}ms.");
-
-            return mess.Bytes[0] == 0 ? false : true;
+            return CheckInfo.Any(x => x == (byte)CheckInfoT.Stalemate);
         }
     }
 }

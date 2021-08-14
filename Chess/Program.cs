@@ -85,6 +85,8 @@ namespace Chess
         private static Avalonia.Logging.LogEventLevel avaloniaLogLevel;
         public static void Main(string[] args)
         {
+            Debugger.Launch();
+
             var sw = new StreamWriter("chess_test.log");
             var swColour = new StreamWriter("chess_test_col.log");
             sw.AutoFlush = true;
@@ -96,7 +98,7 @@ namespace Chess
             Logger.DebugLevelT = DebugLevel.All;
             avaloniaLogLevel = Avalonia.Logging.LogEventLevel.Verbose;
 #else
-            Logger.DebugLevelT = DebugLevel.Info;
+            Logger.DebugLevelT = DebugLevel.All;
             avaloniaLogLevel = Avalonia.Logging.LogEventLevel.Information;
 #endif
             AppDomain currentDomain = AppDomain.CurrentDomain;
