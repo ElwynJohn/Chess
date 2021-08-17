@@ -44,7 +44,7 @@ endif()
 
 add_custom_command(
   OUTPUT ChessPublish
-  COMMAND dotnet publish ${CMAKE_CURRENT_LIST_DIR}/Chess/Chess.csproj -o ${CMAKE_BINARY_DIR}/publish
+  COMMAND dotnet publish ${CMAKE_CURRENT_LIST_DIR}/Chess/Chess.csproj -o ${CMAKE_BINARY_DIR}/publish -c Release
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   ${CMAKE_CURRENT_LIST_DIR}/Chess/Assets ${CMAKE_BINARY_DIR}/publish/Assets
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING ${CMAKE_BINARY_DIR}/publish
