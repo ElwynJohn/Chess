@@ -5,6 +5,10 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
 endif()
 
+# This makes macOS find dylibs when we run?
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
 project(ChessEngine C)
 
 add_subdirectory(ChessEngine)
