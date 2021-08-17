@@ -121,7 +121,7 @@ namespace Chess
         private static Avalonia.Logging.LogEventLevel avaloniaLogLevel;
         private static string traceLogFile = "chess_trace.log";
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             // Before we do anything else, cd to the directory that the
             // executable file is in.
@@ -180,11 +180,8 @@ namespace Chess
             // If we haven't connected after 5 seconds, something is definitely
             // wrong and we should just throw TimeoutException
             int timeout = 5000;
-            var wConnect = Message.client_w.ConnectAsync(timeout);
-            var rConnect = Message.client_r.ConnectAsync(timeout);
-
-            await wConnect;
-            await rConnect;
+            Message.client_w.Connect(timeout);
+            Message.client_r.Connect(timeout);
 
             Message.replyThread.Start();
             Message.requestThread.Start();
