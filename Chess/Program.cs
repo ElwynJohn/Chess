@@ -101,6 +101,15 @@ namespace Chess
             vm.View = uc;
             vm.Window = uc.FindAncestorOfType<Window>(true);
         }
+
+        public static bool IsReleaseBuild()
+        {
+#if DEBUG
+            return false;
+#else
+            return true;
+#endif
+        }
     }
 
     class Program
@@ -149,8 +158,8 @@ namespace Chess
 
             string engine_path = Path.Join(exe_dir, "ChessEngineMain");
             engine = Process.Start(new ProcessStartInfo {
-                    UseShellExecute = true,
-                    CreateNoWindow = false,
+                    UseShellExecute = !Util.IsReleaseBuild(),
+                    CreateNoWindow = Util.IsReleaseBuild(),
 #if DEBUG
                     WindowStyle = ProcessWindowStyle.Normal,
 #else
