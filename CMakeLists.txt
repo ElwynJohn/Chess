@@ -55,7 +55,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngine.dll ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/rgl.dll ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ipc.dll ${CMAKE_BINARY_DIR}/publish
-  DEPENDS ChessCopyPthreads.dll
+  DEPENDS ChessCopyPthreads.dll ChessEngine
   )
 
 # TODO: This is kinda ugly, it's awkward because Windows needs to copy
