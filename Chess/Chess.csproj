@@ -4,6 +4,7 @@
     <OutputType Condition=" '$(Configuration)' == 'Debug' ">Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>Assets\piece_black_castle.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Models\" />
