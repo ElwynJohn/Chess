@@ -5,6 +5,8 @@ This is a simple chess client written with
 [ChessEngine](https://github.com/rleathart/ChessEngine) (and hopefully other
 engines in the future) to let you play chess!
 
+![Image of a chess game](../assets/images/ChessSample.png)
+
 # Building and Running
 
 Building Chess and its dependencies has been tested with Clang 12 and dotnet
