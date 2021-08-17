@@ -171,6 +171,7 @@ namespace Chess
                     });
 
             Console.CancelKeyPress += OnExit;
+            AppDomain.CurrentDomain.UnhandledException += OnExit;
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
 
             // Clear the trace file on startup. Otherwise it can get really big
