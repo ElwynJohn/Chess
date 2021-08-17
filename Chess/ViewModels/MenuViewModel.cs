@@ -121,14 +121,14 @@ namespace Chess.ViewModels
             Buttons.Clear();
             Buttons.Add("Play");
             Buttons.Add("Match History");
-            Buttons.Add("Statistics");
+            /* Buttons.Add("Statistics"); */
             buttonMenu = ButtonMenu.Default;
         }
         private void DisplayGameMode()
         {
             Buttons.Clear();
             Buttons.Add("Back");
-            Buttons.Add("Online");
+            /* Buttons.Add("Online"); */
             Buttons.Add("vs Computer");
             Buttons.Add("Local");
             buttonMenu = ButtonMenu.GameMode;
