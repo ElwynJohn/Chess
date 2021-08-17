@@ -24,7 +24,13 @@
 
     <Grid ColumnDefinitions="Auto,15,*,25,Auto" Margin="15,20,25,20">
 
-        <Border Grid.Column="0" BorderThickness="0" CornerRadius="8" Background="#D95555" VerticalAlignment="Center">
+        <Border Grid.Column="0"
+            BorderThickness="0"
+            CornerRadius="8"
+            Background="#D95555"
+            VerticalAlignment="Center"
+            Opacity="{Binding IsPromoting}"
+            IsEnabled="{Binding IsPromoting}">
             <StackPanel Orientation="Vertical">
                 <Panel Classes="chess-tile" PointerReleased="on_pointer_released" Name="PromoteCastle">
                     <Rectangle Classes="chess-tile"/>
