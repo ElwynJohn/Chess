@@ -66,9 +66,6 @@ namespace Chess.ViewModels
             };
             Window.EffectiveViewportChanged += (s, e) =>
             {
-                Logger.Buffer += $"\nBoard View's Width: {View.Bounds.Width}";
-                Logger.Buffer += $"\nBoard View's Height: {View.Bounds.Height}";
-                Logger.DWrite();
                 UpdateTileSizes();
                 TileSizeChanged?.Invoke(this, EventArgs.Empty);
             };

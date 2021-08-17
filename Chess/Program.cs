@@ -130,7 +130,7 @@ namespace Chess
             Logger.DebugLevelT = DebugLevel.All;
             avaloniaLogLevel = Avalonia.Logging.LogEventLevel.Verbose;
 #else
-            Logger.DebugLevelT = DebugLevel.All;
+            Logger.DebugLevelT = DebugLevel.Info;
             avaloniaLogLevel = Avalonia.Logging.LogEventLevel.Information;
 #endif
             AppDomain currentDomain = AppDomain.CurrentDomain;

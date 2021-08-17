@@ -17,7 +17,6 @@ namespace Chess.ViewModels
         {
             View.EffectiveViewportChanged += (s, e) =>
             {
-                Logger.DWrite($"GameStats View's Height: {Height}");
                 NotifyPropertyChanged(nameof(Height));
             };
         }

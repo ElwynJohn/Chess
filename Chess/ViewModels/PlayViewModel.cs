@@ -20,12 +20,6 @@ namespace Chess.ViewModels
         {
             Window.EffectiveViewportChanged += (s, e) =>
             {
-                Logger.Buffer += $"\nPlay View changed Height to {View.Bounds.Height}";
-                Logger.Buffer += $"\nPlay View changed Width to {View.Bounds.Width}";
-                Logger.Buffer += $"\nWindow changed Width to {Window.Bounds.Width}";
-                Logger.Buffer += $"\nChess Tile Size {ChessTile.TileSize}";
-                Logger.Buffer += $"\nChess Piece Size {ChessTile.PieceSize}";
-                Logger.DWrite();
                 UpdateTileSizes(sender, e);
             };
         }
