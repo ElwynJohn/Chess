@@ -31,15 +31,17 @@ add_custom_target(gui ALL
   DEPENDS ChessGUI
   )
 
-foreach(file COPYING COPYING.LIB)
-  if(NOT EXISTS ${CMAKE_BINARY_DIR}/pthreads-win32-${file})
-    message("Downloading pthreads-win32 " ${file})
-    file(DOWNLOAD
-      https://mirrors.kernel.org/sourceware/pthreads-win32/${file}
-      ${CMAKE_BINARY_DIR}/pthreads-win32-${file}
-      )
-  endif()
-endforeach()
+if(WIN32)
+  foreach(file COPYING COPYING.LIB)
+    if(NOT EXISTS ${CMAKE_BINARY_DIR}/pthreads-win32-${file})
+      message("Downloading pthreads-win32 " ${file})
+      file(DOWNLOAD
+        https://mirrors.kernel.org/sourceware/pthreads-win32/${file}
+        ${CMAKE_BINARY_DIR}/pthreads-win32-${file}
+        )
+    endif()
+  endforeach()
+endif()
 
 if(WIN32)
   # Need to use find_program since pthread.dll will be on PATH
@@ -54,6 +56,8 @@ if(WIN32)
     OUTPUT ChessCopyPthreads.dll
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
     COMMAND ${CMAKE_COMMAND} -E copy ${PTHREAD_DLL_PATH} ${CMAKE_BINARY_DIR}/publish/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING ${CMAKE_BINARY_DIR}/publish
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING.lib ${CMAKE_BINARY_DIR}/publish
     )
   add_custom_command(
     OUTPUT ChessBundleCdlls
@@ -69,6 +73,7 @@ if(WIN32)
   set(DotnetRID win-x64)
 elseif(APPLE)
   set(DynamicLibExt dylib)
+  set(DynamicLibPre lib)
   set(DotnetRID osx-x64)
 elseif(UNIX)
   set(DynamicLibExt so)
@@ -86,13 +91,11 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT ChessPublish
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING ${CMAKE_BINARY_DIR}/publish
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING.lib ${CMAKE_BINARY_DIR}/publish
   # TODO: Would be nice if there was a way to resolve a target's dependencies
   # automatically
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngineMain${ExeExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_BINARY_DIR}/ChessEngine.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
+  ${CMAKE_BINARY_DIR}/${DynamicLibPre}ChessEngine.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}rgl.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}ipc.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   DEPENDS ${ChessPublishDepends} ChessDotnetPublish
