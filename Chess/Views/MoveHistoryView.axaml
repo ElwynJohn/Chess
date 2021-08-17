@@ -5,10 +5,9 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Chess.Views.MoveHistoryView">
 
-    <StackPanel Height="630" Width="300" VerticalAlignment="Top" Background="#323240">
+    <Grid RowDefinitions="*,Auto" Width="300" Background="#323240">
 
-        <Panel Height="555">
-            <ScrollViewer Initialized="SvOnInitialized">
+            <ScrollViewer Grid.Row="0" Initialized="SvOnInitialized">
                 <ItemsControl Items="{Binding Turns}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -23,12 +22,11 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-        </Panel>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
             <Button Margin="15" Content="Prev" Click="previous_move" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="40" Width="70" Background="#28283D" Foreground="#DBCEE1"/>
             <Button Margin="10" Content="Next" Click="next_move" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="40" Width="70" Background="#28283D" Foreground="#DBCEE1"/>
         </StackPanel>
 
-    </StackPanel>
+    </Grid>
 </UserControl>

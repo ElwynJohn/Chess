@@ -5,10 +5,11 @@ using Chess.ViewModels;
 
 namespace Chess.Views
 {
-    public partial class GamePanelView : UserControl
+    public partial class GamePanelView : ViewBase
     {
         public GamePanelView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

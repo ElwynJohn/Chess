@@ -33,9 +33,9 @@
     </Style>
 </UserControl.Styles>
 
-    <StackPanel Margin="0,20" Height="940" Width="300" VerticalAlignment="Top">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
 
-    <Border BorderThickness="0" CornerRadius="8,0" Background="#3B4382">
+    <Border Grid.Row="0" BorderThickness="0" CornerRadius="8,0" Background="#3B4382">
         <Panel Width="300" Height="70">
             <TextBlock Text="{Binding BlackTimer}" VerticalAlignment="Center" Foreground="#DBCEE1" Margin="5,0"/>
 
@@ -71,7 +71,7 @@
         </Panel>
     </Border>
 
-        <StackPanel Orientation="Horizontal" Height="50" Background="Black">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Height="50" Background="Black">
             <Panel Height="50" Width="150" PointerReleased="ClickMoves">
                 <Rectangle Width="149" Height="50" Fill="{Binding MovesFill}" HorizontalAlignment="Left"/>
                 <TextBlock Text="Moves" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#DBCEE1"/>
@@ -82,9 +82,9 @@
             </Panel>
         </StackPanel>
 
-        <ContentControl Content="{Binding Content}"/>
+        <ContentControl Grid.Row="2" Content="{Binding Content}"/>
 
-    <Border BorderThickness="0" CornerRadius="0,8" Background="#DBCEE1">
+    <Border Grid.Row="3" BorderThickness="0" CornerRadius="0,8" Background="#DBCEE1">
         <Panel Width="300" Height="70">
             <TextBlock Text="{Binding WhiteTimer}" VerticalAlignment="Center" Margin="5,0"/>
             <ItemsControl Items="{Binding DeadBlackPieces}">
@@ -114,6 +114,6 @@
         </Panel>
     </Border>
 
-    </StackPanel>
+    </Grid>
 
 </UserControl>

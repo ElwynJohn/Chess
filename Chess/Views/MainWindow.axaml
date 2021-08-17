@@ -4,16 +4,17 @@
         x:Class="Chess.Views.MainWindow"
         Icon="/Assets/piece_black_castle.png"
         Width="1500" Height="860"
+        MinWidth="980" MinHeight="400"
         Title="Chess"
         Background="#312e2b"
         WindowStartupLocation="CenterScreen">
 
-    <StackPanel Orientation="Horizontal">
+    <Grid ColumnDefinitions="Auto,*">
 
-        <views:MenuView DataContext="{Binding Menu}"/>
+        <ContentControl Grid.Column="0" Content="{Binding Menu}"/>
 
-        <ContentControl Content="{Binding ChildViews}"/>
+        <ContentControl Grid.Column="1" Content="{Binding ChildViews}"/>
 
-    </StackPanel>
+    </Grid>
 
 </Window>

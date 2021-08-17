@@ -9,10 +9,13 @@ using static Chess.Models.ChessPiece;
 
 namespace Chess.Views
 {
-    public partial class PlayView : UserControl
+    public partial class PlayView : ViewBase
     {
         public PlayView()
         {
+            Initialized += Util.InitialiseViewModelBase;
+            Initialized += (s, e) =>
+                ((PlayViewModel)DataContext).OnViewInitialised(s, e);
             InitializeComponent();
         }
 

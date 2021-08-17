@@ -7,10 +7,11 @@ using Chess.Models;
 
 namespace Chess.Views
 {
-    public partial class MoveHistoryView : UserControl
+    public partial class MoveHistoryView : ViewBase
     {
         public MoveHistoryView()
         {
+            Initialized += Util.InitialiseViewModelBase;
             InitializeComponent();
         }
 

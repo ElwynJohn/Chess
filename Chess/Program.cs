@@ -5,9 +5,12 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.VisualTree;
 using Avalonia.ReactiveUI;
 
 using Chess.Models;
+using Chess.ViewModels;
 
 namespace Chess
 {
@@ -74,6 +77,29 @@ namespace Chess
         public static Int32 ToInt32(this byte[] data)
         {
             return BitConverter.ToInt32(data);
+        }
+    }
+
+    public static class Util
+    {
+        public static void InitialiseViewModelBase(object? sender, EventArgs e)
+        {
+            var uc = sender as ContentControl;
+            if (uc == null)
+            {
+                Logger.EWrite("Cast failed!");
+                return;
+            }
+
+            var vm = uc.DataContext as ViewModelBase;
+            if (vm == null)
+            {
+                Logger.EWrite($"{sender!.ToString()}Model is null!");
+                return;
+            }
+
+            vm.View = uc;
+            vm.Window = uc.FindAncestorOfType<Window>(true);
         }
     }
 

@@ -1,8 +1,14 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.VisualTree;
+
 using Chess.Models;
 
 namespace Chess.ViewModels
@@ -47,13 +53,68 @@ namespace Chess.ViewModels
 
             IsInteractable = isInteractable;
         }
+        public void OnViewInitialised(object sender, EventArgs e)
+        {
+            Window.LayoutUpdated += (s, e) =>
+            {
+                if (!initialised)
+                {
+                    UpdateTileSizes();
+                    TileSizeChanged?.Invoke(this, EventArgs.Empty);
+                    initialised = true;
+                }
+            };
+            Window.EffectiveViewportChanged += (s, e) =>
+            {
+                Logger.Buffer += $"\nBoard View's Width: {View.Bounds.Width}";
+                Logger.Buffer += $"\nBoard View's Height: {View.Bounds.Height}";
+                Logger.DWrite();
+                UpdateTileSizes();
+                TileSizeChanged?.Invoke(this, EventArgs.Empty);
+            };
+        }
+        public void UpdateTileSizes()
+        {
+            double boardSize;
+            if (View.Bounds.Width < View.Bounds.Height)
+            {
+                double viewSize = View.Bounds.Width;
+                boardSize = viewSize - BorderSize * 2;
+                double marginThickness = (View.Bounds.Height - viewSize) / 2;
+                Margin = new Thickness(0,marginThickness,0,marginThickness);
+            }
+            else
+            {
+                double viewSize = View.Bounds.Height;
+                boardSize = viewSize - BorderSize * 2;
+                double marginThickness = (View.Bounds.Width - viewSize) / 2;
+                Margin = new Thickness(marginThickness,0,marginThickness,0);
+            }
+            ChessTile.TileSize = (int)(boardSize / 8);
+            ChessTile.PieceSize = (int)(boardSize / 8 * PiecePxPerTilePx);
+            Size = ChessTile.TileSize * 8 + BorderSize * 2;
+            for (int i = 0; i < tiles.Length; i++)
+            {
+                tiles[i].NotifyPropertyChanged(nameof(ChessTile.TileSize));
+                tiles[i].NotifyPropertyChanged(nameof(ChessTile.PieceSize));
+                tiles[i].NotifyPropertyChanged(nameof(ChessTile.FileToDisplay));
+                tiles[i].NotifyPropertyChanged(nameof(ChessTile.RankToDisplay));
+            }
+                NotifyPropertyChanged(nameof(Size));
+                NotifyPropertyChanged(nameof(Margin));
+        }
 
+        public event EventHandler? TileSizeChanged;
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public double Size { get; set; }
+        public Thickness Margin { get; set; }
+        public double BorderSize { get => 10; }
+        public Thickness BorderSizetest { get => new Thickness(10); }
         public ChessBoard Board { get; private set; }
         public ChessBoard LiveBoard { get; private set; } // If we don't store this,
         // we would not be able to retrieve the most recent board after clicking previous move.
@@ -65,6 +126,8 @@ namespace Chess.ViewModels
         private ChessTile[] checkedTileToClear = new ChessTile[2];
         private ChessTile? stagedTile;
         private int currentBoard = 0;
+        private const double PiecePxPerTilePx = 0.7;
+        private bool initialised = false;
 
         public void LeftClickTile(ChessTile clickedTile)
         {

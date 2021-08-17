@@ -6,10 +6,13 @@ using Chess.ViewModels;
 
 namespace Chess.Views
 {
-    public partial class BoardView : UserControl
+    public partial class BoardView : ViewBase
     {
         public BoardView()
         {
+            AttachedToVisualTree += Util.InitialiseViewModelBase;
+            AttachedToVisualTree += (s, e) =>
+                ((BoardViewModel)DataContext).OnViewInitialised(s, e);
             InitializeComponent();
         }
 
