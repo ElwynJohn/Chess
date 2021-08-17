@@ -42,6 +42,23 @@ if(WIN32)
   find_program(PTHREAD_DLL_PATH pthread.dll)
 endif()
 
+set(ChessPublishDepends ChessEngine)
+
+if(WIN32)
+  list(APPEND ChessPublishDepends ChessCopyPthreads.dll ChessBundleCdlls)
+  add_custom_command(
+    OUTPUT ChessCopyPthreads.dll
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PTHREAD_DLL_PATH} ${CMAKE_BINARY_DIR}/publish/
+    )
+  add_custom_command(
+    OUTPUT ChessBundleCdlls
+    # NOTE: This requires VC++ 2015 installed system wide (for developers)
+    COMMAND ${CMAKE_COMMAND} -E copy $ENV{WINDIR}/System32/ucrtbase.dll ${CMAKE_BINARY_DIR}/publish/
+    COMMAND ${CMAKE_COMMAND} -E copy $ENV{WINDIR}/System32/vcruntime140.dll ${CMAKE_BINARY_DIR}/publish/
+    )
+endif()
+
 add_custom_command(
   OUTPUT ChessPublish
   COMMAND dotnet publish ${CMAKE_CURRENT_LIST_DIR}/Chess/Chess.csproj -o ${CMAKE_BINARY_DIR}/publish -c Release
@@ -55,22 +72,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngine.dll ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/rgl.dll ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ipc.dll ${CMAKE_BINARY_DIR}/publish
-  DEPENDS ChessCopyPthreads.dll ChessEngine
+  DEPENDS ${ChessPublishDepends}
   )
-
-# TODO: This is kinda ugly, it's awkward because Windows needs to copy
-# pthread.dll into the publish dir but *nix does not
-if(WIN32)
-  add_custom_command(
-    OUTPUT ChessCopyPthreads.dll
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PTHREAD_DLL_PATH} ${CMAKE_BINARY_DIR}/publish/
-    )
-else()
-  add_custom_command(
-    OUTPUT ChessCopyPthreads.dll
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
-    )
-endif()
 
 add_custom_target(publish DEPENDS ChessPublish)
