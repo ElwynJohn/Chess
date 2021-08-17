@@ -46,7 +46,7 @@ if(WIN32)
   find_program(PTHREAD_DLL_PATH pthread.dll)
 endif()
 
-set(ChessPublishDepends ChessEngine)
+set(ChessPublishDepends ChessEngine ChessEngineMain)
 
 if(WIN32)
   list(APPEND ChessPublishDepends ChessCopyPthreads.dll ChessBundleCdlls)
@@ -58,25 +58,44 @@ if(WIN32)
   add_custom_command(
     OUTPUT ChessBundleCdlls
     # NOTE: This requires VC++ 2015 installed system wide (for developers)
-    COMMAND ${CMAKE_COMMAND} -E copy $ENV{WINDIR}/System32/ucrtbase.dll ${CMAKE_BINARY_DIR}/publish/
-    COMMAND ${CMAKE_COMMAND} -E copy $ENV{WINDIR}/System32/vcruntime140.dll ${CMAKE_BINARY_DIR}/publish/
+    COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/ucrtbase.dll ${CMAKE_BINARY_DIR}/publish/
+    COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/vcruntime140.dll ${CMAKE_BINARY_DIR}/publish/
     )
 endif()
 
+if(WIN32)
+  set(ExeExt .exe)
+  set(DynamicLibExt dll)
+  set(DotnetRID win-x64)
+elseif(APPLE)
+  set(DynamicLibExt dylib)
+  set(DotnetRID osx-x64)
+elseif(UNIX)
+  set(DynamicLibExt so)
+  set(DynamicLibPre lib)
+  set(DotnetRID linux-x64)
+endif()
+
 add_custom_command(
-  OUTPUT ChessPublish
-  COMMAND dotnet publish ${CMAKE_CURRENT_LIST_DIR}/Chess/Chess.csproj -o ${CMAKE_BINARY_DIR}/publish -c Release
+  OUTPUT ChessDotnetPublish
+  COMMAND dotnet publish ${CMAKE_CURRENT_LIST_DIR}/Chess/Chess.csproj -o
+  ${CMAKE_BINARY_DIR}/publish -c Release -r ${DotnetRID}
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   ${CMAKE_CURRENT_LIST_DIR}/Chess/Assets ${CMAKE_BINARY_DIR}/publish/Assets
+  )
+
+add_custom_command(
+  OUTPUT ChessPublish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING.lib ${CMAKE_BINARY_DIR}/publish
   # TODO: Would be nice if there was a way to resolve a target's dependencies
   # automatically
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngineMain.exe ${CMAKE_BINARY_DIR}/publish
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngine.dll ${CMAKE_BINARY_DIR}/publish
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/rgl.dll ${CMAKE_BINARY_DIR}/publish
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ipc.dll ${CMAKE_BINARY_DIR}/publish
-  DEPENDS ${ChessPublishDepends}
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngineMain${ExeExt} ${CMAKE_BINARY_DIR}/publish
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_BINARY_DIR}/ChessEngine.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}rgl.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}ipc.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
+  DEPENDS ${ChessPublishDepends} ChessDotnetPublish
   )
 
 add_custom_target(publish DEPENDS ChessPublish)
