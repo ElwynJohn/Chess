@@ -125,7 +125,11 @@ namespace Chess
             engine = Process.Start(new ProcessStartInfo {
                     UseShellExecute = true,
                     CreateNoWindow = false,
+#if DEBUG
                     WindowStyle = ProcessWindowStyle.Normal,
+#else
+                    WindowStyle = ProcessWindowStyle.Hidden,
+#endif
                     FileName = engine_path,
                     RedirectStandardError = false,
                     RedirectStandardOutput = false,
