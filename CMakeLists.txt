@@ -69,6 +69,7 @@ if(WIN32)
   set(DotnetRID win-x64)
 elseif(APPLE)
   set(DynamicLibExt dylib)
+  set(DynamicLibPre lib)
   set(DotnetRID osx-x64)
 elseif(UNIX)
   set(DynamicLibExt so)
@@ -92,7 +93,7 @@ add_custom_command(
   # automatically
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngineMain${ExeExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_BINARY_DIR}/ChessEngine.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
+  ${CMAKE_BINARY_DIR}/${DynamicLibPre}ChessEngine.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}rgl.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}ipc.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   DEPENDS ${ChessPublishDepends} ChessDotnetPublish
