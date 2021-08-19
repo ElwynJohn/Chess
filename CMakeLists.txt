@@ -5,10 +5,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
 endif()
 
-# This makes macOS find dylibs when we run?
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
 project(ChessEngine C)
 
 add_subdirectory(ChessEngine)
@@ -101,4 +97,55 @@ add_custom_command(
   DEPENDS ${ChessPublishDepends} ChessDotnetPublish
   )
 
-add_custom_target(publish DEPENDS ChessPublish)
+if(APPLE)
+add_custom_command(
+  OUTPUT Chess.app
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} -E rm -rf publish/Chess.app
+  COMMAND ${CMAKE_COMMAND} -E make_directory Chess.app/Contents/Resources
+  COMMAND ${CMAKE_COMMAND} -E make_directory Chess.app/Contents/CodeSignature
+  COMMAND ${CMAKE_COMMAND} -E rename publish Chess.app/Contents/MacOS
+  COMMAND ${CMAKE_COMMAND} -E rename Chess.app/Contents/MacOS/Assets/piece_black_castle.icns Chess.app/Contents/Resources/Chess.icns
+  COMMAND ${CMAKE_COMMAND} -E make_directory publish
+  COMMAND ${CMAKE_COMMAND} -E rename Chess.app publish/Chess.app
+  COMMAND ${CMAKE_COMMAND} -E touch publish/Chess.app/Contents/Info.plist
+  COMMAND echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\\n\
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\\n\
+<plist version=\"1.0\">\\n\
+<dict>\\n\
+    <key>CFBundleIconFile</key>\\n\
+    <string>Chess.icns</string>\\n\
+    <key>CFBundleName</key>\\n\
+    <string>Chess</string>\\n\
+    <key>CFBundleVersion</key>\\n\
+    <string>0.1.0</string>\\n\
+    <key>LSMinimumSystemVersion</key>\\n\
+    <string>10.12</string>\\n\
+    <key>CFBundleExecutable</key>\\n\
+    <string>Chess</string>\\n\
+    <key>CFBundleInfoDictionaryVersion</key>\\n\
+    <string>6.0</string>\\n\
+    <key>CFBundlePackageType</key>\\n\
+    <string>APPL</string>\\n\
+    <key>CFBundleShortVersionString</key>\\n\
+    <string>1.0</string>\\n\
+    <key>NSHighResolutionCapable</key>\\n\
+    <true/>\\n\
+</dict>\\n\
+</plist>" > publish/Chess.app/Contents/Info.plist
+  VERBATIM
+  DEPENDS ChessPublish
+  )
+endif()
+
+set(publishDepends ChessPublish)
+if(APPLE)
+  list(APPEND publishDepends Chess.app)
+endif()
+add_custom_target(publish DEPENDS ${publishDepends})
+
+# This makes macOS find dylibs when we run?
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH ${CMAKE_BINARY_DIR})
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
