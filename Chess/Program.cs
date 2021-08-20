@@ -162,18 +162,19 @@ namespace Chess
             };
 
             string engine_path = Path.Join(exe_dir, "ChessEngineMain");
-            engine = Process.Start(new ProcessStartInfo {
-                    UseShellExecute = !Util.IsReleaseBuild(),
-                    CreateNoWindow = Util.IsReleaseBuild(),
+            engine = Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = !Util.IsReleaseBuild(),
+                CreateNoWindow = Util.IsReleaseBuild(),
 #if DEBUG
-                    WindowStyle = ProcessWindowStyle.Normal,
+                WindowStyle = ProcessWindowStyle.Normal,
 #else
                     WindowStyle = ProcessWindowStyle.Hidden,
 #endif
-                    FileName = engine_path,
-                    RedirectStandardError = false,
-                    RedirectStandardOutput = false,
-                    });
+                FileName = engine_path,
+                RedirectStandardError = false,
+                RedirectStandardOutput = false,
+            });
 
             Console.CancelKeyPress += OnExit;
             AppDomain.CurrentDomain.UnhandledException += OnExit;
