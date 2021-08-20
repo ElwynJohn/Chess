@@ -5,6 +5,14 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
 endif()
 
+# This makes macOS find dylibs when we run?
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+if(APPLE)
+  set(CMAKE_INSTALL_RPATH "@executable_path;@loader_path")
+else()
+  set(CMAKE_INSTALL_RPATH "$ORIGIN")
+endif()
+
 project(ChessEngine C)
 
 add_subdirectory(ChessEngine)
@@ -143,9 +151,3 @@ if(APPLE)
   list(APPEND publishDepends Chess.app)
 endif()
 add_custom_target(publish DEPENDS ${publishDepends})
-
-# This makes macOS find dylibs when we run?
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH ${CMAKE_BINARY_DIR})
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
