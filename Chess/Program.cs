@@ -128,6 +128,11 @@ namespace Chess
             string? exe_dir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location);
             Directory.SetCurrentDirectory(exe_dir!);
 
+            Directory.CreateDirectory(
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "Chess",
+                    "GameHistorys"));
+
             var sw = new StreamWriter("chess_test.log");
             var swColour = new StreamWriter("chess_test_col.log");
             sw.AutoFlush = true;
