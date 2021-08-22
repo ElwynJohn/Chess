@@ -150,4 +150,36 @@ set(publishDepends ChessPublish)
 if(APPLE)
   list(APPEND publishDepends Chess.app)
 endif()
-add_custom_target(publish DEPENDS ${publishDepends})
+
+# TODO: This is super ugly for now
+set(dist_arch x64)
+set(dist_tar_opts cf)
+set(dist_archive_fmt zip)
+set(dist_archive_fmt_opt --format=zip)
+set(dist_source_dir .)
+
+if(WIN32)
+  set(dist_platform windows)
+elseif(APPLE)
+  set(dist_platform macOS)
+  set(dist_source_dir Chess.app)
+else()
+  set(dist_platform linux)
+  set(dist_tar_opts czf)
+  set(dist_archive_fmt tar.gz)
+  set(dist_archive_fmt_opt)
+endif()
+
+set(dist_archive_name
+  ${CMAKE_BINARY_DIR}/dist/Chess_${dist_platform}-${dist_arch}.${dist_archive_fmt})
+
+add_custom_command(
+  OUTPUT ${dist_archive_name}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/dist
+  COMMAND ${CMAKE_COMMAND} -E tar ${dist_tar_opts} ${dist_archive_name}
+  ${dist_archive_fmt_opt} ${dist_source_dir}
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/publish
+  DEPENDS ${publishDepends}
+  )
+
+add_custom_target(publish DEPENDS ${dist_archive_name})
