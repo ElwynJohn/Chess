@@ -47,25 +47,22 @@ if(WIN32)
   endforeach()
 endif()
 
-if(WIN32)
-  # Need to use find_program since pthread.dll will be on PATH
+if(WIN32) # Need to use find_program since pthread.dll will be on PATH
   find_program(PTHREAD_DLL_PATH pthread.dll)
 endif()
 
-set(ChessPublishDepends ChessEngine ChessEngineMain)
-
 if(WIN32)
-  list(APPEND ChessPublishDepends ChessCopyPthreads.dll ChessBundleCdlls)
-  add_custom_command(
-    OUTPUT ChessCopyPthreads.dll
+  add_custom_target(copy_win_libs
+    COMMENT "Copying shared libs to publish (win32)"
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING
+               ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING.lib
+               ${CMAKE_BINARY_DIR}/publish/ucrtbase.dll
+               ${CMAKE_BINARY_DIR}/publish/vcruntime140.dll
+
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
     COMMAND ${CMAKE_COMMAND} -E copy ${PTHREAD_DLL_PATH} ${CMAKE_BINARY_DIR}/publish/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING ${CMAKE_BINARY_DIR}/publish
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING.lib ${CMAKE_BINARY_DIR}/publish
-    )
-  add_custom_command(
-    OUTPUT ChessBundleCdlls
-    # NOTE: This requires VC++ 2015 installed system wide (for developers)
     COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/ucrtbase.dll ${CMAKE_BINARY_DIR}/publish/
     COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/vcruntime140.dll ${CMAKE_BINARY_DIR}/publish/
     )
@@ -85,16 +82,17 @@ elseif(UNIX)
   set(DotnetRID linux-x64)
 endif()
 
-add_custom_command(
-  OUTPUT ChessDotnetPublish
+add_custom_target(dotnet_publish
+  COMMENT "dotnet publish"
   COMMAND dotnet publish ${CMAKE_CURRENT_LIST_DIR}/Chess/Chess.csproj -o
   ${CMAKE_BINARY_DIR}/publish -c Release -r ${DotnetRID}
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   ${CMAKE_CURRENT_LIST_DIR}/Chess/Assets ${CMAKE_BINARY_DIR}/publish/Assets
   )
 
-add_custom_command(
-  OUTPUT ChessPublish
+add_custom_target(copy_libs
+  DEPENDS dotnet_publish ChessEngine ChessEngineMain
+  COMMENT "Copying shared libs to publish"
   # TODO: Would be nice if there was a way to resolve a target's dependencies
   # automatically
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/ChessEngineMain${ExeExt} ${CMAKE_BINARY_DIR}/publish
@@ -102,25 +100,26 @@ add_custom_command(
   ${CMAKE_BINARY_DIR}/${DynamicLibPre}ChessEngine.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}rgl.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${DynamicLibPre}ipc.${DynamicLibExt} ${CMAKE_BINARY_DIR}/publish
-  DEPENDS ${ChessPublishDepends} ChessDotnetPublish
   )
 
 if(APPLE)
-add_custom_command(
-  OUTPUT Chess.app
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  COMMAND ${CMAKE_COMMAND} -E rm -rf publish/Chess.app
-  COMMAND ${CMAKE_COMMAND} -E make_directory Chess.app/Contents/Resources
-  COMMAND ${CMAKE_COMMAND} -E make_directory Chess.app/Contents/CodeSignature
-  COMMAND ${CMAKE_COMMAND} -E rename publish Chess.app/Contents/MacOS
-  COMMAND ${CMAKE_COMMAND} -E rename Chess.app/Contents/MacOS/Assets/piece_black_castle.icns Chess.app/Contents/Resources/Chess.icns
-  COMMAND ${CMAKE_COMMAND} -E make_directory publish
-  COMMAND ${CMAKE_COMMAND} -E rename Chess.app publish/Chess.app
-  COMMAND ${CMAKE_COMMAND} -E touch publish/Chess.app/Contents/Info.plist
-  COMMAND echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\\n\
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\\n\
-<plist version=\"1.0\">\\n\
-<dict>\\n\
+  add_custom_target(Chess.app
+    COMMENT "Creating Chess.app"
+    DEPENDS copy_libs
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/publish/Chess.app/*
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E rm -rf publish/Chess.app
+    COMMAND ${CMAKE_COMMAND} -E make_directory Chess.app/Contents/Resources
+    COMMAND ${CMAKE_COMMAND} -E make_directory Chess.app/Contents/CodeSignature
+    COMMAND ${CMAKE_COMMAND} -E rename publish Chess.app/Contents/MacOS
+    COMMAND ${CMAKE_COMMAND} -E rename Chess.app/Contents/MacOS/Assets/piece_black_castle.icns Chess.app/Contents/Resources/Chess.icns
+    COMMAND ${CMAKE_COMMAND} -E make_directory publish
+    COMMAND ${CMAKE_COMMAND} -E rename Chess.app publish/Chess.app
+    COMMAND ${CMAKE_COMMAND} -E touch publish/Chess.app/Contents/Info.plist
+    COMMAND echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\\n\
+    <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\\n\
+    <plist version=\"1.0\">\\n\
+    <dict>\\n\
     <key>CFBundleIconFile</key>\\n\
     <string>Chess.icns</string>\\n\
     <key>CFBundleName</key>\\n\
@@ -139,16 +138,17 @@ add_custom_command(
     <string>1.0</string>\\n\
     <key>NSHighResolutionCapable</key>\\n\
     <true/>\\n\
-</dict>\\n\
-</plist>" > publish/Chess.app/Contents/Info.plist
-  VERBATIM
-  DEPENDS ChessPublish
-  )
+    </dict>\\n\
+    </plist>" > publish/Chess.app/Contents/Info.plist
+    VERBATIM
+    )
 endif()
 
-set(publishDepends ChessPublish)
+set(publishDepends dotnet_publish copy_libs)
 if(APPLE)
   list(APPEND publishDepends Chess.app)
+elseif(WIN32)
+  list(APPEND publishDepends copy_win_libs)
 endif()
 
 # TODO: This is super ugly for now
