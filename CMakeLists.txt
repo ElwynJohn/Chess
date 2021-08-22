@@ -173,13 +173,12 @@ endif()
 set(dist_archive_name
   ${CMAKE_BINARY_DIR}/dist/Chess_${dist_platform}-${dist_arch}.${dist_archive_fmt})
 
-add_custom_command(
-  OUTPUT ${dist_archive_name}
+add_custom_target(publish
+  DEPENDS ${publishDepends}
+  BYPRODUCTS ${dist_archive_name}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/dist
   COMMAND ${CMAKE_COMMAND} -E tar ${dist_tar_opts} ${dist_archive_name}
   ${dist_archive_fmt_opt} ${dist_source_dir}
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/publish
-  DEPENDS ${publishDepends}
+  COMMENT "Creating release archive"
   )
-
-add_custom_target(publish DEPENDS ${dist_archive_name})
