@@ -26,14 +26,14 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Build and publish (win32)
-        if: matrix.os == windows-latest
+        if: matrix.os == 'windows-latest'
         run: |
           cd ${{ github.workspace }}
           cmake -B build -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -T ClangCL
           cmake --build build --target publish
 
       - name: Build and publish
-        if: matrix.os != windows-latest
+        if: matrix.os != 'windows-latest'
         run: |
           cd ${{ github.workspace }}
           cmake -B build -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
