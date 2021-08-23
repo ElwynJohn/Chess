@@ -23,14 +23,12 @@ jobs:
           dotnet-version: 5.0.x
 
       - name: Setup Ninja
+        if: matrix.os != 'windows-latest' # Windows already has Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
 
-      - name: Setup clang
+      - name: Setup dev cmd
         if: matrix.os == 'windows-latest'
-        uses: egor-tensin/setup-clang@v1
-        with:
-          version: latest
-          platform: x64
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build and publish
         run: |

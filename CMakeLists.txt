@@ -38,13 +38,13 @@ add_custom_target(gui ALL
 set(ChessPublishDepends ChessEngine ChessEngineMain)
 
 if(WIN32)
+  find_program(VCRUNTIME_PATH vcruntime140.dll REQUIRED)
   add_custom_target(copy_win_libs
     COMMENT "Copying shared libs to publish (win32)"
     DEPENDS pthread
     BYPRODUCTS ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING
                ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING.lib
                ${CMAKE_BINARY_DIR}/publish/pthread.dll
-               ${CMAKE_BINARY_DIR}/publish/ucrtbase.dll
                ${CMAKE_BINARY_DIR}/publish/vcruntime140.dll
 
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
@@ -55,9 +55,7 @@ if(WIN32)
     COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_CURRENT_LIST_DIR}/ChessEngine/extern/librgl/extern/pthreads-win32-CMake/src/COPYING.lib
             ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING.lib
-    # NOTE: This requires VC++ 2015 installed system wide (for developers)
-    COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/ucrtbase.dll ${CMAKE_BINARY_DIR}/publish/
-    COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/vcruntime140.dll ${CMAKE_BINARY_DIR}/publish/
+    COMMAND ${CMAKE_COMMAND} -E copy ${VCRUNTIME_PATH} ${CMAKE_BINARY_DIR}/publish/
     )
 endif()
 
