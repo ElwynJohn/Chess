@@ -40,6 +40,7 @@ set(ChessPublishDepends ChessEngine ChessEngineMain)
 if(WIN32)
   add_custom_target(copy_win_libs
     COMMENT "Copying shared libs to publish (win32)"
+    DEPENDS pthread
     BYPRODUCTS ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING
                ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING.lib
                ${CMAKE_BINARY_DIR}/publish/pthread.dll
