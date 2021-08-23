@@ -35,23 +35,6 @@ add_custom_target(gui ALL
   DEPENDS ChessGUI
   )
 
-if(WIN32)
-  foreach(file COPYING COPYING.LIB)
-    if(NOT EXISTS ${CMAKE_BINARY_DIR}/pthreads-win32-${file})
-      message("Downloading pthreads-win32 " ${file})
-      file(DOWNLOAD
-        https://mirrors.kernel.org/sourceware/pthreads-win32/${file}
-        ${CMAKE_BINARY_DIR}/pthreads-win32-${file}
-        )
-    endif()
-  endforeach()
-endif()
-
-if(WIN32)
-  # Need to use find_program since pthread.dll will be on PATH
-  find_program(PTHREAD_DLL_PATH pthread.dll)
-endif()
-
 set(ChessPublishDepends ChessEngine ChessEngineMain)
 
 if(WIN32)
@@ -59,12 +42,17 @@ if(WIN32)
   add_custom_command(
     OUTPUT ChessCopyPthreads.dll
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PTHREAD_DLL_PATH} ${CMAKE_BINARY_DIR}/publish/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING ${CMAKE_BINARY_DIR}/publish
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthreads-win32-COPYING.lib ${CMAKE_BINARY_DIR}/publish
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pthread.dll ${CMAKE_BINARY_DIR}/publish/
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_LIST_DIR}/ChessEngine/extern/librgl/extern/pthreads-win32-CMake/src/COPYING
+            ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_LIST_DIR}/ChessEngine/extern/librgl/extern/pthreads-win32-CMake/src/COPYING.lib
+            ${CMAKE_BINARY_DIR}/publish/pthreads-win32-COPYING.lib
     )
   add_custom_command(
     OUTPUT ChessBundleCdlls
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/publish/
     # NOTE: This requires VC++ 2015 installed system wide (for developers)
     COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/ucrtbase.dll ${CMAKE_BINARY_DIR}/publish/
     COMMAND ${CMAKE_COMMAND} -E copy /Windows/System32/vcruntime140.dll ${CMAKE_BINARY_DIR}/publish/
