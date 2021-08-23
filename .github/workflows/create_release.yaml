@@ -1,0 +1,38 @@
+name: Create tagged release
+on:
+  push:
+      tags:
+        - "v*.*.*"
+jobs:
+  create_release:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-10.15]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Build and publish
+        run: |
+          cd ${{ github.workspace }}
+          cmake -B build -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target publish
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/dist/Chess_*
